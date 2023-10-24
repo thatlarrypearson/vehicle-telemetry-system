@@ -10,8 +10,8 @@ from os import fsync
 from datetime import datetime, timezone
 import json
 
-from telemetry_obd.telemetry_common_functions import (
-    # default_imu_shared_command_list as SHARED_DICTIONARY_COMMAND_LIST,
+from counter.common import (
+    default_shared_imu_command_list as SHARED_DICTIONARY_COMMAND_LIST,
     SharedDictionaryManager,
     get_output_file_name,
     BASE_PATH
@@ -21,15 +21,6 @@ from .usb_devices import get_serial_device_name
 from .__init__ import __version__
 
 logger = logging.getLogger("imu_logger")
-
-SHARED_DICTIONARY_COMMAND_LIST = [
-    "IMU_ACCELEROMETER",
-    "IMU_GYROSCOPE",
-    "IMU_GRAVITY",
-    "IMU_LINEAR_ACCELERATION",
-    "IMU_MAGNETOMETER",
-    "IMU_ROTATION_VECTOR",
-]
 
 def quaternion_to_euler(v:list) -> tuple:
     """
@@ -139,8 +130,8 @@ def initialize_imu(serial_device_name):
             s.write(b'\x0d')        # CR
 
         # Look for last command in set
-        if 'ROTATION_VECTOR' in record:
-            logger.debug(f"initialize_imu(): found {cmd} in record")
+        if 'rotation_vector' in record:
+            logger.debug("initialize_imu(): found 'rotation_vector' in record")
             return s
 
         response_count += 1
@@ -199,11 +190,13 @@ def main():
 
             # check record validity
             # reorganize data as required
-            imu_data['command_name'] = 'IMU_' + imu_data['command_name']
 
-            if imu_data['command_name'] == 'IMU_rotation_vector':
+            if imu_data['command_name'] == 'rotation_vector':
                 # "vector": [-0.646912, -0.262695, 0.230164, 0.677856],
-                imu_data['roll'], imu_data['pitch'], imu_data['yaw'] = quaternion_to_euler(imu_data['vector'])
+                roll, pitch, yaw = quaternion_to_euler(imu_data['obd_response_value']['vector'])
+                imu_data['obd_response_value']['roll'] = roll
+                imu_data['obd_response_value']['pitch'] = pitch
+                imu_data['obd_response_value']['yaw'] = yaw
 
             imu_data['iso_ts_pre'] = iso_ts_pre
             imu_data['iso_ts_post'] = datetime.isoformat(datetime.now(tz=timezone.utc))
@@ -214,9 +207,10 @@ def main():
             log_file_handle.flush()
             fsync(log_file_handle.fileno())
 
-            if shared_dictionary is not None and imu_data["command_name"] in shared_dictionary_command_list:
+            shared_dict_index = 'IMU_' + imu_data["command_name"]
+            if shared_dictionary is not None and shared_dict_index in shared_dictionary_command_list:
                     logger.debug( f"Sharing record {record_count}: {imu_data['command_name']}")
-                    shared_dictionary[imu_data['command_name']] = imu_data
+                    shared_dictionary[shared_dict_index] = imu_data
 
         except json.decoder.JSONDecodeError as e:
             # improperly closed JSON file

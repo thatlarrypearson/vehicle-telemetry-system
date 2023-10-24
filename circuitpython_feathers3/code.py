@@ -45,8 +45,9 @@ for i in count(0):
     # print("before")
     x, y, z = bno.acceleration
     print(
-        dumps({'acceleration':
-                {
+        dumps({
+                'command_name': 'acceleration',
+                'obd_response_value': {
                     'record_number': i,
                     'x': x,
                     'y': y,
@@ -58,8 +59,9 @@ for i in count(0):
     )
     x, y, z = bno.gravity
     print(
-        dumps({'gravity':
-                {
+        dumps({
+                'command_name': 'gravity',
+                'obd_response_value': {
                     'record_number': i,
                     'x': x,
                     'y': y,
@@ -71,8 +73,9 @@ for i in count(0):
     )
     x, y, z = bno.gyro
     print(
-        dumps({'gyroscope':
-                {
+        dumps({
+                'command_name': 'gyroscope',
+                'obd_response_value': {
                     'record_number': i,
                     'x': x,
                     'y': y,
@@ -84,8 +87,9 @@ for i in count(0):
     )
     x, y, z = bno.linear_acceleration
     print(
-        dumps({'linear_acceleration':
-                {
+        dumps({
+                'command_name': 'linear_acceleration',
+                'obd_response_value': {
                     'record_number': i,
                     'x': x,
                     'y': y,
@@ -97,8 +101,9 @@ for i in count(0):
     )
     x, y, z = bno.magnetic
     print(
-        dumps({'magnetometer':
-                {
+        dumps({
+                'command_name': 'magnetometer',
+                'obd_response_value': {
                     'record_number': i,
                     'x': x,
                     'y': y,
@@ -110,8 +115,9 @@ for i in count(0):
     )
     vector = bno.quaternion
     print(
-        dumps({'rotation_vector':
-                {
+        dumps({
+                'command_name': 'rotation_vector',
+                'obd_response_value': {
                     'record_number': i,
                     'vector': vector,
                 },
