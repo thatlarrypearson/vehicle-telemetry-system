@@ -10,7 +10,7 @@ from os import fsync
 from datetime import datetime, timezone
 import json
 
-from counter.common import (
+from tcounter.common import (
     default_shared_imu_command_list as SHARED_DICTIONARY_COMMAND_LIST,
     SharedDictionaryManager,
     get_output_file_name,

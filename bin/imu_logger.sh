@@ -13,10 +13,10 @@ export SHARED_DICTIONARY_NAME="TELEMETRY"
 export RESTART_DELAY=30
 
 # get next application startup counter
-export APP_COUNT=$(${APP_PYTHON} -m counter.app_counter ${APP_ID})
+export APP_COUNT=$(${APP_PYTHON} -m tcounter.app_counter ${APP_ID})
 
 # get current system startup counter
-export BOOT_COUNT=$(${APP_PYTHON} -m counter.boot_counter)
+export BOOT_COUNT=$(${APP_PYTHON} -m tcounter.boot_counter)
 
 export APP_LOG_FILE="telemetry-${BOOT_COUNT}-${APP_ID}-${APP_COUNT}.log"
 
