@@ -50,7 +50,7 @@ cd "${APP_HOME}"
 while date '+%Y/%m/%d %H:%M:%S'
 do
 	# Enable shared dictionary option
-	${APP_PYTHON} -m telemetry_imu.imu_logger \
+	${APP_PYTHON} -m imu_logger.imu_logger \
 		--shared_dictionary_name "${SHARED_DICTIONARY_NAME}" \
 		"${APP_BASE_PATH}"
 
