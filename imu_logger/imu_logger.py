@@ -68,7 +68,7 @@ def argument_parsing()-> dict:
         "base_path",
         nargs='?',
         metavar="base_path",
-        default=[BASE_PATH, ],
+        default=BASE_PATH,
         help=f"Relative or absolute output data directory. Defaults to '{BASE_PATH}'."
     )
 
@@ -160,7 +160,7 @@ def main():
     shared_dictionary_name = args['shared_dictionary_name']
     shared_dictionary_command_list = args['shared_dictionary_command_list']
 
-    base_path = args['base_path'][0]
+    base_path = args['base_path']
 
     logging_level = logging.DEBUG if verbose else logging.INFO
 
