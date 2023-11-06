@@ -19,7 +19,7 @@ repository = "https://github.com/thatlarrypearson/telemetry-imu"
 documentation = "https://github.com/thatlarrypearson/telemetry-imu"
 keywords = ["imu", "telematics", "vehicle"]
 dependencies = [
-    'telemetry_counter',
+    'telemetry_counter == 0.0.1',
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
