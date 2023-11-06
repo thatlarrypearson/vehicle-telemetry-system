@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Install_imu.sh
+# Install_telemetry-imu.sh
 #
 
 export APP_HOME="/home/$(whoami)/telemetry-imu"
