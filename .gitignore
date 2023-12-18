@@ -144,3 +144,4 @@ vehicles.py
 *.tar
 *.pdf
 *.ipynb
+*.swp
