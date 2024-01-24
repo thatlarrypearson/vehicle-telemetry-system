@@ -3,6 +3,7 @@
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from itertools import islice
+from numpy import arctan2, sin, cos
 
 data_file_base_directory = f"{str(Path.home())}/telemetry-data"
 work_product_file_path = f"{str(Path.home())}/testing/work-product-files"
@@ -47,3 +48,20 @@ def timedelta_to_hhmmss_str(td:timedelta)->str:
     mm = int(hh_remainder / 60)
     ss = int(hh_remainder % 60)
     return f"{hh:02}:{mm:02}:{ss:02}"
+
+def heading(a:list, b:list)->float:
+    """
+    Given two coordinates a and b (lat/lon pairs), return the
+    true north compass heading in radians.
+    Based on Towards Data Science article by Daniel Ellis Research
+    titled "Calculating the bearing between two geospatial coordinates.
+    """
+    lat = 0
+    lon = 1
+    dL = b[lon] - a[lon]
+    X = cos(b[lat]) * sin(dL)
+    Y = cos(a[lat]) * sin(b[lat]) - sin(a[lat]) * cos(b[lat]) * cos(dL)
+
+    bearing = arctan2(X, Y)
+
+    return bearing

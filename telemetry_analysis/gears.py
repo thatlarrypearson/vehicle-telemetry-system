@@ -856,7 +856,7 @@ def route_by_name_table(vin:str, df:pd.DataFrame):
 
     for route in routes:
         # ('2023 Ford Maverick Lariat', 7),
-        console.print(f"\t# ('{vehicles[vin]['name']}', {route}),")
+        console.print(f"\t# ('{vehicles[vin]['name']}', {route}),\t# count: {(df[df['route'] == route]).shape[0]}")
 
     console.print("]")
     return
@@ -884,7 +884,10 @@ def generate_images_for_video(name:str, route:int, df:pd.DataFrame, create_video
     if not vin:
         console.print(f"Vehicle name <{name}> not found in private.vehicles.py")
         return
-    
+
+    console.print(f"\t# ('{name}', {route}),\t# count: {(df[df['route'] == route]).shape[0]}")
+
+
     elapsed_time = None
     vehicle_name = (vehicles[vin]['name']).replace(' ', '-')
 
@@ -903,11 +906,12 @@ def generate_images_for_video(name:str, route:int, df:pd.DataFrame, create_video
     for i in range(imin, imax + 1):
         image_file_name = f"{i:010}.{image_file_extn}"
     
-        if Path(f"{image_file_full_path}/{image_file_name}").is_file() and verbose:
+        if Path(f"{image_file_full_path}/{image_file_name}").is_file():
             # No need to recreate image file if it already exists.
             # Memory error/leak in matplotlib/seaborn causes out of memory errors
             # so restarts might be required.
-            console.print(f"Image file already exists, skipping: {image_file_name}")
+            if verbose:
+                console.print(f"Image file already exists, skipping: {image_file_name}")
             continue
 
         df_route_i = df[(df['i'] <= i) & (df['i'] >= (i - trailing_points))]

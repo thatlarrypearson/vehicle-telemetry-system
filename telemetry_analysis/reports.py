@@ -34,7 +34,9 @@ def obd_log_evaluation_report(vin, console, width=None, verbose=False):
     # Make a list of OBD data files.
     # directory where "*.json" OBD data files are held
     root = Path(data_file_base_directory)
-    obd_files = [ str(rp) for rp in root.rglob(f"*{vin}*.json") if rp.is_file() ]    
+    obd_files = [ str(rp) for rp in root.rglob(f"*{vin}*.json") if rp.is_file() ]
+
+    console.print(f"OBD Log Evaluation Report: {vehicles[vin]['name']} OBD data file count {len(obd_files)}\n")
 
     # get dictionary of command statistics by command
     raw_data = obd_log_evaluation_input_file(obd_files)

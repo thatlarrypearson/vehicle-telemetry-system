@@ -139,6 +139,11 @@ pdf/
 markdown/
 python/
 notebook/
+conda/
+private/
+PrivateNotes/
+notebooks/
+scripts/
 vehicles.py
 *.zip
 *.tar
