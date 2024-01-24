@@ -106,8 +106,10 @@ route_by_name = [
     # ('2023 Ford Maverick Lariat', 7),
     #
     # put the vehicle and route pairs desired into this array
-    ('2013 Jeep Wrangler Rubicon 2 Door', 142),
-    # ('2023 Ford Maverick Lariat', 13),
+    # ('2013 Jeep Wrangler Rubicon 2 Door', 142),
+    # ('2019 Ford EcoSport Platinum', 277), # count: 12823
+    # ('2017 Ford F-450 Platinum', 54),     # count: 10248
+    ('2023 Ford Maverick Lariat', 13),
 ]
 
 # %%
