@@ -24,7 +24,7 @@ I had this crazy idea that I could get better gas mileage if I managed the shift
 
 Then I thought that better controlling the shift points would also be beneficial when vehicles were loaded, experiencing adverse weather (headwinds) or running at high elevation.
 
-Even though the OBD standard, [J1979-DA, Digital Annex of E/E Diagnostic Test Modes J1979DA_202104](https://www.sae.org/standards/content/j1979da_202104/), documents an OBD command to retrieve the current gear from the vehicle, none of the vehicles tested support this particular command.  Also, vehicle manufacturers don't always document the different transmission gear ratios in the cars they sell.  It's like they don't want their customers to know much about how their vehicle actually works (or doesn't work).
+Even though the OBD standard, [J1979-DA, Digital Annex of E/E Diagnostic Test Modes J1979DA_202104](https://www.sae.org/standards/content/j1979da_202104/), documents an OBD command to retrieve the current gear from the vehicle, none of the vehicles tested support this particular command.  Also, vehicle manufacturers don't always document the different transmission gear ratios in the cars they sell.  It is difficult to determine how a vehicle actually works (or doesn't work).
 
 Determining the current transmission gear in real time is the *Gear Study*'s goal.
 
@@ -35,9 +35,89 @@ I still don't know if it is hubris to think a better method, one that improves f
 - ```Gear-Study-2``` - summary
 - ```Gear-Study-3``` - summary
 
+### Fuel Study
+
 ## Supporting Code
 
 ## Private Data
+
+## Anaconda Installation Environment
+
+### Install Anaconda Distribution
+
+[Download Anaconda](https://www.anaconda.com/download) and follow the Anaconda installation instructions.   Once the software is installed, run [Anaconda Navigator](https://docs.anaconda.com/free/navigator/index.html)
+
+### Create New Conda Environment (Windows)
+
+From Anaconda Navigator's ```base (root)``` environment, find the ```Powershell Prompt``` Launcher and launch a ```powershell``` terminal.
+
+```powershell
+conda create --name python311 python=3.11
+activate python311
+```
+
+### Install Additional Conda Packages (Windows)
+
+The following install commands may take an extremely long time to complete.
+
+```powershell
+activate python311
+conda install bzip2 ipywidgets jupyter_client jupyterlab_widgets matplotlib
+conda install nbclient nbconvert nbformat numpy pandas psutil python-dateutil pytz scipy seaborn setuptools tzdata wheel
+conda install conda-forge::geopandas conda-forge::shapely conda-forge::geopy
+conda install conda-forge::folium
+```
+
+### Install/Update Python Support Packages
+
+```powershell
+activate python311
+python -m pip install --upgrade pip
+python -m pip install --upgrade wheel setuptools markdown build cython psutil
+```
+
+### Install/Update Additional PyPi Packages
+
+```powershell
+activate python311
+python -m pip install haversine nbimporter pandasgui plotly pyserial
+python -m pip install rich==13.6.0 obd==0.7.2 pint==0.20.1 python-dateutil==2.8.2
+```
+
+### Build/Install Supporting Telemetry Packages
+
+```powershell
+git clone https://github.com/thatlarrypearson/telemetry-counter.git
+cd telemetry-counter
+python -m pip uninstall -y telemetry-counter
+python -m build .
+python -m pip install dist\*.whl
+python -m tcounter.boot_counter --help
+python -m tcounter.app_counter --help
+cd ..
+
+
+git clone https://github.com/thatlarrypearson/telemetry-obd.git
+cd telemetry-obd
+python -m pip uninstall -y telemetry-obd
+python -m build .
+python -m pip install dist\*.whl
+python -m telemetry_obd.obd_logger --help
+python -m telemetry_obd.obd_command_tester --help
+cd ..
+
+
+git clone https://github.com/thatlarrypearson/telemetry-obd-log-to-csv.git
+cd telemetry-obd-log-to-csv
+python -m pip uninstall -y telemetry-obd-log-to-csv
+python -m build .
+python -m pip install dist\*.whl
+python -m obd_log_to_csv.obd_log_to_csv --help
+python -m obd_log_to_csv.obd_log_evaluation --help
+python -m obd_log_to_csv.csv_to_delta_csv --help
+python -m obd_log_to_csv.csv_to_ratio_csv --help
+cd ..
+```
 
 ## LICENSE
 
