@@ -37,14 +37,14 @@ def obd_to_csv_file_name(obd_file_name:str)->str:
 def quotes_around_string(command:str, single_quote="'")->str:
     return (single_quote + command + single_quote)
 
-def obd_to_csv(vin:str, columns:list, verbose=False):
+def obd_to_csv(vin:str, columns:list, study="gear", verbose=False):
     # make temporary directory
-    temporary_file_directory = f"{temporary_file_base_directory}/{vin}"
+    temporary_file_directory = f"{temporary_file_base_directory}/{vin}/{study}"
     Path(temporary_file_directory).mkdir(parents=True, exist_ok=True)
     create_count = 0
     skip_count = 0
 
-    console.print(f"{vehicles[vin]['name']} Generating CSV Files")
+    console.print(f"{vehicles[vin]['name']} Generating CSV Files in {temporary_file_directory}")
 
     # Make a list of OBD data files.
     # directory where "*.json" OBD data files are held

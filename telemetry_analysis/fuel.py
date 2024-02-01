@@ -45,12 +45,14 @@ from telemetry_analysis.common import (
     image_file_extn,
     timedelta_to_hhmmss_str,
     heading,
+    fuel_grams_to_milliliters,
 )
 from private.vehicles import vehicles
 
 fuel_study_input_columns = [
     "AMBIANT_AIR_TEMP",                                           # Celsius 
     "BAROMETRIC_PRESSURE",                                        # kilopascal (kPa)
+    "COMMANDED_EQUIV_RATIO",                                      # air/fuel equivalence ratio
     "ENGINE_LOAD",                                                # % of maximum torque
     "FUEL_LEVEL",                                                 # % of useable fuel capacity
     "FUEL_RATE",                                                  # liters per hour
@@ -58,7 +60,7 @@ fuel_study_input_columns = [
     "FUEL_RATE_2-vehicle_fuel_rate",                              # grams per second
     "ODOMETER",                                                   # Kilometers
     "MAF",                                                        # grams per second
-    "THROTTLE_ACTUATOR,"                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
+    "THROTTLE_ACTUATOR",                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
     "THROTTLE_POS",                                               # Absolute Throttle Position - %, min @ idle > 0, max @ WOT <= 100
     "RPM",                                                        # revolutions per minute
     "SPEED",                                                      # kilometers per hour
@@ -85,7 +87,7 @@ fuel_study_input_columns = [
     "rotation_vector-pitch",                                      # radians
     "rotation_vector-roll",                                       # radians
     "rotation_vector-yaw",                                        # radians
-    "rotation_vector-vector"
+#    "rotation_vector-vector"
 #    "rotation_vector-vector-w",                                   # dimensionless scaler
 #    "rotation_vector-vector-x",                                   # dimensionless vector component
 #    "rotation_vector-vector-y",                                   # dimensionless vector component
@@ -109,12 +111,14 @@ input_int_columns = [
     "linear_acceleration-record_number",                          # count in this "route"
     "magnetometer-record_number",                                 # count in this "route"
     "rotation_vector-record_number",                              # count in this "route"
+    "WTHR_rapid_wind-time_epoch",                                 # seconds (monotonically increasing)
     "WTHR_obs_st-time_epoch",                                     # seconds (monotonically increasing)
 ]
 
 input_float_columns = [
     "AMBIANT_AIR_TEMP",                                           # Celsius 
     "BAROMETRIC_PRESSURE",                                        # kilopascal (kPa)
+    "COMMANDED_EQUIV_RATIO",                                      # air/fuel equivalence ratio
     "ENGINE_LOAD",                                                # % of maximum torque
     "FUEL_LEVEL",                                                 # % of useable fuel capacity
     "FUEL_RATE",                                                  # liters per hour
@@ -122,7 +126,7 @@ input_float_columns = [
     "FUEL_RATE_2-vehicle_fuel_rate",                              # grams per second
     "ODOMETER",                                                   # Kilometers
     "MAF",                                                        # grams per second
-    "THROTTLE_ACTUATOR,"                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
+    "THROTTLE_ACTUATOR",                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
     "THROTTLE_POS",                                               # Absolute Throttle Position - %, min @ idle > 0, max @ WOT <= 100
     "RPM",                                                        # revolutions per minute
     "SPEED",                                                      # kilometers per hour
@@ -144,10 +148,10 @@ input_float_columns = [
     "rotation_vector-pitch",                                      # radians
     "rotation_vector-roll",                                       # radians
     "rotation_vector-yaw",                                        # radians
-    "rotation_vector-vector-w",                                   # dimensionless scaler
-    "rotation_vector-vector-x",                                   # dimensionless vector component
-    "rotation_vector-vector-y",                                   # dimensionless vector component
-    "rotation_vector-vector-z",                                   # dimensionless vector component
+#    "rotation_vector-vector-w",                                   # dimensionless scaler
+#    "rotation_vector-vector-x",                                   # dimensionless vector component
+#    "rotation_vector-vector-y",                                   # dimensionless vector component
+#    "rotation_vector-vector-z",                                   # dimensionless vector component
     "WTHR_obs_st-wind_lull",                                      # meters per second
     "WTHR_obs_st-wind_average",                                   # meters per second
     "WTHR_obs_st-wind_gust",                                      # meters per second
@@ -160,6 +164,7 @@ fuel_study_output_columns = [
     'i',                                                          # row number
     "AMBIANT_AIR_TEMP",                                           # Celsius 
     "BAROMETRIC_PRESSURE",                                        # kilopascal (kPa)
+    "COMMANDED_EQUIV_RATIO",                                      # air/fuel equivalence ratio
     "ENGINE_LOAD",                                                # % of maximum torque
     "FUEL_LEVEL",                                                 # % of useable fuel capacity
     "FUEL_RATE",                                                  # liters per hour
@@ -167,7 +172,7 @@ fuel_study_output_columns = [
     "FUEL_RATE_2-vehicle_fuel_rate",                              # grams per second
     "ODOMETER",                                                   # Kilometers
     "MAF",                                                        # grams per second
-    "THROTTLE_ACTUATOR,"                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
+    "THROTTLE_ACTUATOR",                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
     "THROTTLE_POS",                                               # Absolute Throttle Position - %, min @ idle > 0, max @ WOT <= 100
     "RPM",                                                        # revolutions per minute
     "SPEED",                                                      # kilometers per hour
@@ -206,6 +211,30 @@ fuel_study_output_columns = [
     'duration',                                                   # seconds
     'iso_ts_pre',                                                 # UTC timestamp (before)
     'iso_ts_post',                                                # UTC timestamp (after)
+    'gps_distance',                                               # Kilometers
+    'gps_heading',                                                # radians
+    'gps_road_grade',                                             # percentage (100 * (rise/run))
+    'gps_rise',                                                   # meters
+    'gps_pitch',                                                  # radians
+    'gps_yaw',                                                    # radians
+    'vehicle_fuel_grams',                                         # total grams for record duration
+    'vehicle_fuel_milliliters',                                   # total milliliters for record duration
+    'fuel_milliliters',                                           # total milliliters for record duration
+    'fuel_rate',                                                  # milliliters per second
+    'fuel_maf_grams',                                             # total grams for record duration
+    'fuel_maf_milliliters',                                       # total milliliters for record duration
+    'fuel_maf_rate_milliliters',                                  # milliliters per second
+    'fuel_maf_lambda_maf_grams',                                  # total grams for record duration
+    'fuel_lambda_maf_milliliters',                                # total milliliters for record duration
+    'fuel_lambda_maf_rate_milliliters',                           # milliliters per second
+    'rotation_vector-record_number', 
+    'engine_fuel_grams', 
+    'engine_fuel_milliliters', 
+    'magnetometer-record_number', 
+    'gyroscope-record_number', 
+    'linear_acceleration-record_number', 
+    'gravity-record_number', 
+    'fuel_lambda_maf_grams',
 ]
 
 previous_input_columns = [
@@ -216,13 +245,16 @@ previous_input_columns = [
     "FUEL_RATE_2-vehicle_fuel_rate",                              # grams per second
     "ODOMETER",                                                   # Kilometers
     "MAF",                                                        # grams per second
-    "THROTTLE_ACTUATOR,"                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
+    "THROTTLE_ACTUATOR",                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
     "THROTTLE_POS",                                               # Absolute Throttle Position - %, min @ idle > 0, max @ WOT <= 100
     "RPM",                                                        # revolutions per minute
     "SPEED",                                                      # kilometers per hour
     "GNGNS-alt",                                                  # altitude in meters
     "GNGNS-lat",                                                  # latitude in decimal degrees
     "GNGNS-lon",                                                  # longitude in decimal degrees
+    "iso_ts_post",                                                # timestamp
+    "iso_ts_pre",                                                 # timestamp
+    'gps_heading',
 ]
 
 console = Console()
@@ -241,12 +273,11 @@ def save_fuel_study_data_to_csv(vin:str, output_file_name:str, obd_fuel_study:li
 
     return
 
-def generate_fuel_study_data(csv_file_dir:str, vin:str)->list:
+def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
     Path(csv_file_dir).mkdir(parents=True, exist_ok=True)
 
     obd_fuel_study = []
     theta_data = read_theta_data_file(theta_file_name)
-    bad_row_counter = 0
 
     # each raw JSON data file, after transformation into a CSV file, will have a
     # unique 'route_counter' value assigned to it.
@@ -264,130 +295,181 @@ def generate_fuel_study_data(csv_file_dir:str, vin:str)->list:
             previous = {column: None for column in previous_input_columns}
 
             reader = csv.DictReader(csv_file)
-            try:
-                for row in reader:
-                    i += 1
-                    line_number += 1
-                    record = {}
+            # try:
+            for row in reader:
+                i += 1
+                line_number += 1
+                record = {}
 
-                    # convert floats
-                    for column in input_float_columns:
-                        if row[column] and isinstance(row[column], str) and len(row[column]) > 0:
-                            record[column] = float(row[column])
-                        elif row[column] and isinstance(row[column], float):
-                            record[column] = row[column]
-                        elif row[column] and isinstance(row[column], int):
-                            record[column] = float(row[column])
-                        else:
-                            record[column] = None
+                # convert floats
+                for column in input_float_columns:
+                    try:
+                        record[column] = float(row[column])
+                    except ValueError:
+                       record[column] = None
 
-                    # "rotation_vector-vector" is list
-                    if isinstance(row["rotation_vector-rotation_vector"], list):
-                        row["rotation_vector-vector-w"] = record['rotation_vector'][0]
-                        row["rotation_vector-vector-x"] = record['rotation_vector'][1]
-                        row["rotation_vector-vector-y"] = record['rotation_vector'][2]
-                        row["rotation_vector-vector-z"] = record['rotation_vector'][3]
+                # convert ints
+                for column in input_int_columns:
+                    try:
+                        record[column] = int(row[column])
+                    except ValueError:
+                       record[column] = None
 
-                    # convert ints
-                    for column in input_int_columns:
-                        if row[column] and isinstance(row[column], str) and len(row[column]) > 0:
-                            record[column] = int(row[column])
-                        elif row[column] and isinstance(row[column], int):
-                            record[column] = row[column]
-                        else:
-                            record[column] = None
+                # "rotation_vector-vector" is list
+                # if isinstance(record["rotation_vector-rotation_vector"], list):
+                #     record["rotation_vector-vector-w"] = record['rotation_vector'][0]
+                #     record["rotation_vector-vector-x"] = record['rotation_vector'][1]
+                #     record["rotation_vector-vector-y"] = record['rotation_vector'][2]
+                #     record["rotation_vector-vector-z"] = record['rotation_vector'][3]
 
-                    # convert date/time
-                    if isinstance(row['iso_ts_pre'], str):
-                        record['iso_ts_pre'] = parser.isoparse(row['iso_ts_pre'])
+                # convert date/time
+                if isinstance(row['iso_ts_pre'], str):
+                    record['iso_ts_pre'] = parser.isoparse(row['iso_ts_pre'])
 
-                    if isinstance(row['iso_ts_post'], str):
-                        record['iso_ts_post'] = parser.isoparse(row['iso_ts_post'])
+                if isinstance(row['iso_ts_post'], str):
+                    record['iso_ts_post'] = parser.isoparse(row['iso_ts_post'])
 
-                    record['duration'] = record['iso_ts_post'] - record['iso_ts_pre']
-                    record['duration'] = record['duration'].total_seconds()
+                record['duration'] = record['iso_ts_post'] - record['iso_ts_pre']
+                record['duration'] = record['duration'].total_seconds()
 
-                    record['i'] = i
-                    record['route'] = route_counter
+                record['i'] = i
+                record['route'] = route_counter
 
-                    # create modify fields
+                # create modify fields
+                record['mps'] = None
+                record['rps'] = None
+                record['theta'] = None
+                if record['RPM'] is not None:
                     record['rps'] = record['RPM'] / 60.0
+                if record['SPEED'] is not None:
                     record['mps'] = record['SPEED'] * 0.44704
+                if record['mps'] is not None and record['rps'] is not None:
                     record['theta'] = atan2(record['mps'], record['rps'])
-                    record['acceleration'] = 0
 
-                    # need previous[column] to track all of the previous things
-
+                try:
+                    record['acceleration'] = (((record['SPEED'] - previous['SPEED']) * 0.44704)
+                                                / record['duration'])
+                except Exception:
                     record['acceleration'] = None
-                    if previous['iso_ts_post'] is not None and previous['SPEED'] is not None and record['SPEED'] is not None:
-                        # route is current
-                        record['acceleration'] = (((record['SPEED'] - previous['SPEED']) * 0.44704)
-                                                   / record['duration'])
 
-                    record['gps_distance'] = None
-                    if (previous['GNGNS_lat'] is not None and
-                         record['GNGNS_lat'] is not None and
-                       previous['GNGNS_lon'] is not None and
-                         record['GNGNS_lon'] is not None):
-                        
-                        record['gps_distance'] = haversine(
-                            (previous['GNGNS_lat'], previous['GNGNS_lon']),
-                            (record['GNGNS_lat'], record['GNGNS_lon'])
-                        )
-                        record['gps_heading'] = heading(
-                            (previous['GNGNS-lat'], previous['lon']),
-                            (record['GNGNS_lat'], record['GNGNS_lon'])
-                        )
+                # GPS
+                record['gps_distance'] = None
+                record['gps_heading'] = None
+                if (previous['GNGNS-lat'] is not None and
+                        record['GNGNS-lat'] is not None and
+                    previous['GNGNS-lon'] is not None and
+                        record['GNGNS-lon'] is not None):
 
-                    record['WTHR_rapid_wind-wind_direction'] = None
-                    if row['WTHR_rapid_wind-wind_direction'] is not None:
-                        record['WTHR_rapid_wind-wind_direction'] = radians(row['WTHR_rapid_wind-wind_direction'])
+                    record['gps_distance'] = haversine(
+                        (previous['GNGNS-lat'], previous['GNGNS-lon']),
+                        (record['GNGNS-lat'], record['GNGNS-lon'])
+                    )
+                    record['gps_heading'] = heading(
+                        (previous['GNGNS-lat'], previous['GNGNS-lon']),
+                        (record['GNGNS-lat'], record['GNGNS-lon'])
+                    )
 
-                    record['WTHR_obs_st-wind_direction'] = None
-                    if row['WTHR_obs_st-wind_direction'] is not None:
-                        record['WTHR_obs_st-wind_direction'] = radians(row['WTHR_obs_st-wind_direction'])
+                record['gps_rise'] = None
+                if previous['GNGNS-alt'] is not None and record['GNGNS-alt'] is not None:
+                    record['gps_rise'] = record['GNGNS-alt'] - previous['GNGNS-alt']
 
-                    record['gps-rise'] = None
-                    if previous['GNGNS_alt'] is not None and record['GNGNS_alt'] is not None:
-                        record['gps-rise'] = record['GNGNS_alt'] - previous['GNGNS_alt']
+                # USA Grade Definition
+                # https://en.wikipedia.org/wiki/Grade_(slope)
+                record['gps_pitch'] = None
+                record['gps_road_grade'] = None
+                if record['gps_rise'] is not None and record['gps_distance'] is not None:
+                    record['gps_pitch'] = atan2(record['gps_rise'], record['gps_distance'])
+                    if record['gps_distance'] != 0.0:
+                        record['gps_road_grade'] = abs(100.0 * record['gps_rise'] / record['gps_distance'])
 
-                    # Alternative Fuels Data Center Fuel Properties Comparison
-                    # https://afdc.energy.gov/files/u/publication/fuel_comparison_chart.pdf
-                    # SAE - 2014-03-05 Automotive Fuels Reference Book, Third Edition R-297
-                    # https://www.sae.org/publications/books/content/r-297/
-                    if row['FUEL_RATE_2-engine_fuel_rate'] is not None:
-                        
-                    if row['FUEL_RATE_2-vehicle_fuel_rate'] is not None:
+                record['gps_yaw'] = None
+                if record['gps_heading'] is not None and previous['gps_heading'] is not None:
+                    record['gps_yaw'] = record['gps_heading'] - previous['gps_heading']
 
-                    if theta_data and vin in theta_data:
-                        # find closest gear using theta_data[vin][gear]['theta'] being compared to row['theta']
-                        gear_distance = None
-                        closest_gear = 1
-                        for gear in theta_data[vin]:
-                            if not gear:
-                                continue
+                # Weather - Wind Direction to Radians
+                if record['WTHR_rapid_wind-wind_direction'] is not None:
+                    record['WTHR_rapid_wind-wind_direction'] = radians(record['WTHR_rapid_wind-wind_direction'])
+
+                if record['WTHR_obs_st-wind_direction'] is not None:
+                    record['WTHR_obs_st-wind_direction'] = radians(record['WTHR_obs_st-wind_direction'])
+
+                # FUEL_RATE_2
+                # grams per second
+                # see fuel_grams_to_milliliters() in common.py for info.
+                record['engine_fuel_grams'] = None
+                record['engine_fuel_milliliters'] = None
+                if record['FUEL_RATE_2-engine_fuel_rate'] is not None:
+                    record['engine_fuel_grams'] = record['FUEL_RATE_2-engine_fuel_rate'] * record['duration']
+                    record['engine_fuel_milliliters'] = fuel_grams_to_milliliters(vin, record['engine_fuel_grams'])
+
+                record['vehicle_fuel_grams'] = None
+                record['vehicle_fuel_milliliters'] = None
+                if record['FUEL_RATE_2-vehicle_fuel_rate'] is not None:
+                    record['vehicle_fuel_grams'] = record['FUEL_RATE_2-vehicle_fuel_rate'] * record['duration']
+                    record['vehicle_fuel_milliliters'] = fuel_grams_to_milliliters(vin, record['vehicle_fuel_grams'])
+
+                # FUEL_RATE
+                # liters per hour to milliliters per second
+                # divide the volume / time value by 3.6
+                # This is not volume/temperature corrected.
+                record['fuel_milliliters'] = None
+                record['fuel_rate'] = None
+                if record['FUEL_RATE'] is not None:
+                    record['fuel_rate'] = record['FUEL_RATE'] / 3.6
+                    record['fuel_milliliters'] = record['fuel_rate'] * record['duration']
+
+                # fuel usage based on MAF alone
+                #   - https://www.windmill.co.uk/fuel.html
+                #       - "chemically ideal value of 14.7 grams of air to every gram of gasoline"
+                #   - SAE J1979DA Standard shows ideal value of 14.64
+                record['fuel_maf_grams'] = None
+                record['fuel_maf_milliliters'] = None
+                record['fuel_maf_rate_milliliters'] = None
+                if record['MAF'] is not None:
+                    record['fuel_maf_rate_milliliters'] = (record['MAF'] / 14.64)
+                    record['fuel_maf_grams'] = (record['MAF'] / 14.64) * record['duration']
+                    record['fuel_maf_milliliters'] = fuel_grams_to_milliliters(vin, record['fuel_maf_grams'])
+
+                # fuel usage based on MAF and Lambda, Air/Fuel mixture ratio
+                #   - SAE J1979DA Standard for 0x44 COMMANDED_EQUIV_RATIO
+                record['fuel_lambda_maf_grams'] = None
+                record['fuel_lambda_maf_milliliters'] = None
+                record['fuel_lambda_maf_rate_milliliters'] = None
+                if record['MAF'] is not None and record['COMMANDED_EQUIV_RATIO'] is not None:
+                    record['fuel_lambda_maf_rate_milliliters'] = (record['MAF'] / (14.64 * record['COMMANDED_EQUIV_RATIO']))
+                    record['fuel_lambda_maf_grams'] = (record['MAF'] / (14.64 * record['COMMANDED_EQUIV_RATIO'])) * record['duration']
+                    record['fuel_lambda_maf_milliliters'] = fuel_grams_to_milliliters(vin, record['fuel_lambda_maf_grams'])
+
+                # closest_gear assignment
+                if theta_data and vin in theta_data and record['theta']:
+                    # find closest gear using theta_data[vin][gear]['theta'] being compared to record['theta']
+                    gear_distance = None
+                    closest_gear = 1
+                    for gear in theta_data[vin]:
+                        # sourcery skip: merge-nested-ifs
+                        if gear:
                             gear_distance = abs(theta_data[vin][gear]['theta'] - record['theta'])
+                            # sourcery skip: merge-nested-ifs
                             if gear != closest_gear:
                                 if gear_distance < last_gear_distance:
                                     closest_gear = gear
                             last_gear_distance = gear_distance
 
-                        record['closest_gear'] = closest_gear
+                    record['closest_gear'] = closest_gear
+                else:
+                    record['closest_gear'] = 0
 
-                    else:
+                # need previous[column] to track all of the previous things
+                previous = {column: record[column] for column in previous_input_columns}
+                obd_fuel_study.append(record)
 
-                        record['closest_gear'] = 0
+                    # except Exception as e:
+                    #     console.print(
+                    #         f"oops {vehicles[vin]['name']}:\n{csv_data_file}\nline {line_number}\n{str(e)}"
+                    #     )
+                    #     pprint(row)
+                    #     pprint(record)
 
-                    previous = {column: record[column] for column in previous_input_columns}
-                    obd_fuel_study.append(record)
-
-            except Exception as e:
-                console.print(
-                    f"oops {vehicles[vin]['name']}:\n{csv_data_file}\nline {line_number}\n{str(e)}"
-                )
-                pprint(row)
-                pprint(record)
-
-    console.print(f"{vehicles[vin]['name']} good rows: {len(obd_fuel_study)} bad rows: {bad_row_counter} file count: {route_counter}")
+    console.print(f"{vehicles[vin]['name']} good rows: {len(obd_fuel_study)} file count: {route_counter}")
 
     return obd_fuel_study

@@ -66,9 +66,10 @@ conda install bzip2 ipywidgets jupyter_client jupyterlab_widgets matplotlib
 conda install nbclient nbconvert nbformat numpy pandas psutil python-dateutil pytz scipy seaborn setuptools tzdata wheel
 conda install conda-forge::geopandas conda-forge::shapely conda-forge::geopy
 conda install conda-forge::folium
+conda install conda-forge::jupyter-ui-poll
 ```
 
-### Install/Update Python Support Packages
+### Install/Update Python Support Packages (Windows)
 
 ```powershell
 activate python311
@@ -76,22 +77,24 @@ python -m pip install --upgrade pip
 python -m pip install --upgrade wheel setuptools markdown build cython psutil
 ```
 
-### Install/Update Additional PyPi Packages
+### Install/Update Additional PyPi Packages (Windows)
 
 ```powershell
 activate python311
 python -m pip install haversine nbimporter pandasgui plotly pyserial
-python -m pip install rich==13.6.0 obd==0.7.2 pint==0.20.1 python-dateutil==2.8.2
+python -m pip uninstall PIL
+python -m pip uninstall Pillow
+python -m pip install Pillow
 ```
 
-### Build/Install Supporting Telemetry Packages
+### Build/Install Supporting Telemetry Packages (Windows)
 
 ```powershell
 git clone https://github.com/thatlarrypearson/telemetry-counter.git
 cd telemetry-counter
 python -m pip uninstall -y telemetry-counter
 python -m build .
-python -m pip install dist\*.whl
+python -m pip install .\dist\telemetry_counter-0.0.1-py3-none-any.whl
 python -m tcounter.boot_counter --help
 python -m tcounter.app_counter --help
 cd ..
@@ -101,7 +104,7 @@ git clone https://github.com/thatlarrypearson/telemetry-obd.git
 cd telemetry-obd
 python -m pip uninstall -y telemetry-obd
 python -m build .
-python -m pip install dist\*.whl
+python -m pip install .\dist\telemetry_obd-0.4.2-py3-none-any.whl
 python -m telemetry_obd.obd_logger --help
 python -m telemetry_obd.obd_command_tester --help
 cd ..
@@ -111,7 +114,7 @@ git clone https://github.com/thatlarrypearson/telemetry-obd-log-to-csv.git
 cd telemetry-obd-log-to-csv
 python -m pip uninstall -y telemetry-obd-log-to-csv
 python -m build .
-python -m pip install dist\*.whl
+python -m pip install .\dist\telemetry_obd_log_to_csv-0.3.3-py3-none-any.whl
 python -m obd_log_to_csv.obd_log_to_csv --help
 python -m obd_log_to_csv.obd_log_evaluation --help
 python -m obd_log_to_csv.csv_to_delta_csv --help
