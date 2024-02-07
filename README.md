@@ -6,6 +6,33 @@ Logs 9 DOF (degrees of freedom) captured from CircuitPython enabled feather micr
 
 ## Usage
 
+```bash
+$ python -m imu_logger.imu_logger --help
+usage: imu_logger.py [-h] [--shared_dictionary_name SHARED_DICTIONARY_NAME]
+                     [--shared_dictionary_command_list SHARED_DICTIONARY_COMMAND_LIST]
+                     [--serial_device_name SERIAL_DEVICE_NAME] [--verbose] [--version]
+                     [base_path]
+
+Telemetry IMU Logger
+
+positional arguments:
+  base_path             Relative or absolute output data directory. Defaults to 'C:\Users\runar/telemetry-data/data'.
+
+options:
+  -h, --help            show this help message and exit
+  --shared_dictionary_name SHARED_DICTIONARY_NAME
+                        Enable shared memory/dictionary using this name
+  --shared_dictionary_command_list SHARED_DICTIONARY_COMMAND_LIST
+                        Comma separated list of IMU commands/reports to be shared (no spaces), defaults to all:
+                        ['IMU_accelerometer', 'IMU_gyroscope', 'IMU_gravity', 'IMU_linear_acceleration',
+                        'IMU_magnetometer', 'IMU_rotation_vector']
+  --serial_device_name SERIAL_DEVICE_NAME
+                        Name for the hardware IMU serial device. Defaults to None
+  --verbose             Turn DEBUG logging on. Default is off.
+  --version             Print version number and exit.
+$
+```
+
 ## Installation
 
 ### Problems Identifying Serial Device Name
@@ -44,3 +71,7 @@ DEFAULT_USB_VID = 12346
 DEFAULT_USB_PID = 32983
 CIRCUITPYTHON_DEVICE_NAME = "Unexpected Maker FeatherS3"
 ```
+
+## LICENSE
+
+[MIT License](./LICENSE.md)

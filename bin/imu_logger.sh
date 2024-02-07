@@ -57,10 +57,11 @@ fi
 
 while date '+%Y/%m/%d %H:%M:%S'
 do
-	# Enable shared dictionary option
 	${APP_PYTHON} -m imu_logger.imu_logger \
-		--shared_dictionary_name "${SHARED_DICTIONARY_NAME}" \
 		"${APP_BASE_PATH}"
+
+	# Enable shared dictionary option
+	# --shared_dictionary_name "${SHARED_DICTIONARY_NAME}" \
 
 	export RtnVal="$?"
 	echo imu_logger returns "${RtnVal}"
