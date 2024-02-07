@@ -49,7 +49,7 @@ def obd_to_csv(vin:str, columns:list, study="gear", verbose=False):
     # Make a list of OBD data files.
     # directory where "*.json" OBD data files are held
     root = Path(data_file_base_directory)
-    obd_files = [ str(rp) for rp in root.rglob(f"*{vin}*.json") if rp.is_file() ]    
+    obd_files = [ str(rp) for rp in root.rglob(f"*{vin}*.json") if rp.is_file() and 'integrated' not in rp.name]    
 
     # Make a sorted list of OBD data files.
     # obd_files = sorted(obd_files, key=sort_key_on_timestamp)
