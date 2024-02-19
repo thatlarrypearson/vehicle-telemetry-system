@@ -103,6 +103,7 @@ def save_gear_study_data_to_csv(vin:str, output_file_name:str, obd_gear_study:li
     return
 
 def generate_gear_study_data(csv_file_dir:str, vin:str)->list:
+    # sourcery skip: merge-dict-assign, move-assign-in-block, swap-nested-ifs
     Path(csv_file_dir).mkdir(parents=True, exist_ok=True)
 
     obd_gear_study = []
