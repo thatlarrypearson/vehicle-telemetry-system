@@ -88,8 +88,10 @@ gear_colors = {
 
 console = Console()
 
-def save_gear_study_data_to_csv(vin:str, output_file_name:str, obd_gear_study:list, force_save=False):
+def save_gear_study_data_to_csv(vin:str, output_file_name:str, obd_gear_study:list, force_save=True):
     console.print(f"Creating gear study CSV file for {vehicles[vin]['name']} as {output_file_name.replace(vin, fake_vin)}")
+    if not obd_gear_study:
+        ValueError("Empty OBD Gear Study passed to save_gear_study_data_to_csv()")
 
     if Path(output_file_name).is_file() and not force_save:
         console.print(f"\tCSV file for {vehicles[vin]['name']} already exists - skipping...")
@@ -689,6 +691,7 @@ def error_relationships(vin:str, df:pd.DataFrame):
 
 # Compute the local maximums for 'theta_error' column kernel density estimation (KDE)
 def theta_error_local_maximums(vin:str, df:pd.DataFrame):
+    # sourcery skip: flip-comparison
     theta_data = read_theta_data_file(theta_file_name)
     
     if theta_data and vin not in theta_data:

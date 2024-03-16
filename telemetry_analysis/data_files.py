@@ -12,6 +12,7 @@ from .vins import fake_vin
 from obd_log_to_csv.obd_log_evaluation import input_file as obd_log_evaluation_input_file
 from obd_log_to_csv.obd_log_evaluation import rich_output as obd_log_evaluation_rich_output
 from obd_log_to_csv.obd_log_to_csv import main as obd_log_to_csv_main
+from obd_log_to_csv.vin_data_integrator import main as integrator
 
 console = Console()
 
@@ -56,7 +57,7 @@ def obd_to_csv(vin:str, columns:list, study="gear", verbose=False):
 
     for obd_file in obd_files:
         # generate CSV version of OBD data file
-        output_file_name = f"{temporary_file_directory}/{str(Path(obd_to_csv_file_name(obd_file)).name)}"
+        output_file_name = Path(temporary_file_directory) / Path(obd_to_csv_file_name(obd_file)).name
 
         # Only (re)generate when the file doesn't already exist
         if (Path(output_file_name)).is_file():
@@ -73,3 +74,49 @@ def obd_to_csv(vin:str, columns:list, study="gear", verbose=False):
         create_count +=1
 
     console.print(f"\tCreated {create_count}\n\tSkipped {skip_count}\n")
+
+def integrated_to_csv(vin:str, columns:list, study="fuel", verbose=False):
+    # make temporary directory
+    temporary_file_directory = Path(f"{temporary_file_base_directory}/{vin}/{study}")
+    temporary_file_directory.mkdir(parents=True, exist_ok=True)
+    create_count = 0
+    replace_count = 0
+    skip_count = 0
+
+    console.print(f"{vehicles[vin]['name']} Generating CSV Files in {str(temporary_file_directory).replace(vin, '<VIN>')}")
+
+    # make list of integrated files
+    integrated_files = list(
+        Path(data_file_base_directory).glob(f"**/*integrated-{vin}.json")
+    )
+
+    for integrated_file in integrated_files:
+        csv_integrated_file = Path(temporary_file_directory) / Path(obd_to_csv_file_name(integrated_file.name))
+
+        if not csv_integrated_file.exists():
+            # create CSV file
+            create_count += 1
+            if verbose:
+                console.print(
+                    f"Converting {integrated_file.name.replace(vin, '<vin>')} to {csv_integrated_file.name.replace(vin, '<vin>')}"
+                )
+            obd_log_to_csv_main(json_input_files=[integrated_file, ], csv_output_file_name=csv_integrated_file, commands=columns)
+
+        elif integrated_file.stat().st_mtime > csv_integrated_file.stat().st_mtime:
+            # JSON file changed, need to update CSV file
+            replace_count += 1
+            if verbose:
+                console.print(
+                    f"Converting {integrated_file.name.replace(vin, '<vin>')} to {csv_integrated_file.name.replace(vin, '<vin>')}"
+                )
+            obd_log_to_csv_main(json_input_files=[integrated_file, ], csv_output_file_name=csv_integrated_file, commands=columns)
+
+        else:
+            # no need to recreate
+            skip_count += 1
+            if verbose:
+                console.print(
+                    f"Skipping {integrated_file.name.replace(vin, '<vin>')} to {csv_integrated_file.name.replace(vin, '<vin>')}"
+                )
+
+    console.print(f"\tCreated {create_count}\n\tReplaced {replace_count}\n\tSkipped {skip_count}\n")

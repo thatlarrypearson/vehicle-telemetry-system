@@ -260,7 +260,8 @@ previous_input_columns = [
 console = Console()
 
 def save_fuel_study_data_to_csv(vin:str, output_file_name:str, obd_fuel_study:list, force_save=False):
-    console.print(f"Creating fuel study CSV file for {vehicles[vin]['name']} as {output_file_name.replace(vin, fake_vin)}")
+    # sourcery skip: remove-unnecessary-cast
+    console.print(f"Creating fuel study CSV file for {vehicles[vin]['name']} as {str(output_file_name).replace(vin, fake_vin)}")
 
     if Path(output_file_name).is_file() and not force_save:
         console.print(f"\tCSV file for {vehicles[vin]['name']} already exists - skipping...")
@@ -286,7 +287,7 @@ def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
     # each row in the union of all CSV files has a unique row number 'i'
     i = 0
 
-    for csv_data_file in (Path(csv_file_dir).glob(f"*{vin}*.csv")):
+    for csv_data_file in (Path(csv_file_dir).glob(f"**/*integrated-{vin}.csv")):
         with open(csv_data_file, "r") as csv_file:
             route_counter += 1
             line_number = 0
@@ -295,7 +296,6 @@ def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
             previous = {column: None for column in previous_input_columns}
 
             reader = csv.DictReader(csv_file)
-            # try:
             for row in reader:
                 i += 1
                 line_number += 1
@@ -462,13 +462,6 @@ def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
                 # need previous[column] to track all of the previous things
                 previous = {column: record[column] for column in previous_input_columns}
                 obd_fuel_study.append(record)
-
-                    # except Exception as e:
-                    #     console.print(
-                    #         f"oops {vehicles[vin]['name']}:\n{csv_data_file}\nline {line_number}\n{str(e)}"
-                    #     )
-                    #     pprint(row)
-                    #     pprint(record)
 
     console.print(f"{vehicles[vin]['name']} good rows: {len(obd_fuel_study)} file count: {route_counter}")
 
