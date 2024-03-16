@@ -86,6 +86,11 @@ gear_colors = {
 10: 'cyan',
 }
 
+# Usable values for max_indices and vin_[xy]_values are generated in gear_study_kde_extrema_chart(vin:str, df:pd.DataFrame)
+max_indices = None
+vin_x_values = None
+vin_y_values = None
+
 console = Console()
 
 def save_gear_study_data_to_csv(vin:str, output_file_name:str, obd_gear_study:list, force_save=True):
@@ -195,9 +200,8 @@ def generate_gear_study_data(csv_file_dir:str, vin:str)->list:
                             if not gear:
                                 continue
                             gear_distance = abs(theta_data[vin][gear]['theta'] - record['theta'])
-                            if gear != closest_gear:
-                                if gear_distance < last_gear_distance:
-                                    closest_gear = gear
+                            if gear != closest_gear and gear_distance < last_gear_distance:
+                                closest_gear = gear
                             last_gear_distance = gear_distance
 
                         record['closest_gear'] = closest_gear
@@ -338,6 +342,7 @@ def gear_study_rps_mps_kde_chart(vin:str, df:pd.DataFrame):
     return
 
 def gear_study_kde_extrema_chart(vin:str, df:pd.DataFrame):
+    # sourcery skip: flip-comparison, identity-comprehension, merge-dict-assign, move-assign-in-block
     # This computes the local maximums for 'theta' column kernel density estimation (KDE)
     # apply filters to better improve results by reducing error
     df2D = df
@@ -542,6 +547,9 @@ def gear_study_theta_histogram(vin:str, df:pd.DataFrame):
 
 def gear_study_kde_plot_overlays_for_each_gear(vin:str, df:pd.DataFrame):
     theta_data = read_theta_data_file(theta_file_name)
+
+    if not vin_x_values:
+        ValueError("vin_x_values not set. run telemetry_analysis.gears.gear_study_kde_plot_overlays_for_each_gear() first")
 
     gear_count = len(theta_data[vin])
 
