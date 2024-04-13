@@ -67,6 +67,9 @@ fuel_study_input_columns = [
     "GNGNS-alt",                                                  # altitude in meters
     "GNGNS-lat",                                                  # latitude in decimal degrees
     "GNGNS-lon",                                                  # longitude in decimal degrees
+    "NMEA_GNGNS-alt",                                             # altitude in meters
+    "NMEA_GNGNS-lat",                                             # latitude in decimal degrees
+    "NMEA_GNGNS-lon",                                             # longitude in decimal degrees
     "gravity-record_number",                                      # count in this "route"
     "gravity-x",                                                  # meters per second squared
     "gravity-y",                                                  # meters per second squared
@@ -133,6 +136,9 @@ input_float_columns = [
     "GNGNS-alt",                                                  # altitude in meters
     "GNGNS-lat",                                                  # latitude in decimal degrees
     "GNGNS-lon",                                                  # longitude in decimal degrees
+    "NMEA_GNGNS-alt",                                             # altitude in meters
+    "NMEA_GNGNS-lat",                                             # latitude in decimal degrees
+    "NMEA_GNGNS-lon",                                             # longitude in decimal degrees
     "gravity-x",                                                  # meters per second squared
     "gravity-y",                                                  # meters per second squared
     "gravity-z",                                                  # meters per second squared
@@ -308,6 +314,14 @@ def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
                     except ValueError:
                        record[column] = None
 
+                # Column names changed midway through data collection
+                #   "NMEA_GNGNS-alt" to "GNGNS-alt"
+                #   "NMEA_GNGNS-lat" to "GNGNS-lat"
+                #   "NMEA_GNGNS-lon" to "GNGNS-lon"
+                for column in ['NMEA_GNGNS-alt', 'NMEA_GNGNS-lat', 'NMEA_GNGNS-lon', ]:
+                    if record[column]:
+                        record[column.replace('NMEA_', '')] = record[column]
+
                 # convert ints
                 for column in input_int_columns:
                     try:
@@ -461,6 +475,15 @@ def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
 
                 # need previous[column] to track all of the previous things
                 previous = {column: record[column] for column in previous_input_columns}
+
+                # The column names that changed midway through data collection
+                # need to be removed from the dictionary.
+                #   "NMEA_GNGNS-alt" to "GNGNS-alt"
+                #   "NMEA_GNGNS-lat" to "GNGNS-lat"
+                #   "NMEA_GNGNS-lon" to "GNGNS-lon"
+                for column in ['NMEA_GNGNS-alt', 'NMEA_GNGNS-lat', 'NMEA_GNGNS-lon', ]:
+                    del record[column]
+
                 obd_fuel_study.append(record)
 
     console.print(f"{vehicles[vin]['name']} good rows: {len(obd_fuel_study)} file count: {route_counter}")
