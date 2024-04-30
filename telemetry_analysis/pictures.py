@@ -188,21 +188,23 @@ def image_to_exif(image_path:str, verbose=False)->dict:
 
     return return_value
 
-def image_directory_to_exif(image_directory=DEFAULT_IMAGE_DIRECTORY, image_suffix=DEFAULT_IMAGE_SUFFIX, verbose=False)->dict:
+def image_directory_to_exif(image_directory=DEFAULT_IMAGE_DIRECTORY, image_suffix=DEFAULT_IMAGE_SUFFIX, verbose=False) -> dict:
     """
     Given an image_directory, find all images in the directory (and sub-directories)
     matching the image_suffix.
 
     Return a dictionary with
-        key - image_file_name
+        key - (DateTime, image_file_name)
         value - exif data
     """
     root = Path(image_directory)
     images = [ str(image) for image in root.rglob(f"*{image_suffix}") if image.is_file()]
     image_exif_data = {}
     for image in images:
-        file_string = image
-        image_exif_data[file_string] = image_to_exif(image, verbose=verbose)
+        exif_data = image_to_exif(image, verbose=verbose)
+        # use GPS date/time whenever possible
+        DateTime = exif_data.get('aware_gps_datetime', exif_data['DateTime'])
+        image_exif_data[(DateTime, image)] = exif_data
 
     if verbose:
         pprint(image_exif_data)

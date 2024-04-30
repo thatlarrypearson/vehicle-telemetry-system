@@ -18,7 +18,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 from itertools import count
 from dateutil import parser
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
 from openpyxl import load_workbook
 from rich.pretty import pprint
@@ -31,6 +31,15 @@ DEFAULT_XLSX = Path.home() / Path("Dropbox/RV/Mileage.xlsx")
 DEFAULT_IMAGE_DIRECTORY = Path.home() / Path("telemetry-data/fuel-images")
 DEFAULT_DATA_DIRECTORY = Path.home() / Path("telemetry-data")
 DEFAULT_HOME_TIMEZONE = timezone('US/Central')
+# 4 hours 
+DEFAULT_MAXIMUM_TIME_DIFFERENCE = timedelta(seconds=(4*60*60))
+ONE_DAY = timedelta(days=1.0)
+
+def naive_datetime_to_aware_datetime(naive)->datetime:
+    """
+    Create a default home timezone aware datetime object
+    """
+    return DEFAULT_HOME_TIMEZONE.localize(naive)
 
 def string_to_list(sheets:str) -> list:
     """
@@ -74,7 +83,10 @@ def spreadsheet(spreadsheet:Path, sheet:str, vin:str, verbose=False) -> list:
             'StationAddress': ws.cell(row=row, column=7).value,
         }
 
-        if not isinstance(tmp_row['Date'], datetime):
+        if isinstance(tmp_row['Date'], datetime):
+            # convert datetime object to a default home timezone aware datetime.
+            tmp_row['Date'] = naive_datetime_to_aware_datetime(tmp_row['Date'])
+        else:
             if verbose:
                 print(f"Date ({tmp_row['Date']}) not datetime at row {row}")
             tmp_row['Date'] = None
@@ -340,6 +352,7 @@ def obd_logger_data(vins:list, data_directory=DEFAULT_DATA_DIRECTORY, verbose=Fa
     return obd_data
 
 def fuel_image_data(image_directory=DEFAULT_IMAGE_DIRECTORY, verbose=False)->dict:
+    # sourcery skip: use-named-expression, use-next
     """
     Gets image data (timestamp and location) from images (*.jgp) in image_directory.
     Returns dictionary with:
@@ -347,12 +360,64 @@ def fuel_image_data(image_directory=DEFAULT_IMAGE_DIRECTORY, verbose=False)->dic
     """
     image_data = image_directory_to_exif(image_directory=image_directory, verbose=verbose)
 
-    return {
-        (v['DateTimeOriginal'], k): v 
-        for k, v in image_data.items()
-    }
+    return_value = {}
+
+    for k, v in image_data.items():
+        first_key_part = None
+        for dt in ['aware_gps_datetime', 'DateTime', 'DateTimeOriginal', 'DateTimeDigitized', ]:
+            # find the first valid datetime object and use it in the key
+            # where the key is (datetime.datetime, file_name)
+            if dt in image_data[k] and isinstance(image_data[k][dt], datetime):
+                first_key_part = dt
+                break
+
+        if first_key_part:
+            return_value[(v[first_key_part], k)] = v
+        else:
+            if verbose:
+                print(f"No valid timestamp available in image exif: {image_data[k]}")
+            return_value[(datetime(1,1,1), k)] = v
+
+    return return_value
 
 def combine_data(
+        vins, fuel_fill_data, location_data, engine_data, fuel_fill_picture_data,
+        maximum_time_difference=DEFAULT_MAXIMUM_TIME_DIFFERENCE,
+        verbose=False
+) -> dict:
+    """
+    Integrate data so that all available data can be connected fuel fill events found in the spreadsheet data.
+    """
+    combined_data = {}
+    for vin in vins:
+        if verbose:
+            print(f"combine_data({vin})")
+
+        # limit fuel fill data to this vin
+        fuel = {k: v for k, v in fuel_fill_data.items() if k[0] == vin}
+
+        # limit engine_data to this vin
+        engine = {k: v for k, v in engine_data.items() if k[0] == vin}
+
+        matching_engine = {}
+        for filling in fuel:
+            for k, v in engine.items():
+                # first_iso_ts_pre must be same day
+                if filling[1] < k[1] and abs(k[1] - filling[1]) <= ONE_DAY:
+                    matching_engine[k] = v
+                    if verbose:
+                        print(f"fuel_fill_data[{filling}] same day as first_iso_ts_pre engine_data[{k}]")
+                # or last_iso_ts_post must be same day
+                elif filling[1] < k[2] and abs(k[2] - filling[1]) <= ONE_DAY:
+                    matching_engine[k] = v
+                    if verbose:
+                        print(f"fuel_fill_data[{filling}] same day as last_iso_ts_post engine_data[{k}]")
+
+
+
+    return combined_data
+
+def gather_data(
         sheets=None,
         vins=None,
         xlsx=DEFAULT_XLSX,
@@ -362,13 +427,25 @@ def combine_data(
         verbose=False
 ):
     """
-    Gather and combine data from spreadsheets, telemetry_obd.obd_logger
-    and telemetry_gps.gps_logger to create mapping between the three.
+    Gather data from images, spreadsheets, telemetry_obd.obd_logger
+    and telemetry_gps.gps_logger to create mapping between the four.
 
-    The mapping between the three sources of data will be placed into
+    The mapping between the four sources of data will be placed into
     a python program file where the dictionary containing the mapping
     can be imported by other python programs.
     """
+    # mileage_spreadsheet() sample output:
+        # ('3FTTW8F97PRA00000', datetime.datetime(2023, 8, 23, 0, 0, tzinfo=<DstTzInfo 'US/Central' CDT-1 day, 19:00:00 DST>), 0): {
+        #     'vin': '3FTTW8F97PRA00000',
+        #     'Date': datetime.datetime(2023, 8, 23, 0, 0, tzinfo=<DstTzInfo 'US/Central' CDT-1 day, 19:00:00 DST>),
+        #     'MPG': None,
+        #     'Odometer': 76.1,
+        #     'Gallons': 14.5,
+        #     'PricePerGallon': None,
+        #     'FuelBrand': None,
+        #     'StationAddress': 'Jordan Ford',
+        #     'column': None
+        # },
     fuel_fill_data = mileage_spreadsheet(
         sheets=sheets,
         vins=vins,
@@ -379,12 +456,45 @@ def combine_data(
     )
     fuel_fill_data = dict(sorted(fuel_fill_data.items()))
 
+    # gps_logger_data() sample output:
+        # (datetime.datetime(2000, 1, 1, 0, 0, 55, 892776, tzinfo=tzutc()), datetime.datetime(2000, 1, 1, 0, 7, 41, 897955, tzinfo=tzutc())): {
+        #     'iso_ts_pre': datetime.datetime(2000, 1, 1, 0, 0, 55, 892776, tzinfo=tzutc()),
+        #     'iso_ts_post': datetime.datetime(2000, 1, 1, 0, 7, 41, 897955, tzinfo=tzutc()),
+        #     'file_name': 'C:\\Users\\runar\\telemetry-data\\telemetry-gps\\data\\NMEA-20000101000034-utc.json',
+        #     'first_location': {
+        #         'time': '16:59:56',
+        #         'lat': '29.51895683',
+        #         'NS': 'N',
+        #         'lon': '-98.4627545',
+        #         'EW': 'W',
+        #         'alt': '242.6'
+        #     },
+        #     'last_location': {
+        #         'time': '17:06:41',
+        #         'lat': '29.51488633',
+        #         'NS': 'N',
+        #         'lon': '-98.464322',
+        #         'EW': 'W',
+        #         'alt': '242.0'
+        #     }
+        # },
     location_data = gps_logger_data(
         data_directory=data_directory,
         verbose=verbose
     )
     location_data = dict(sorted(location_data.items()))
 
+    # obd_logger_data() sample output:
+        # ('3FTTW8F97PRA00000', datetime.datetime(2023, 9, 1, 17, 11, 30, 545411, tzinfo=tzutc()), datetime.datetime(2023, 9, 1, 18, 14, 26, 839080, tzinfo=tzutc())): {
+        #     'vin': '3FTTW8F97PRA00000',
+        #     'iso_ts_pre': datetime.datetime(2023, 9, 1, 17, 11, 30, 545411, tzinfo=tzutc()),
+        #     'iso_ts_post': datetime.datetime(2023, 9, 1, 18, 14, 26, 839080, tzinfo=tzutc()),
+        #     'file_name': 'C:\\Users\\runar\\telemetry-data\\data\\3FTTW8F97PRA00000\\3FTTW8F97PRA00000-0000000001.json',
+        #     'first_ODOMETER': 3347.2,
+        #     'last_ODOMETER': 4118.1,
+        #     'first_FUEL_LEVEL': 76.07843137254902,
+        #     'last_FUEL_LEVEL': 51.372549019607845
+        # },
     engine_data = obd_logger_data(
         vins=vins,
         data_directory=data_directory,
@@ -392,6 +502,18 @@ def combine_data(
     )
     engine_data = dict(sorted(engine_data.items()))
 
+    # fuel_image_data() sample output:
+        # (datetime.datetime(2017, 6, 11, 15, 43, 26, tzinfo=<UTC>), 'C:\\Users\\runar\\telemetry-data\\fuel-images\\20170611-2017-06-11 10.43.26.jpg'): {
+        #     'GPSInfo': {
+        #         'time': '15:43:26',
+        #         'date': '2017/06/11',
+        #         'aware_gps_datetime': datetime.datetime(2017, 6, 11, 15, 43, 26, tzinfo=<UTC>),
+        #         'lat': 29.6512,
+        #         'ns': 'N',
+        #         'lon': 97.59375,
+        #         'ew': 'W',
+        #         'alt': 93.71814671814671
+        #     },
     fuel_fill_picture_data = fuel_image_data(image_directory=image_directory, verbose=verbose)
     fuel_fill_picture_data = dict(sorted(fuel_fill_picture_data.items()))
 
@@ -487,7 +609,7 @@ if __name__ == "__main__":
     data_directory = args['data_directory']
     verbose = args['verbose']
 
-    combine_data(
+    gather_data(
         sheets=sheets,
         vins=vins,
         xlsx=xlsx,

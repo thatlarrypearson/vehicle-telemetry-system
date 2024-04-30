@@ -280,7 +280,7 @@ def save_fuel_study_data_to_csv(vin:str, output_file_name:str, obd_fuel_study:li
 
     return
 
-def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
+def generate_fuel_study_data(csv_file_dir:str, vin:str, verbose=False) -> list:
     Path(csv_file_dir).mkdir(parents=True, exist_ok=True)
 
     obd_fuel_study = []
@@ -297,6 +297,9 @@ def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
         with open(csv_data_file, "r") as csv_file:
             route_counter += 1
             line_number = 0
+
+            if verbose:
+                print(f"{route_counter}: {csv_data_file.replace(vin, '<VIN>')}: {line_number} ")
 
             # previous value setup
             previous = {column: None for column in previous_input_columns}
@@ -485,6 +488,9 @@ def generate_fuel_study_data(csv_file_dir:str, vin:str) -> list:
                     del record[column]
 
                 obd_fuel_study.append(record)
+
+        if verbose:
+            print(f"{route_counter}: {csv_data_file.replace(vin, '<VIN>')}: {line_number} ")
 
     console.print(f"{vehicles[vin]['name']} good rows: {len(obd_fuel_study)} file count: {route_counter}")
 
