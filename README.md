@@ -8,8 +8,7 @@ Logs 9 DOF (degrees of freedom) captured from CircuitPython enabled feather micr
 
 ```bash
 $ python -m imu_logger.imu_logger --help
-usage: imu_logger.py [-h] [--shared_dictionary_name SHARED_DICTIONARY_NAME]
-                     [--shared_dictionary_command_list SHARED_DICTIONARY_COMMAND_LIST]
+usage: imu_logger.py [-h]
                      [--serial_device_name SERIAL_DEVICE_NAME] [--verbose] [--version]
                      [base_path]
 
@@ -20,12 +19,6 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  --shared_dictionary_name SHARED_DICTIONARY_NAME
-                        Enable shared memory/dictionary using this name
-  --shared_dictionary_command_list SHARED_DICTIONARY_COMMAND_LIST
-                        Comma separated list of IMU commands/reports to be shared (no spaces), defaults to all:
-                        ['IMU_accelerometer', 'IMU_gyroscope', 'IMU_gravity', 'IMU_linear_acceleration',
-                        'IMU_magnetometer', 'IMU_rotation_vector']
   --serial_device_name SERIAL_DEVICE_NAME
                         Name for the hardware IMU serial device. Defaults to None
   --verbose             Turn DEBUG logging on. Default is off.

@@ -11,8 +11,6 @@ from datetime import datetime, timezone
 import json
 
 from tcounter.common import (
-    default_shared_imu_command_list as SHARED_DICTIONARY_COMMAND_LIST,
-    SharedDictionaryManager,
     get_output_file_name,
     get_next_application_counter_value,
     BASE_PATH
@@ -70,21 +68,6 @@ def argument_parsing()-> dict:
         metavar="base_path",
         default=BASE_PATH,
         help=f"Relative or absolute output data directory. Defaults to '{BASE_PATH}'."
-    )
-
-    parser.add_argument(
-        "--shared_dictionary_name",
-        default=None,
-        help="Enable shared memory/dictionary using this name"
-    )
-
-    parser.add_argument(
-        "--shared_dictionary_command_list",
-        default=None,
-        help=(
-            "Comma separated list of IMU commands/reports to be shared (no spaces), defaults to all: " +
-            f"{SHARED_DICTIONARY_COMMAND_LIST}"
-        )
     )
 
     parser.add_argument(
@@ -157,8 +140,6 @@ def main():
 
     verbose = args['verbose']
     serial_device_name = args['serial_device_name']
-    shared_dictionary_name = args['shared_dictionary_name']
-    shared_dictionary_command_list = args['shared_dictionary_command_list']
 
     base_path = args['base_path']
 
@@ -170,21 +151,6 @@ def main():
 
     log_file_handle = get_log_file_handle(base_path=base_path)
     logger.info(f"log file name: {log_file_handle.name}")
-
-    if shared_dictionary_command_list:
-        shared_dictionary_command_list = shared_dictionary_command_list.split(sep=',')
-    else:
-        shared_dictionary_command_list = SHARED_DICTIONARY_COMMAND_LIST
-
-    logger.info(f"shared_dictionary_command_list {shared_dictionary_command_list})")
-
-    if shared_dictionary_name:
-        shared_dictionary = SharedDictionaryManager(shared_dictionary_name)
-        logger.info(f"shared_dictionary_command_list {shared_dictionary_command_list}")
-    else:
-        shared_dictionary = None
-
-    logger.info(f"shared_dictionary_name {shared_dictionary_name})")
 
     io_handle = initialize_imu(serial_device_name)
 
@@ -216,11 +182,6 @@ def main():
             log_file_handle.write(json.dumps(imu_data) + "\n")
             log_file_handle.flush()
             fsync(log_file_handle.fileno())
-
-            shared_dict_index = 'IMU_' + imu_data["command_name"]
-            if shared_dictionary is not None and shared_dict_index in shared_dictionary_command_list:
-                    logger.debug( f"Sharing record {record_count}: {imu_data['command_name']}")
-                    shared_dictionary[shared_dict_index] = imu_data
 
         except json.decoder.JSONDecodeError as e:
             # improperly closed JSON file
