@@ -46,6 +46,7 @@ from telemetry_analysis.common import (
     timedelta_to_hhmmss_str,
     heading,
     fuel_grams_to_milliliters,
+    get_column_names_in_csv_file,
 )
 from private.vehicles import vehicles
 

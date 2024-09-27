@@ -698,7 +698,7 @@ def error_relationships(vin:str, df:pd.DataFrame):
     return
 
 # Compute the local maximums for 'theta_error' column kernel density estimation (KDE)
-def theta_error_local_maximums(vin:str, df:pd.DataFrame):
+def theta_error_local_maximums(vin:str, df:pd.DataFrame, verbose=False):
     # sourcery skip: flip-comparison
     theta_data = read_theta_data_file(theta_file_name)
     
@@ -706,6 +706,9 @@ def theta_error_local_maximums(vin:str, df:pd.DataFrame):
         console.print(f"{vehicles[vin]['name']} - skipping error relationships kernel density estimation (KDE)")
         return
     
+    if verbose:
+        console.print(f"{vehicles[vin]['name']} - working on error relationships kernel density estimation (KDE)")
+
     vin_gear_x_values = {}
     vin_gear_y_values = {}
     for sgear in theta_data[vin]:
@@ -728,6 +731,11 @@ def theta_error_local_maximums(vin:str, df:pd.DataFrame):
                 f"Skipping {vehicles[vin]['name']} Gear-Study gear {gear} Theta Error Local Maximums"
             )
             continue
+
+        if verbose:
+            console.print(
+                f"Working {vehicles[vin]['name']} Gear-Study gear {gear} Theta Error Local Maximums"
+            )
 
         fig, ax = plt.subplots(figsize=(12,12))
         sns.set_theme(style="ticks")

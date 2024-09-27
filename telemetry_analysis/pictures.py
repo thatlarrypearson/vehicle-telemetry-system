@@ -8,7 +8,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 import pytz
-
+from rich.console import Console
 from rich.pretty import pprint
 
 DEFAULT_HOME_TIMEZONE = pytz.timezone('US/Central')
@@ -40,6 +40,8 @@ DateTime_mapping_to_OffsetTime = {
     'DateTime': 'OffsetTime',
 }
 
+console = Console(width=140)
+
 def datetime_with_tzinfo(
     year=0,
     month=0,
@@ -50,24 +52,40 @@ def datetime_with_tzinfo(
     offset_hour=0,
     offset_minute=0,
     verbose=False
-)->datetime:
+) -> datetime:
     """
     Create a timezone aware datetime object
     """
-    offset_seconds = (hour * 3600) + (minute * 60)
-    naive = datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=second) - timedelta(seconds=offset_seconds)
-    utc_aware = pytz.timezone('UTC').localize(naive)
+    naive = (
+        datetime(
+            year=year, month=month, day=day, hour=hour, minute=minute, second=second
+        ) - timedelta(
+            hours=offset_hour, minutes=offset_minute
+        )
+    )
+    return pytz.timezone('UTC').localize(naive)
 
-    return utc_aware
+def datetime_without_tzinfo(
+    year=0,
+    month=0,
+    day=0,
+    hour=0,
+    minute=0,
+    second=0,
+    verbose=False
+) -> datetime:
+    """
+    Create a timezone unaware datetime object
+    """
+    return datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=second)
 
-def exif_GPSDateTimeStamp_to_datetime(gps_date, gps_time)->datetime:
+def exif_GPSDateTimeStamp_to_datetime(gps_date, gps_time) -> datetime:
     gd = gps_date.split('/')
     gt = gps_time.split(':')
     naive = datetime(year=int(gd[0]), month=int(gd[1]), day=int(gd[2]), hour=int(gt[0]), minute=int(gt[1]), second=int(gt[2]))
-    utc_aware = pytz.timezone('UTC').localize(naive)
-    return utc_aware
+    return pytz.timezone('UTC').localize(naive)
 
-def exif_DateTime_to_datetime(exif_DateTime, exif_OffsetTime)->datetime:
+def exif_DateTime_to_datetime(exif_DateTime:str, exif_OffsetTime:str)->datetime:
     """
     EXIF data field pairs that can be converted to python datetime:
         DateTime, OffsetTime,
@@ -76,6 +94,16 @@ def exif_DateTime_to_datetime(exif_DateTime, exif_OffsetTime)->datetime:
     Returns:
         datetime object with offset time set.
     """
+    if not exif_OffsetTime:
+        return datetime_without_tzinfo(
+            year=int(exif_DateTime[:4]),
+            month=int(exif_DateTime[5:7]),
+            day=int(exif_DateTime[8:10]),
+            hour=int(exif_DateTime[11:13]),
+            minute=int(exif_DateTime[14:16]),
+            second=int(exif_DateTime[17:19])
+        )
+
     # 'DateTimeOriginal': '2024:03:03 08:44:38',
     # 'OffsetTimeOriginal': '-06:00',
     sign = exif_OffsetTime[0]
@@ -91,6 +119,7 @@ def exif_DateTime_to_datetime(exif_DateTime, exif_OffsetTime)->datetime:
         offset_hour =(sign * int(exif_OffsetTime[1:3])),
         offset_minute=int(exif_OffsetTime[4:6])
     )
+        
 
 def exif_to_location(ie:dict, gps_info='GPSInfo')->dict:
     """
@@ -153,7 +182,7 @@ def exif_to_location(ie:dict, gps_info='GPSInfo')->dict:
     }
 
 def image_to_exif(image_path:str, verbose=False)->dict:
-    # sourcery skip: assign-if-exp, dict-comprehension
+    # sourcery skip: assign-if-exp, dict-comprehension, use-next
     """
     Extract image data and return a dictionary (which may include dictionaries)
     containing the image's EXIF data. 
@@ -171,14 +200,30 @@ def image_to_exif(image_path:str, verbose=False)->dict:
 
     for DateTime in ['DateTime', 'DateTimeOriginal', 'DateTimeDigitized']:
         OffsetTime = DateTime_mapping_to_OffsetTime[DateTime]
-        if DateTime not in return_value or OffsetTime not in return_value:
-            continue
+        if DateTime in return_value:
+            return_value[f"_{DateTime}"] = return_value[DateTime]
+            return_value[f"Local{DateTime}"] = exif_DateTime_to_datetime(return_value[DateTime], None)
+        if OffsetTime in return_value:
+            return_value[f"_{OffsetTime}"] = return_value[OffsetTime]
 
-        return_value[f"_{DateTime}"] = return_value[DateTime]
-        return_value[f"_{OffsetTime}"] = return_value[OffsetTime]
         # 'DateTime': '2024:03:21 07:59:30',
         # 'OffsetTime': '-05:00',
-        return_value[DateTime] = exif_DateTime_to_datetime(return_value[DateTime], return_value[OffsetTime])
+        if DateTime not in return_value:
+            continue
+
+        if OffsetTime not in return_value:
+            # find an alternative offset time
+            OffsetTime = None
+            for alt_DateTime in ['DateTimeOriginal', 'DateTimeDigitized', 'DateTime']:
+                if DateTime_mapping_to_OffsetTime[alt_DateTime] in return_value:
+                    OffsetTime = DateTime_mapping_to_OffsetTime[alt_DateTime]
+                    break
+            if (not OffsetTime) and verbose:
+                print(f"No valid OffsetTime for {DateTime} {image_path}")
+                continue
+
+        return_value[DateTime] = exif_DateTime_to_datetime(return_value[DateTime], return_value.get(OffsetTime))
+
 
     if 'GPSInfo' in return_value:
         return_value['_GPSInfo'] = return_value['GPSInfo']
@@ -202,11 +247,23 @@ def image_directory_to_exif(image_directory=DEFAULT_IMAGE_DIRECTORY, image_suffi
     image_exif_data = {}
     for image in images:
         exif_data = image_to_exif(image, verbose=verbose)
-        # use GPS date/time whenever possible
-        DateTime = exif_data.get('aware_gps_datetime', exif_data['DateTime'])
-        image_exif_data[(DateTime, image)] = exif_data
+        # Use local or naive datetime to enable matching to spreadsheet data
+        if 'LocalDateTimeOriginal' in exif_data:
+            LocalDateTime = exif_data['LocalDateTimeOriginal']
+        elif 'LocalDateTimeDigitized' in exif_data:
+            LocalDateTime = exif_data['LocalDateTimeDigitized']
+        elif 'LocalDateTime' in exif_data:
+            LocalDateTime = exif_data['LocalDateTime']
+        else:
+            LocalDateTime = datetime.now()
+
+        image_exif_data[(LocalDateTime, image)] = exif_data
+
+    # sort dictionary by keys
+    image_exif_data = dict(sorted(image_exif_data.items()))
 
     if verbose:
+        console.print("image_directory_to_exif")
         pprint(image_exif_data)
 
     return image_exif_data

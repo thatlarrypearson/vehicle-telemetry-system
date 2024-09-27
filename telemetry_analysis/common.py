@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from itertools import islice
 from numpy import arctan2, sin, cos
 from private.vehicles import vehicles
+from csv import DictReader
 
 data_file_base_directory = f"{str(Path.home())}/telemetry-data"
 work_product_file_path = f"{str(Path.home())}/testing/work-product-files"
@@ -107,4 +108,38 @@ def fuel_grams_to_milliliters(vin:str, grams:float)->float:
 
     return None
 
+def get_column_names_in_csv_file(file_name:str):
+    """
+    Simple function to get the column names from the first line of a CSV file.
+    Assumes
+        - column names are on the first line of the CSV file
+        - column names are comma separated.
+    
+    Returns sequence of
+        - list of column names
+        - number of data rows in the file
+    """
+    record_count = 0
+    column_names = None
+    with open(file_name) as fd:
+        rows = DictReader(fd)
+        for row in rows:
+            if not column_names:
+                column_names = list(row)
+            else:
+                record_count += 1
 
+    return column_names, record_count
+
+def within_timeframe(td:timedelta, datetime1:datetime, datetime2:datetime) -> bool:
+    """
+    Return true if datetime1 is within td of datetime2 otherwise false
+    where td is the timedelta representing the maximum allowed time difference
+    """
+    return (abs(datetime1 - datetime2)) <= td
+
+def day_matches(dt1:datetime, dt2:datetime) -> bool:
+    """
+    Returns True when dt1 and dt2 have the same year, month and day.
+    """
+    return dt1.year == dt2.year and dt1.month == dt2.month and dt1.day == dt2.day

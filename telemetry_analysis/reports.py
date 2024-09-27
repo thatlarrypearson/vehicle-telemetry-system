@@ -108,6 +108,36 @@ def generate_basic_stats_report(vin:str, df:pd.DataFrame, columns:list):
 
     return
 
+def low_memory_basic_statistics(vin:str, columns:list, csv_file)->dict:
+    df_basic_statistics = {}
+
+    for column in columns:
+        df = pd.read_csv(csv_file, usecols=[column, ])
+        df_basic_statistics[column] = {
+            'max': (df[df[column].notnull()])[column].max(),
+            'min': (df[df[column].notnull()])[column].min(),
+            'mean': (df[df[column].notnull()])[column].mean(),
+            'std': (df[df[column].notnull()])[column].std(),
+            'not_null_rows': (df[df[column].notnull()])[column].shape[0],
+            'null_rows': df.shape[0] - (df[df[column].notnull()])[column].shape[0],
+        }
+        del df
+
+    return df_basic_statistics
+
+def generate_low_memory_basic_stats_report(vin:str, csv_file, columns:list):
+    """
+    Generate a basic statistics report with the same output as generate_basic_stats_report()
+    but without loading the entire CSV file into a pandas dataframe first.
+    """
+    # remove datetime objects from column list
+    stat_columns = [column for column in columns if column not in ['iso_ts_pre', 'iso_ts_post', ]]
+
+    basic_stats_table_generator(vin, low_memory_basic_statistics(vin, stat_columns, csv_file))
+
+    return
+
+
 # https://matplotlib.org/stable/gallery/color/named_colors.html
 def plot_color_table(colors=mcolors.TABLEAU_COLORS, ncols=4, sort_colors=True):
 
@@ -158,7 +188,7 @@ def plot_color_table(colors=mcolors.TABLEAU_COLORS, ncols=4, sort_colors=True):
                       height=18, facecolor=colors[name], edgecolor='0.7')
         )
 
-    console.print(f"Gear Color Table")
+    console.print("Gear Color Table")
     plt.show()
     plt.close()
 
@@ -198,14 +228,7 @@ def calculated_best_fit_gear_ratios(vin:str, vehicle:dict):
                 f"{vehicle['a'][gear]:.6f}"
             )
         else:
-            table.add_row(
-                " ",
-                f"{gear}",
-                f"{gear_ratio:.4f}",
-                f"????",
-                f"????",
-                f"????"
-            )
+            table.add_row(" ", f"{gear}", f"{gear_ratio:.4f}", "????", "????", "????")
     table.add_row(
             " ",
             " ",
@@ -216,7 +239,7 @@ def calculated_best_fit_gear_ratios(vin:str, vehicle:dict):
     )
 
     console.print(table)
-    console.print(f"NOTE: column '1/tan(theta)' is the calculated best fit final gear ratio.")
-    console.print(f"NOTE: column 'a' is the calculated best fit theta to gear ratio multiplier.")
+    console.print("NOTE: column '1/tan(theta)' is the calculated best fit final gear ratio.")
+    console.print("NOTE: column 'a' is the calculated best fit theta to gear ratio multiplier.")
 
     return

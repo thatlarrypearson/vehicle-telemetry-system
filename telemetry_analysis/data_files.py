@@ -3,7 +3,6 @@
 # Data file handling and management
 from pathlib import Path
 from rich.console import Console
-from rich.jupyter import print
 
 from private.vehicles import vehicles
 from .common import data_file_base_directory, work_product_file_path, temporary_file_base_directory
@@ -19,12 +18,11 @@ console = Console()
 Path(work_product_file_path).mkdir(parents=True, exist_ok=True)
 
 # Sort list of files in timestamp order - This is the sorted() function parameter required to change how the sort is done.
-def sort_key_on_timestamp(file_path:str)->str:
+def sort_key_on_timestamp(file_path:str) -> str:
     # TEST form "../../telemetry-obd/data/{vin}/{vin}-TEST-20221102183723-utc.json"
     # Normal form "../../telemetry-obd/data/{vin}/{vin}-20221030145832-utc.json"
     file_name = (file_path.split('/'))[-1]
-    date_part = ((file_name.split('-'))[-2:-1])[0]
-    return date_part
+    return ((file_name.split('-'))[-2:-1])[0]
 
 def obd_to_csv_file_name(obd_file_name:str)->str:
     # convert OBD data file name into csv file name
