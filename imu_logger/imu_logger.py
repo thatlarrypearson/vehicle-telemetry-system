@@ -81,10 +81,12 @@ def argument_parsing()-> dict:
         help="CircuitPython microcontroller connects via USB is True. Default is False.",
     )
 
+    serial_device_name = get_serial_device_name()
+
     parser.add_argument(
         "--serial_device_name",
-        default=get_serial_device_name(),
-        help=f"Name for the hardware IMU serial device. Defaults to {get_serial_device_name()}",
+        default=serial_device_name,
+        help=f"Name for the hardware IMU serial device. Defaults to {serial_device_name}",
     )
 
     parser.add_argument(

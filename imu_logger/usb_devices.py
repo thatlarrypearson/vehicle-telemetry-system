@@ -16,7 +16,7 @@ def get_serial_device_name(verbose=False)->str:
         if p.vid and p.vid == DEFAULT_USB_VID and p.pid == DEFAULT_USB_PID:
             return p.device
 
-    logging.error(f"\nUSB Serial Device <{CIRCUITPYTHON_DEVICE_NAME}> NOT found")
+    logging.warning(f"\nUSB Serial Device <{CIRCUITPYTHON_DEVICE_NAME}> NOT found")
 
     return None
 
@@ -48,6 +48,7 @@ def main():
         logging.info(f"\nUSB Serial Device <{CIRCUITPYTHON_DEVICE_NAME}> Name {sdn} found")
         exit(0)
     else:
+        logging.info(f"\nUSB Serial Device <{CIRCUITPYTHON_DEVICE_NAME}> NOT found")
         exit(1)
 
 if __name__ == "__main__":
