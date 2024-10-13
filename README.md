@@ -22,7 +22,7 @@ options:
   --serial_device_name SERIAL_DEVICE_NAME
                         Name for the hardware IMU serial device. Defaults to None
   --no_wifi             CircuitPython microcontroller does NOT use WIFI to connect. Default is False
-  --upp_port_number UPP_PORT_NUMBER
+  --udp_port_number UPP_PORT_NUMBER
                         TCP/IP UDP port number for receiving datagrams. Defaults to '50224'
   --verbose             Turn DEBUG logging on. Default is off.
   --version             Print version number and exit.
