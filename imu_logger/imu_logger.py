@@ -1,7 +1,5 @@
 # telemetry-imu/telemetry_imu/imu_logger.py
 
-from serial import Serial
-from time import sleep
 from argparse import ArgumentParser
 from math import atan2, asin
 import logging
@@ -17,6 +15,12 @@ from tcounter.common import (
 )
 
 from .usb_devices import get_serial_device_name
+from .io import (
+    DEFAULT_LOCAL_HOST_UDP_PORT_NUMBER,
+    UDP_Reader,
+    Serial_Reader,
+)
+
 from .__init__ import __version__
 
 logger = logging.getLogger("imu_logger")
@@ -67,13 +71,34 @@ def argument_parsing()-> dict:
         nargs='?',
         metavar="base_path",
         default=BASE_PATH,
-        help=f"Relative or absolute output data directory. Defaults to '{BASE_PATH}'."
+        help=f"Relative or absolute output data directory. Defaults to '{BASE_PATH}'.",
+    )
+
+    parser.add_argument(
+        "--usb",
+        default=False,
+        action='store_true',
+        help="CircuitPython microcontroller connects via USB is True. Default is False.",
     )
 
     parser.add_argument(
         "--serial_device_name",
         default=get_serial_device_name(),
-        help=f"Name for the hardware IMU serial device. Defaults to {get_serial_device_name()} "
+        help=f"Name for the hardware IMU serial device. Defaults to {get_serial_device_name()}",
+    )
+
+    parser.add_argument(
+        "--no_wifi",
+        default=False,
+        action='store_true',
+        help="CircuitPython microcontroller does NOT use WIFI to connect.  Default is False",
+    )
+
+    parser.add_argument(
+        "--upp_port_number",
+        type=int,
+        default=DEFAULT_LOCAL_HOST_UDP_PORT_NUMBER,
+        help=f"TCP/IP UDP port number for receiving datagrams. Defaults to '{DEFAULT_LOCAL_HOST_UDP_PORT_NUMBER}'"
     )
 
     parser.add_argument(
@@ -92,45 +117,6 @@ def argument_parsing()-> dict:
 
     return vars(parser.parse_args())
 
-def initialize_imu(serial_device_name):
-    """initialize IMU connection and return serial device"""
-    s = Serial(
-        port=serial_device_name,
-        baudrate=115200,
-        write_timeout=4.0,
-        timeout=4.0
-    )
-    logger.debug("initialize_imu(): Serial device open.")
-
-    sleep(1.0)
-
-    # flush serial buffer to remove any junk
-    s.flushInput()
-    s.flushOutput()
-
-    s.write(b'\x0d')        # CR
-
-    sleep(1.0)
-
-    response_count = 0
-    while (record := s.readline().decode('utf-8')) and response_count < 20:
-        logger.debug(f"initialize_imu(): record {record}")
-
-        sleep(1.0)
-
-        if "code.py" in record:
-            logger.debug("initialize_imu(): code.py open")
-            s.write(b'\x0d')        # CR
-
-        # Look for last command in set
-        if 'rotation_vector' in record:
-            logger.debug("initialize_imu(): found 'rotation_vector' in record")
-            return s
-
-        response_count += 1
-
-    raise IOERROR(f"Unable to sync with IMU at {serial_device_name} after {response_count} responses")
-
 def main():
     args = argument_parsing()
 
@@ -139,53 +125,59 @@ def main():
         exit(0)
 
     verbose = args['verbose']
-    serial_device_name = args['serial_device_name']
-
-    base_path = args['base_path']
 
     logging_level = logging.DEBUG if verbose else logging.INFO
 
     logging.basicConfig(stream=stderr, level=logging_level)
-
     logger.debug(f"argument --verbose: {verbose}")
+
+    base_path = args['base_path']
+    logger.info(f"argument --base_path: {base_path}")
+
+    if args['usb']:
+        logger.info(f"argument --usb: {args['usb']}, WIFI disabled.")
+
+    if args['no_wifi']:
+        logger.info(f"argument --no_wifi: {args['no_wifi']}, WIFI disabled.")
+
+    if args['usb'] or args['no_wifi']:
+        logger.info("USB enabled")
+        serial_device_name = args['serial_device_name']
+        logger.info(f"argument --serial_device_name: {serial_device_name}")
+        io_iterator = Serial_Reader(logger, serial_device_name)
+    else:
+        logger.info("WIFI enabled")
+        udp_port_number = args['udp_port_number']
+        logger.info("argument --udp_port_number: {udp_port_number}")
+        io_iterator = UDP_Reader(logger, local_host_udp_port_number=udp_port_number)
 
     log_file_handle = get_log_file_handle(base_path=base_path)
     logger.info(f"log file name: {log_file_handle.name}")
 
-    io_handle = initialize_imu(serial_device_name)
-
     iso_ts_pre = datetime.isoformat(datetime.now(tz=timezone.utc))
 
-    record_count = 0
-    while record := (io_handle.readline()).decode('utf-8'):
-        record_count += 1
+    for record_count, record in enumerate(io_iterator, start=1):
         logger.debug(f"json encoded record {record_count}: {record}")
 
-        try:
-            imu_data = json.loads(record)
-
+        if record:
             # check record validity
             # reorganize data as required
 
-            if imu_data['command_name'] == 'rotation_vector':
+            if record['command_name'] == 'rotation_vector':
                 # "vector": [-0.646912, -0.262695, 0.230164, 0.677856],
-                roll, pitch, yaw = quaternion_to_euler(imu_data['obd_response_value']['vector'])
-                imu_data['obd_response_value']['roll'] = roll
-                imu_data['obd_response_value']['pitch'] = pitch
-                imu_data['obd_response_value']['yaw'] = yaw
+                roll, pitch, yaw = quaternion_to_euler(record['obd_response_value']['vector'])
+                record['obd_response_value']['roll'] = roll
+                record['obd_response_value']['pitch'] = pitch
+                record['obd_response_value']['yaw'] = yaw
 
-            imu_data['iso_ts_pre'] = iso_ts_pre
-            imu_data['iso_ts_post'] = datetime.isoformat(datetime.now(tz=timezone.utc))
+            record['iso_ts_pre'] = iso_ts_pre
+            record['iso_ts_post'] = datetime.isoformat(datetime.now(tz=timezone.utc))
 
-            logger.debug(f"logging json record {record_count}: {imu_data}")
+            logger.debug(f"logging json record {record_count}: {record}")
 
-            log_file_handle.write(json.dumps(imu_data) + "\n")
+            log_file_handle.write(json.dumps(record) + "\n")
             log_file_handle.flush()
             fsync(log_file_handle.fileno())
-
-        except json.decoder.JSONDecodeError as e:
-            # improperly closed JSON file
-            logger.error(f"JSONDecodeError {e} in record {record_count}: {record}")
 
         iso_ts_pre = datetime.isoformat(datetime.now(tz=timezone.utc))
 

@@ -9,6 +9,7 @@ Logs 9 DOF (degrees of freedom) captured from CircuitPython enabled feather micr
 ```bash
 $ python -m imu_logger.imu_logger --help
 usage: imu_logger.py [-h]
+					 [--usb] [--wifi]
                      [--serial_device_name SERIAL_DEVICE_NAME] [--verbose] [--version]
                      [base_path]
 
@@ -19,8 +20,12 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  --usb					CircuitPython microcontroller connects via USB
   --serial_device_name SERIAL_DEVICE_NAME
                         Name for the hardware IMU serial device. Defaults to None
+  --wifi				CircuitPython microcontroller connects via WIFI
+  --udp_port_number 
+						TCP/IP UDP port number for receiving datagrams. Defaults to 50224
   --verbose             Turn DEBUG logging on. Default is off.
   --version             Print version number and exit.
 $
