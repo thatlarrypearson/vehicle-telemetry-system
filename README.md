@@ -7,25 +7,23 @@ Logs 9 DOF (degrees of freedom) captured from CircuitPython enabled feather micr
 ## Usage
 
 ```bash
-$ python -m imu_logger.imu_logger --help
-usage: imu_logger.py [-h]
-					 [--usb] [--wifi]
-                     [--serial_device_name SERIAL_DEVICE_NAME] [--verbose] [--version]
+$ python3.11 -m imu_logger.imu_logger --help
+usage: imu_logger.py [-h] [--usb] [--serial_device_name SERIAL_DEVICE_NAME] [--no_wifi] [--upp_port_number UPP_PORT_NUMBER] [--verbose] [--version]
                      [base_path]
 
 Telemetry IMU Logger
 
 positional arguments:
-  base_path             Relative or absolute output data directory. Defaults to 'C:\Users\runar/telemetry-data/data'.
+  base_path             Relative or absolute output data directory. Defaults to '/home/lbp/telemetry-data/data'.
 
 options:
   -h, --help            show this help message and exit
-  --usb					CircuitPython microcontroller connects via USB
+  --usb                 CircuitPython microcontroller connects via USB is True. Default is False.
   --serial_device_name SERIAL_DEVICE_NAME
                         Name for the hardware IMU serial device. Defaults to None
-  --wifi				CircuitPython microcontroller connects via WIFI
-  --udp_port_number 
-						TCP/IP UDP port number for receiving datagrams. Defaults to 50224
+  --no_wifi             CircuitPython microcontroller does NOT use WIFI to connect. Default is False
+  --upp_port_number UPP_PORT_NUMBER
+                        TCP/IP UDP port number for receiving datagrams. Defaults to '50224'
   --verbose             Turn DEBUG logging on. Default is off.
   --version             Print version number and exit.
 $

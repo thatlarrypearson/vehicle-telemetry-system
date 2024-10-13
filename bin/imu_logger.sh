@@ -57,11 +57,11 @@ fi
 
 while date '+%Y/%m/%d %H:%M:%S'
 do
-	${APP_PYTHON} -m imu_logger.imu_logger \
-		"${APP_BASE_PATH}"
+	# imu_logger default is to use WIFI and not USB for sensor connectivity
+	${APP_PYTHON} -m imu_logger.imu_logger "${APP_BASE_PATH}"
 
-	# Enable shared dictionary option
-	# --shared_dictionary_name "${SHARED_DICTIONARY_NAME}" \
+	# uncomment below to use USB sensor connectivity and comment above
+	# ${APP_PYTHON} -m imu_logger.imu_logger --usb "${APP_BASE_PATH}"
 
 	export RtnVal="$?"
 	echo imu_logger returns "${RtnVal}"
