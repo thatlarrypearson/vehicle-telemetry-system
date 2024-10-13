@@ -12,7 +12,7 @@ import logging
 import json
 
 DEFAULT_LOCAL_HOST_INTERFACE_ADDRESS = "0.0.0.0"
-DEFAULT_LOCAL_HOST_UDP_PORT_NUMBER   = 50224
+DEFAULT_LOCAL_HOST_UDP_PORT_NUMBER   = 50219
 BUFFER_SIZE  = 8193
 
 logger = logging.getLogger("imu_logger")

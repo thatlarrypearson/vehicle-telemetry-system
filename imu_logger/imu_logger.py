@@ -149,7 +149,7 @@ def main():
         io_iterator = Serial_Reader(logger, serial_device_name)
     else:
         logger.info("WIFI enabled")
-        udp_port_number = args['udp_port_number']
+        udp_port_number = int(args['udp_port_number'])
         logger.info("argument --udp_port_number: {udp_port_number}")
         io_iterator = UDP_Reader(logger, local_host_udp_port_number=udp_port_number)
 
