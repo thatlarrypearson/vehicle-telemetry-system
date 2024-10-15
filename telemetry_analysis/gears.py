@@ -887,7 +887,7 @@ def generate_images_for_video(
     df:pd.DataFrame,
     create_video=False,
     video_frame_rate=4,
-    trailing_points=9,
+    trailing_points=10,
     verbose=False
 ):
     # set create_video=True when your system (not Windows) is able to run ffmpeg 
