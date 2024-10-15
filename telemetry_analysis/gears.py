@@ -830,8 +830,8 @@ def route_report(vin:str, df:pd.DataFrame):
     table.add_column('rows', justify='right')
     table.add_column('i\nmin', justify='right')
     table.add_column('i\nmax', justify='right')
-    table.add_column('duration\nmin', justify='right')
-    table.add_column('duration\nmax', justify='right')
+    table.add_column('iso_ts_pre\nmin', justify='right')
+    table.add_column('iso_ts_post\nmax', justify='right')
     table.add_column('duration\navg', justify='right')
 
     table.add_row(
@@ -850,8 +850,8 @@ def route_report(vin:str, df:pd.DataFrame):
     for route in routes:
         imin = (df2D[df2D['route'] == route])['i'].min()
         imax = (df2D[df2D['route'] == route])['i'].max()
-        dmin = (df2D[df2D['route'] == route])['duration'].min()
-        dmax = (df2D[df2D['route'] == route])['duration'].max()
+        dmin = (df2D[df2D['route'] == route])['iso_ts_pre'].min()
+        dmax = (df2D[df2D['route'] == route])['iso_ts_post'].max()
         dmean = (df2D[df2D['route'] == route])['duration'].mean()
         table.add_row(
             " ",
@@ -881,7 +881,15 @@ def route_by_name_table(vin:str, df:pd.DataFrame):
     console.print("]")
     return
 
-def generate_images_for_video(name:str, route:int, df:pd.DataFrame, create_video=False, verbose=False):
+def generate_images_for_video(
+    name:str,
+    route:int,
+    df:pd.DataFrame,
+    create_video=False,
+    video_frame_rate=4,
+    trailing_points=9,
+    verbose=False
+):
     # set create_video=True when your system (not Windows) is able to run ffmpeg 
     theta_data = read_theta_data_file(theta_file_name)
 
@@ -896,8 +904,6 @@ def generate_images_for_video(name:str, route:int, df:pd.DataFrame, create_video
     yfps = ygear - 5.0        # frames per second y coordinate
     xsecs = xfps              # seconds into video (reflects drive time) x coordinate
     ysecs = yfps - 5.0        # seconds into video (reflects drive time) y coordinate
-    trailing_points = 4
-    video_frame_rate = 16
 
     vin = get_vin_from_vehicle_name(name)
 
@@ -906,7 +912,6 @@ def generate_images_for_video(name:str, route:int, df:pd.DataFrame, create_video
         return
 
     console.print(f"\t# ('{name}', {route}),\t# count: {(df[df['route'] == route]).shape[0]}")
-
 
     elapsed_time = None
     vehicle_name = (vehicles[vin]['name']).replace(' ', '-')
@@ -984,7 +989,7 @@ def generate_images_for_video(name:str, route:int, df:pd.DataFrame, create_video
             x=xfps,                             # x-coordinate position of data label
             y=yfps,                             # y-coordinate position of data label, adjusted '-' below, '+' above the data point
             transform=ax.transData,             # gets the positioning relative to the plot axis
-            s=f"FPS:{video_frame_rate:8}",   # frames per second data label, formatted to ignore decimals
+            s=f"FPS:{video_frame_rate:8}",      # frames per second data label, formatted to ignore decimals
             color="blue"                        # set text color
         )
         fig.text(
@@ -1044,15 +1049,14 @@ def generate_images_for_video(name:str, route:int, df:pd.DataFrame, create_video
 
     return
 
-def column_range_study_column(df:pd.DataFrame, column_name:str)->dict:
-    return_value = {}
-    return_value['count'] = df.shape[0]
-    return_value['mean']  = df[column_name].mean()
-    return_value['std']   = df[column_name].std()
-    return_value['min']   = df[column_name].min()
-    return_value['max']   = df[column_name].max()
-
-    return return_value
+def column_range_study_column(df:pd.DataFrame, column_name:str) -> dict:
+    return {
+        'count': df.shape[0],
+        'mean': df[column_name].mean(),
+        'std':  df[column_name].std(),
+        'min': df[column_name].min(),
+        'max': df[column_name].max(),
+    }
 
 def column_range_study(df:pd.DataFrame, column_name:str)->dict:
     # column value ranges are based on mean and standard deviation creating 4 ranges where
