@@ -5,6 +5,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import csv
+import json
 import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
@@ -15,6 +16,7 @@ from rich.table import Table
 from dateutil import parser
 from math import sqrt, atan2, tan, pi, radians, ceil
 from scipy.signal import argrelextrema
+from itertools import chain
 
 import pandas as pd
 import numpy as np
@@ -170,6 +172,7 @@ def generate_gear_study_data(csv_file_dir:str, vin:str)->list:
                     record['mps'] = record['SPEED'] * 0.44704
                     record['theta'] = atan2(record['mps'], record['rps'])
                     record['radius'] = sqrt((record['rps'] * record['rps']) + (record['mps'] * record['mps']))
+#                    record['speed_per_rpm'] = record['SPEED'] / record['RPM']
                     if isinstance(row['iso_ts_pre'], str):
                         record['iso_ts_pre'] = parser.isoparse(row['iso_ts_pre'])
                     if isinstance(row['iso_ts_post'], str):
@@ -189,7 +192,7 @@ def generate_gear_study_data(csv_file_dir:str, vin:str)->list:
 
                     # ratio: meters per revolution
                     record['m_per_r'] = record['mps'] / record['rps']
-                    # ratio: revolution per meter
+                    # ratio: revolutions per meter
                     record['r_per_m'] = record['rps'] / record['mps']
 
                     if theta_data and vin in theta_data:
@@ -461,9 +464,7 @@ def gear_study_kde_extrema_chart(vin:str, df:pd.DataFrame):
     calculated_best_fit_gear_ratios(vin, vehicle)
 
     # the following updates the theta_data file automatically
-    theta_data = generate_theta_data_from_vehicle(vin, vehicle)
-
-    return theta_data
+    return generate_theta_data_from_vehicle(vin, vehicle)
 
 def kde_plot_overlay_for_each_gear(vin:str, df:pd.DataFrame):
 
@@ -820,10 +821,7 @@ def theta_error_local_maximums(vin:str, df:pd.DataFrame, verbose=False):
 
 def route_report(vin:str, df:pd.DataFrame):
     # DataFrame Columns
-    #   i, route,
-    #   rps, mps, theta, radius, closest_gear,
-    #   RPM, SPEED,
-    #   m_per_r, r_per_m, acceleration, iso_ts_pre, iso_ts_post, duration
+    #   i, route, iso_ts_pre, iso_ts_post, duration in seconds
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column('Vehicle', justify='left')
     table.add_column('route', justify='right')
@@ -1121,3 +1119,207 @@ def column_range_study(df:pd.DataFrame, column_name:str)->dict:
         }
 
     return rv
+
+def gear_study_kde_m_per_r_chart(vin:str, df:pd.DataFrame, route)->list:
+    # sourcery skip: flip-comparison, identity-comprehension, merge-dict-assign, move-assign-in-block
+    # This computes the local maximums for 'm_per_r' column kernel density estimation (KDE).
+    # returns x_extrema_values, y_extrema_values
+
+    # Apply filters to better improve results by reducing error.
+    df2D = df[df['route'] == route]
+    df2D = df2D[(df2D['m_per_r'] > 0)]
+    df2D = df2D[df2D['acceleration'] > 0]
+
+    # Find maximum for m_per_r for use in xmin/xmax
+    xmax = df['m_per_r'].max()
+    routes = df['route'].max()
+
+    route_record_count = (df[df['route'] == route]).shape[0]
+
+    route_title = f"{vehicles[vin]['name']} route {route} of {routes} records: {route_record_count}\n'm_per_r' kernel density estimation (KDE) with local maximums"
+
+    fig, ax = plt.subplots(figsize=(12,12))
+    sns.set_theme(style="ticks")
+    ax.set_xlim(0.0, xmax)
+
+    ax.set(title=route_title)
+
+    axn = sns.kdeplot(data=df2D, ax=ax, x="m_per_r", color='green', fill=False)
+
+    # for the following to work, above kdeplot fill parameter must be false.
+    try:
+        x, y = (ax.lines[0]).get_data()
+    except IndexError as e:
+        console.print(f"\nIndexError: {e}\n")
+        plt.close()
+        return None, None
+
+    max_indices = argrelextrema(y, np.greater)
+
+    x_values = x[max_indices]
+    y_values = y[max_indices]
+    
+    vin_x_values = x_values
+    vin_y_values = y_values
+
+    # plt.show()
+    plt.close()
+
+    # ymax nees to be set from maximum of y_values plus a small add-on like 0.020
+
+    fig, ax = plt.subplots(figsize=(12.0,12.0))
+    sns.set_theme(style="ticks")
+    ax.set_xlim(0.0, xmax)
+    ax.set_ylim(0.0, vin_y_values.max() + 0.020)
+
+    ax1 = sns.kdeplot(data=df2D, ax=ax, x="m_per_r", color='green', fill=True)
+
+    ax2 = ax.twinx()
+    ax2.set_xlim(0.0, xmax)
+    ax2.set(title=route_title)
+    ax2.set_ylim(0.0, vin_y_values.max() + 0.020)
+
+    for x, y in zip(vin_x_values, vin_y_values):
+        # the position of the data label relative to the data point can be adjusted by adding/subtracting a value from the x &/ y coordinates
+        fig.text(
+            x=x,                              # x-coordinate position of data label
+            y=(y+0.010),                       # y-coordinate position of data label, adjusted '-' below, '+' abovee the data point
+            transform=ax.transData,           # gets the positioning relative to the plot axis
+            s="{:.3f}".format(x),             # data label, formatted to ignore decimals
+            color="red"                       # set text color
+         )
+
+    ax.set_xlim(0.0, xmax)
+    ax.set_ylim(0.0, vin_y_values.max() + 0.020)
+
+    ax1 = sns.scatterplot(ax=ax2, x=vin_x_values, y=vin_y_values, size_norm=None, marker='+', color='red', s=200)
+    
+    plt.show()
+    plt.close()
+
+    return vin_x_values, vin_y_values
+
+def route_extrema_values_converter(values:dict)->dict:
+    """convert route_extrema into values supported by JSON dumps"""
+    return {
+        'x': [float(str(f)) for f in values['x']],
+        'y': [float(str(f)) for f in values['y']],
+    }
+
+def save_route_extrema(route_extrema:dict, filename:str):
+    """save route extrema to file"""
+    if (Path(filename)).is_file():
+        console.print("rewriting route extrema JSON file")
+    else:
+        console.print(f"creating route extrema directory ({Path(filename).parent})")
+        Path(filename).parent.mkdir(parents=True, exist_ok=True)
+
+    with open(filename, "w") as json_output:
+        json.dump(
+            { int(str(k)): route_extrema_values_converter(v) for k, v in route_extrema.items() },
+            json_output
+        )
+
+    return
+
+def load_route_extrema(filename:str)->dict:
+    """load route extrema JSON file"""
+    if not (Path(filename)).is_file():
+        console.print("JSON route extrema data file not found.")
+        return None
+
+    with open(filename, "r") as json_input:
+        data_dict = json.load(json_input)
+
+    return { int(k):v for k, v in data_dict.items() }
+
+def route_extrema_to_m_per_r_list(route_extrema) -> list:
+    """translate route_extrema into an array of m_per_r values"""
+
+    m_per_r_list = []
+    for route_x_list in list(chain([route_extrema[route]['x'] for route in route_extrema])):
+        m_per_r_list.extend(iter(route_x_list))
+
+    return m_per_r_list
+
+def list_histogram(plot_title:str, m_per_r_array:list, bins:int, xmax:float, xmin:float):
+    """Given a list of m_per_r values, create a histogram using bins bins"""
+    fig, ax = plt.subplots(figsize=(12,6))
+    ax.set(title=plot_title)
+    ax.set_xlim(xmin, xmax)
+
+    sns.set_theme(style="ticks")
+    sns.histplot(ax=ax, data=m_per_r_array, bins=bins, discrete=False)
+
+    plt.show()
+    plt.close()
+
+def list_kdeplot(plot_title:str, m_per_r_list:list, xmax:float, xmin:float):
+    """Given a list of m_per_r values, create a KDE plot"""
+    # sourcery skip: flip-comparison, identity-comprehension, merge-dict-assign, move-assign-in-block
+    # This computes the local maximums for 'm_per_r' column kernel density estimation (KDE).
+
+    # Find maximum for m_per_r for use in xmin/xmax
+    xmax = max(m_per_r_list)
+
+    fig, ax = plt.subplots(figsize=(12,12))
+    ax.set_xlim(xmin, xmax)
+
+    ax.set(title=plot_title)
+
+    sns.set_theme(style="ticks")
+    axn = sns.kdeplot(data=m_per_r_list, ax=ax, color='green', fill=False)
+
+    # for the following to work, above kdeplot fill parameter must be false.
+    try:
+        x, y = (ax.lines[0]).get_data()
+    except IndexError as e:
+        console.print(f"\nIndexError: {e}\n")
+        plt.close()
+        return
+
+    max_indices = argrelextrema(y, np.greater)
+
+    x_values = x[max_indices]
+    y_values = y[max_indices]
+    
+    vin_x_values = x_values
+    vin_y_values = y_values
+
+    # plt.show()
+    plt.close()
+
+    # ymax nees to be set from maximum of y_values plus a small add-on like 0.020
+
+    fig, ax = plt.subplots(figsize=(12.0,12.0))
+    sns.set_theme(style="ticks")
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(0.0, vin_y_values.max() + 0.020)
+
+    sns.set_theme(style="ticks")
+    ax1 = sns.kdeplot(data=m_per_r_list, ax=ax, color='green', fill=True)
+
+    ax2 = ax.twinx()
+    ax2.set_xlim(xmin, xmax)
+    ax2.set(title=plot_title)
+    ax2.set_ylim(0.0, vin_y_values.max() + 0.020)
+
+    for x, y in zip(vin_x_values, vin_y_values):
+        # the position of the data label relative to the data point can be adjusted by adding/subtracting a value from the x &/ y coordinates
+        fig.text(
+            x=x,                              # x-coordinate position of data label
+            y=(y+0.010),                       # y-coordinate position of data label, adjusted '-' below, '+' abovee the data point
+            transform=ax.transData,           # gets the positioning relative to the plot axis
+            s="{:.3f}".format(x),             # data label, formatted to ignore decimals
+            color="red"                       # set text color
+         )
+
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(0.0, vin_y_values.max() + 0.020)
+
+    ax1 = sns.scatterplot(ax=ax2, x=vin_x_values, y=vin_y_values, size_norm=None, marker='+', color='red', s=200)
+    
+    plt.show()
+    plt.close()
+
+    return vin_x_values, vin_y_values
