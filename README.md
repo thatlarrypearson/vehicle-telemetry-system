@@ -31,6 +31,10 @@ $
 
 ## Installation
 
+### Selecting USB Connection
+
+In ```telemetry-imu/bin``` there are two versions of the startup script.  The default startup script, ```imu_logger.sh``` should be used for the default behavior which is WIFI.  When using USB as the connection method, use ```imu_logger-USB.sh``` instead.
+
 ### Problems Identifying Serial Device Name
 
 Telemetry IMU includes ```imu_logger.usb_devices```, a Python program that will tell you if it can find the correct device name.
