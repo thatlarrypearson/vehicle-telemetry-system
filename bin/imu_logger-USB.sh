@@ -46,10 +46,18 @@ fi
 
 cd "${APP_HOME}"
 
+${APP_PYTHON} -m imu_logger.usb_devices
+export RtnCode=$?
+
+if [ "${RtnCode}" -gt 0 ]
+then
+	exit 1
+fi
+
 while date '+%Y/%m/%d %H:%M:%S'
 do
-	# imu_logger default is to use WIFI and not USB for sensor connectivity
-	${APP_PYTHON} -m imu_logger.imu_logger "${APP_BASE_PATH}"
+	# USB sensor connectivity
+	${APP_PYTHON} -m imu_logger.imu_logger --usb "${APP_BASE_PATH}"
 
 	export RtnVal="$?"
 	echo imu_logger returns "${RtnVal}"
