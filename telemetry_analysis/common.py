@@ -7,11 +7,46 @@ from numpy import arctan2, sin, cos
 from private.vehicles import vehicles
 from csv import DictReader
 
-data_file_base_directory = f"{str(Path.home())}/telemetry-data"
-work_product_file_path = f"{str(Path.home())}/testing/work-product-files"
-temporary_file_base_directory = f"{str(Path.home())}/testing/work-product-files/Studies"
-base_image_file_path = f"{str(Path.home())}/testing/work-product-files/images"
-base_ffmpeg_file_path = f"{str(Path.home())}/testing/work-product-files/ffmpeg"
+from u_tools.file_system_info import get_file_system_mount_points
+
+def get_mount_point_from_volume_label(volume_label:str) -> str:
+    """
+    given a drive volume label, return the path to the the drive's mount point.
+    # {
+    #     'device': 'C:\\',
+    #     'volume_label': 'Windows ',
+    #     'mount_point': 'C:\\', 
+    #     'file_system_type': 'NTFS', 
+    #     'file_system_options': 'rw,fixed'
+    # },
+    """
+    mount_points = get_file_system_mount_points()
+    return next(
+        (
+            mount_point['mount_point']
+            for mount_point in mount_points
+            if mount_point['volume_label'] == volume_label
+        ),
+        None,
+    )
+
+# To use an alternative (external) drive, set the VOLUME_LABEL to the drive's volume label.
+# Otherwise, set VOLUME_LABEL to None to use the user's home directory
+if VOLUME_LABEL := "Telemetry":
+    HOME = get_mount_point_from_volume_label(VOLUME_LABEL)
+    if not HOME:
+        mount_points = get_file_system_mount_points()
+        for mount_point in mount_points:
+            print(f"{mount_point}")
+        raise ValueError(f"No mount point for volume label {VOLUME_LABEL}")
+else:
+    HOME = str(Path.home())
+
+data_file_base_directory = f"{HOME}/telemetry-data"
+work_product_file_path = f"{HOME}/testing/work-product-files"
+temporary_file_base_directory = f"{HOME}/testing/work-product-files/Studies"
+base_image_file_path = f"{HOME}/testing/work-product-files/images"
+base_ffmpeg_file_path = f"{HOME}/testing/work-product-files/ffmpeg"
 ffmpeg_program_path = "/usr/bin/ffmpeg"
 
 Path(work_product_file_path).mkdir(parents=True, exist_ok=True)
