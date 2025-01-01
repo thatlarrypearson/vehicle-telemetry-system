@@ -86,27 +86,28 @@ def basic_stats_table_generator(vin:str, basic_statistics:dict):
     console.print(f"{'=' * 80}\n{vehicles[vin]['name']}")
     console.print(table)
 
-def basic_statistics(vin:str, columns:list, df:pd.DataFrame)->dict:
-    df_basic_statistics = {}
-
-    for column in columns:
-        df_basic_statistics[column] = {
+def basic_statistics(vin:str, columns:list, df:pd.DataFrame) -> dict:
+    return {
+        column: {
             'max': (df[df[column].notnull()])[column].max(),
             'min': (df[df[column].notnull()])[column].min(),
             'mean': (df[df[column].notnull()])[column].mean(),
             'std': (df[df[column].notnull()])[column].std(),
             'not_null_rows': (df[df[column].notnull()])[column].shape[0],
-            'null_rows': df.shape[0] - (df[df[column].notnull()])[column].shape[0],
+            'null_rows': df.shape[0]
+            - (df[df[column].notnull()])[column].shape[0],
         }
+        for column in columns
+    }
 
-    return df_basic_statistics
-
-def generate_basic_stats_report(vin:str, df:pd.DataFrame, columns:list):
+def generate_basic_stats_report(vin:str, df:pd.DataFrame, columns:list)->dict:
     stat_columns = [column for column in columns if column not in ['iso_ts_pre', 'iso_ts_post', ]]
 
-    basic_stats_table_generator(vin, basic_statistics(vin, stat_columns, df))
+    df_basic_statistics = basic_statistics(vin, stat_columns, df)
 
-    return
+    basic_stats_table_generator(vin, df_basic_statistics)
+
+    return df_basic_statistics
 
 def low_memory_basic_statistics(vin:str, columns:list, csv_file)->dict:
     df_basic_statistics = {}
@@ -133,9 +134,7 @@ def generate_low_memory_basic_stats_report(vin:str, csv_file, columns:list):
     # remove datetime objects from column list
     stat_columns = [column for column in columns if column not in ['iso_ts_pre', 'iso_ts_post', ]]
 
-    basic_stats_table_generator(vin, low_memory_basic_statistics(vin, stat_columns, csv_file))
-
-    return
+    return basic_stats_table_generator(vin, low_memory_basic_statistics(vin, stat_columns, csv_file))
 
 
 # https://matplotlib.org/stable/gallery/color/named_colors.html
