@@ -4,20 +4,20 @@ System for collecting and processing motor vehicle data using included sensor mo
 
 ## **Under Construction**
 
-When completed, this repository will be a combination of the following repositories:
+The following repositories have been combined to create this repository:
 
-- [engine data](https://github.com/thatlarrypearson/telemetry-obd)
-- [location data](https://github.com/thatlarrypearson/telemetry-gps)
-- [motion data](https://github.com/thatlarrypearson/telemetry-imu)
-- [weather data](https://github.com/thatlarrypearson/telemetry-wthr)
-- [trailer hitch connector data](https://github.com/thatlarrypearson/telemetry-trailer-connector)
-
-In addition to the repositories mentioned above, additional modules have been added along the way:
-
-- [Combine JSON records into CSV records](https://github.com/thatlarrypearson/telemetry-obd-log-to-csv)
-- [Common utilities](https://github.com/thatlarrypearson/telemetry-utility)
-- [Data Analysis Using Jupyter Notebooks](https://github.com/thatlarrypearson/telemetry-analysis)
-- [Data Audit Capabilities](https://github.com/thatlarrypearson/telemetry-counter)
+- **Vehicle Sensor Module Repositories**
+  - [engine](https://github.com/thatlarrypearson/telemetry-obd) (OBD)
+  - [location](https://github.com/thatlarrypearson/telemetry-gps) (GPS)
+  - [motion](https://github.com/thatlarrypearson/telemetry-imu) (IMU)
+  - [weather](https://github.com/thatlarrypearson/telemetry-wthr) (WTHR)
+  - [trailer](https://github.com/thatlarrypearson/telemetry-trailer-connector) (TRLR)
+- **Common Function Repositories**
+  - [Common utilities](https://github.com/thatlarrypearson/telemetry-utility) (UTILITY)
+  - [Audit Capabilities](https://github.com/thatlarrypearson/telemetry-counter) (COUNTER)
+- **Data Analysis Repositories**
+  - [Combine JSON records into CSV records](https://github.com/thatlarrypearson/telemetry-obd-log-to-csv) (JSON2CSV)
+  - [Notebook Data Analysis](https://github.com/thatlarrypearson/telemetry-analysis) (ANALYSIS)
 
 ## License
 
