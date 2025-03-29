@@ -1,0 +1,27 @@
+#!/usr/bin/bash
+#
+# telemetry.rc.local.imu - This script is executed by the system /etc/rc.local script on system boot
+
+export IMU_USER="lbp"
+export IMU_GROUP="dialout"
+export IMU_HOME="/home/${IMU_USER}"
+export DEBUG="True"
+export LOG_FILE="/tmp/telemetry-imu_$(date '+%Y-%m-%d_%H:%M:%S').log"
+
+# redirect all stdout and stderr to file
+exec &> "${LOG_FILE}"
+
+# Debugging support
+if [ "${DEBUG}" == "True" ]
+then
+	# enable shell debug mode
+	set -x
+fi
+
+# turn off stdin
+0<&-
+
+## Run the script imu_logger.sh as user "${IMU_USER}" and group "${IMU_GROUP}"
+runuser -u "${IMU_USER}" -g "${IMU_GROUP}" "${IMU_HOME}/telemetry-imu/bin/imu_logger.sh" &
+
+exit 0
