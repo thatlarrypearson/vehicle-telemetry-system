@@ -1,11 +1,15 @@
 # telemetry-analysis/private/vehicles.py
 
+# After updating this file with your vehicle data, copy this file to vehicles.py
+
 from math import pi
 from datetime import datetime
 import pytz
 
 # Vehicle Data
 vehicles = {
+    # Vehicle-Identification-Number or VIN
+    # Unique Invariant Identifier for all vehicles manufactured in modern times.
     '<VIN>': {
         'name': 'What you call this vehicle - should be unique to your set of vehicles',
         # Transmission should be auto or manual
