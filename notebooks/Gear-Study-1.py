@@ -12,7 +12,7 @@ def _(mo):
         r"""
         # Gear Study - Gear Determination And Error Estimation
 
-        This notebook uses statistical methods to determine the most likely gear ratios for each vehicle and stores the results in a file for later use.  Additionaly, error calculations are used to estimate the total error between calculated gear ratios and:
+        This notebook uses statistical methods to determine the most likely gear ratios for each vehicle and stores the results in a file for later use.  Additionally, error calculations are used to estimate the total error between calculated gear ratios and:
 
         - gear ratios in vehicle documentation
         - angles calculated from SPEED and RPM pairs in records
