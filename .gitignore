@@ -106,6 +106,8 @@ venv.bak/
 venv/
 wheels/
 =======
+/src/private/spreadsheet.py
+/src/private/vehicles.py
 /initial_data_analysis
 /.ipynb_checkpoints
 /.vscode
