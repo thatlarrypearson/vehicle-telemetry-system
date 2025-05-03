@@ -23,7 +23,9 @@ Moving forward, module development will be in this repository.  Development in t
 
 ## Project Summary and Purpose
 
-I started this project thinking that I was better at selecting transmission gears for improved fuel economy than the engine/transmission controller is.  Now I'm not so sure.  But the gear selection hypothesis lead to other questions that look suspiciously like functional requirements.
+I started this project thinking that I was better at selecting transmission gears for improved fuel economy than the engine/transmission controller is.  Now I'm not so sure my brain can select gears for fuel mileage better than an algorithm.  However, a better algorithm should be attainable especially in windy or hilly/mountainous environments.  A better algorithm should also be able to do better with changes in vehicle loading (cargo).
+
+The gear selection hypothesis led to other questions that look suspiciously like functional requirements.
 
 As a driver, I want to know how my driving choices affect fuel use so that I can make rational tradeoffs between fuel use and:
 
@@ -43,6 +45,7 @@ The first step involved creating a data collection environment and then adding s
 - identify software issues
 - (in)validate assumptions
   - fuel use spikes in Diesel engines using DEF for emissions control
+  - engine reported fuel use compared to filling up at the pump
   - gear identification using Kernel Density Estimation (KDE) extrema
   - error calculations on identified gears
 - validate data by comparing similar data from different sources
@@ -52,6 +55,238 @@ The first step involved creating a data collection environment and then adding s
 Additionally, work has begun to estimate gallons of fuel remaining in fuel tank based on the percentage of fuel the engine controller thinks is still in the tank.  It is unlikely that the percentage provided through the OBD interface is linear with respect to the actual fuel use compared to the actual volume of fuel held in the tank.  Temperature also affects fuel volume and this needs to be taken into account.
 
 ![Context Diagram](./docs/VTS-Summary-ContextDiagram.jpg)
+
+Five sensors are currently supported:
+
+- engine (OBD II interface)
+- location (GPS)
+- motion (9 DOF [IMU](https://en.wikipedia.org/wiki/Inertial_measurement_unit))
+- weather ([Weatherflow Tempest](https://weatherflow.com/tempest-weather-system/) weather station)
+- trailer (7-pin trailer connector)
+
+## Data
+
+Data from each sensor is captured by one vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer).  The data file naming convention enables aggregating data files from each type of sensor being used such that:
+
+- file system directory structure separates multiple Raspberry Pi's by ```hostname``` to support data collection for a fleet of vehicles
+- data file naming conventions identify
+  - ```sensor```, abbreviated version of the sensor type
+  - ```trip```, a period of time starting when the Raspberry Pi boots and ends when the Raspberry Pi halts (graceful or otherwise)
+  - ```session```, a counter starting with 0 that increments each time a sensor collection program restarts during a ```trip```
+- the engine sensor collection program adds a VIN (vehicle identification number) to its data file name but otherwise conforms to the aforementioned data file naming conventions
+  - this VIN is used by analysis programs to identify and aggregate all of the data files associated with an individual ```trip``` into individual data files associated with that VIN
+
+Aggregating data files requires:
+
+- identifying the list of files for a specific ```trip```
+- reading all of the records into a list
+- sorting the list of all records from all sensors by before and after time stamps
+- writing the sorted list to a new file with a name containing the ```hostname```, ```trip``` and VIN.
+
+### Data File Naming Conventions
+
+These conventions apply to data files collected on the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer).
+
+- **engine** consisting of ```telemetry_obd.obd_logger``` and ```telemetry_obd.obd_command_tester``` modules:
+
+```python
+  "{base_path}/{HOST_ID}/{HOST_ID}-{boot_count_string}-{application_id}-{vin}-{counter_string}.json"
+```
+
+- Everything else:
+
+```python
+  "{base_path}/{HOST_ID}/{HOST_ID}-{boot_count_string}-{application_id}-{counter_string}.json"
+```
+
+Where:
+
+- **```base_path```** defaults to the home directory (```${HOME}```) of the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer) user executing the data collection module(s).
+- **```HOST_ID```** is the host name of the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer).  See bash shell command ```hostname```.
+- **```boot_count_string```** is a zero padded string containing a number that is incremented every time the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer) is booted.
+- **```vin```** is the vehicle manufacturer's Vehicle Identification Number or VIN
+- **```application_id```** is an identifier for each data collection application type.
+  - ```obd```, ```obd-cmd-test``` (engine)
+  - ```gps``` (location)
+  - ```wthr``` (weather)
+  - ```imu``` (motion)
+  - ```trlr``` (trailer)
+- **```counter_string```** is set to 0 at boot and then incremented each time the application restarts.
+
+### Data File Format
+
+Output data files are in a hybrid format.  Data files contain records separated by line feeds (```LF```) or carriage return and line feeds (```CF``` and ```LF```).  The records themselves are formatted in JSON.
+
+All sensor generated data conforms to the following standard format:
+
+```json
+{
+  "command_name": STRING,
+  "obd_response_value": [LIST|DICTIONARY|FLOAT|INTEGER|STRING|PINT_ENCODED_VALUE|None|"no response"],
+  "iso_ts_pre": ISO_FORMATTED_TIMESTAMP,
+  "iso_ts_post": ISO_FORMATTED_TIMESTAMP
+}
+```
+
+### JSON Fields
+
+- ```command_name```
+  
+  Sensor provided _command_ name in string format.  Sensor provided names must be unique such that each time a ```command_name``` is used, the data in the ```obd_response_value``` is consistent in format and meaning.
+
+- ```obd_response_value```
+
+  Response values returned by sensors.
+  
+  - When a sensor has no response, the response can be ```"no response"``` or ```None```.
+  
+  - _PINT_ENCODED_VALUES_ are serialized [Pint](https://pint.readthedocs.io/en/stable/) objects.  As strings in JSON fields, they look like ```"25 degC"``` and ```"101 kilopascal"```.
+  - _FLOAT_ values represent floating point numbers.
+  - _INTEGER_ values represent integers.
+  - _STRING_ is just a ```str``` Python object type.  There may be rare circumstances where they were encoded as Python ```bytearray``` objects.
+  - _LIST_ is a Python ```list``` object.  List items may be any of the accepted data types/objects.
+  - _DICTIONARY_ is a Python ```dict``` object.  Keys must be of type ```str```.  The associated value can be any of the accepted data types/objects.
+
+    Some```obd_response_values``` are a list or a dictionary.  The values within these lists/dictionaries can also be Pint values.  This works just fine in JSON but the code reading these output files will need to be able to manage embedded lists within the response values.  [Telemetry OBD Data To CSV File](https://github.com/thatlarrypearson/telemetry-obd-log-to-csv) contains two programs, ```obd_log_evaluation``` and ```obd_log_to_csv```, providing good examples of how to handle multiple return values.
+
+- ```iso_ts_pre```
+
+  ISO formatted timestamp taken before sensor data was requested (```datetime.isoformat(datetime.now(tz=timezone.utc))```).  This value must always be filled in by the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer) to ensure that all records are collected using the same time clock.
+
+- ```iso_ts_post```
+
+  ISO formatted timestamp taken after sensor data was requested (```datetime.isoformat(datetime.now(tz=timezone.utc))```). This value must always be filled in by the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer) to ensure that all records are collected using the same time clock.
+
+### Pint Encoded Values
+
+[Pint](https://pint.readthedocs.io/en/stable/) encoded values are strings with a numeric part followed by the unit.  For example, ```"25 degC"``` represents 25 degrees Centigrade.  ```"101 kilopascal"``` is around 14.6 PSI (pounds per square inch).  Pint values are used so that the units are always kept with the data and so that unit conversions can easily be done in downstream analysis software.  These strings can be deserialized back to Pint objects for use in Python programs.
+
+### Example Data
+
+Here are some examples of records pulled from multiple JSON data files:
+
+```json
+{
+  "command_name": "PIDS_A",
+  "obd_response_value": [
+    true, false, true, true, true, true, true, false, false, false, true, true, true, true, true, false, true, false, true, false, true, false, false, false, false, false, false, true, false, false, true, true
+  ],
+  "iso_ts_pre": "2023-08-31T15:19:25.365217+00:00",
+  "iso_ts_post": "2023-08-31T15:19:25.416874+00:00"
+}
+{
+  "command_name": "STATUS",
+  "obd_response_value": [
+    "Test MISFIRE_MONITORING: Available, Complete",
+    "Test FUEL_SYSTEM_MONITORING: Available, Complete",
+    "Test COMPONENT_MONITORING: Available, Complete"
+  ],
+  "iso_ts_pre": "2023-08-31T15:19:25.417284+00:00",
+  "iso_ts_post": "2023-08-31T15:19:25.467059+00:00"
+}
+{
+  "command_name": "FREEZE_DTC",
+  "obd_response_value": "no response",
+  "iso_ts_pre": "2023-08-31T15:19:25.467393+00:00",
+  "iso_ts_post": "2023-08-31T15:19:25.576930+00:00"
+}
+{
+  "command_name": "ENGINE_LOAD",
+  "obd_response_value": "34.11764705882353 percent",
+  "iso_ts_pre": "2023-08-31T15:19:25.627322+00:00",
+  "iso_ts_post": "2023-08-31T15:19:25.677821+00:00"
+}
+{
+  "command_name": "COOLANT_TEMP",
+  "obd_response_value": "65 degree_Celsius",
+  "iso_ts_pre": "2023-08-31T15:19:25.679476+00:00",
+  "iso_ts_post": "2023-08-31T15:19:25.727384+00:00"
+}
+{
+  "command_name": "gyroscope",
+  "obd_response_value": {
+    "record_number": 1098,
+    "x": -0.0175781,
+    "y": -0.0117188,
+    "z": 0.00195313
+  },
+  "iso_ts_pre": "2023-11-08T19:35:29.921369+00:00",
+  "iso_ts_post": "2023-11-08T19:35:29.925869+00:00"
+}
+{
+  "command_name": "GNGNS",
+  "obd_response_value": {
+    "time": "16:11:28",
+    "lat": "29.5014915",
+    "NS": "N",
+    "lon": "-98.4308333333",
+    "EW": "W",
+    "posMode": "AA",
+    "numSV": "16",
+    "HDOP": "0.73",
+    "alt": "216.1",
+    "sep": "-22.8",
+    "diffAge": null,
+    "diffStation": null
+  },
+  "iso_ts_pre": "2023-11-08T19:35:29.955941+00:00",
+  "iso_ts_post": "2023-11-08T19:35:29.958733+00:00"
+}
+{
+  "command_name": "WTHR_rapid_wind",
+  "obd_response_value": {
+    "time_epoch": 1723494283,
+    "wind_speed": 1.02,
+    "wind_direction": 236
+  },
+  "iso_ts_pre": "2024-08-12T20:24:09.866113+00:00",
+  "iso_ts_post": "2024-08-12T20:24:09.866529+00:00"
+}
+```
+
+### Aggregating Data From Multiple Sensors
+
+```bash
+$ python -m obd_log_to_csv.json_data_integrator --help
+usage: json_data_integrator [-h] [--base_path BASE_PATH] --hostname HOSTNAME --boot_count BOOT_COUNT [--version VERSION] [--verbose]
+
+Telemetry JSON Data Integrator
+
+options:
+  -h, --help            show this help message and exit
+  --base_path BASE_PATH
+                        BASE_PATH directory variable. Defaults to /home/username/telemetry-data/data
+  --hostname HOSTNAME   The hostname of the computer where the data was collected.
+  --boot_count BOOT_COUNT
+                        A counter used to identify the number of times the data collection computer booted since telemetry-counter was installed and configured.
+  --version VERSION     Returns version and exit.
+  --verbose             Turn verbose output on. Default is off.
+$
+```
+
+At runtime, each sensor generates its own data file.  Integrating these files into a new **```integrated```** data file requires:
+
+- create an empty Python dictionary called **```target_dictionary```**
+- identify all data files sharing a common **```HOST_ID```** and **```boot_count_string```**
+- read each identified file record by record
+  - translate each record from JSON to a Python dictionary called **```data_record```**
+  - set **```key_value```** to the list [```json_record["iso_ts_pre"]```, ```json_record["iso_ts_post"]```, - ```json_record["command_name"]```]
+  - set **```target_dictionary```**[**```key_value```**] to **```data_record```**
+- sort (ascending) the **```target_dictionary```** on its key
+- for each item in **```target_dictionary```**, convert the **```target_dictionary```** ```value``` to JSON format and write that as a line to an output file.
+
+When all three of the JSON record fields in two different records have the same values, then one of the records is a duplicate record.   Duplicate records are automatically removed in the process described above.
+
+Integrated data file names are in the following format:
+
+- f"{base_path}/{HOST_ID}/{HOST_ID}-{boot_count_string}-integrated-{vin}.json"
+
+Where:
+
+- **```base_path```** defaults to the home directory (```${HOME}```) of the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer) user executing the data collection module(s).
+- **```HOST_ID```** is the host name of the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer).  See bash shell command ```hostname```.
+- **```boot_count_string```** is a zero padded string containing a number that is incremented every time the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer) is booted.
+- **```vin```** is the vehicle manufacturer's Vehicle Identification Number or VIN
 
 ## Python Project Software Build and Installation
 
