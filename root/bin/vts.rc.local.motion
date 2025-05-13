@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+#
+# vts.rc.local.motion - This script is executed by the system /etc/rc.local script on system boot
+
+export VTS_MODULE="motion"
+
+source /root/bin/vts.root.profile
+
+## Run the script imu_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
+runuser -u "${VTS_USER}" -g "${VTS_GROUP}" "${VTS_HOME}/vehicle-telemetry-system/bin/imu_logger.sh" &
+
+exit 0

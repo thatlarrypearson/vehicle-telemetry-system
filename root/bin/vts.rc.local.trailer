@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+#
+# vts.rc.local.trailer - This script is executed by the system /etc/rc.local script on system boot
+
+export VTS_MODULE="trailer"
+
+## Run the script trlr_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
+runuser -u "${VTS_USER}" -g dialout "${VTS_HOME}/vehicle-telemetry-system/bin/trlr_logger.sh" &
+
+exit 0

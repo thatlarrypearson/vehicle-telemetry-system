@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+#
+# vts.rc.local.audit - This script is executed by the system /etc/rc.local script on system boot
+
+export VTS_MODULE=audit
+
+source /root/bin/vts.root.profile
+
+# Run the script boot_counter.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
+runuser -u "${VTS_USER}" -g dialout "${VTS_HOME}/vehicle-telemetry-system/bin/boot_counter.sh" &
+
+exit 0

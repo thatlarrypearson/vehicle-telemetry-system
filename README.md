@@ -23,7 +23,7 @@ Moving forward, module development will be in this repository.  Development in t
 
 ## Project Summary and Purpose
 
-I started this project thinking that I was better at selecting transmission gears for improved fuel economy than the engine/transmission controller is.  Now I'm not so sure my brain can select gears for fuel mileage better than an algorithm.  However, a better algorithm should be attainable especially in windy or hilly/mountainous environments.  A better algorithm should also be able to do better with changes in vehicle loading (cargo).
+I started this project thinking that I was better at selecting transmission gears for improved fuel economy than the engine/transmission controller.  Now I'm not so sure my brain can select gears for fuel mileage better than an algorithm.  However, a better algorithm should be attainable especially in windy or hilly/mountainous environments.  A better algorithm should also be able to do better with changes in vehicle loading (cargo).
 
 The gear selection hypothesis led to other questions that look suspiciously like functional requirements.
 
@@ -49,8 +49,9 @@ The first step involved creating a data collection environment and then adding s
   - gear identification using Kernel Density Estimation (KDE) extrema
   - error calculations on identified gears
 - validate data by comparing similar data from different sources
-  - GPS distance traveled versus odometer or speed times time
-- identify current gear
+  - GPS distance traveled (```haversine```) versus odometer versus rate (```SPEED```) times time (```iso_ts_post``` - ```iso_ts_pre```) equals distance
+  - generate videos of how SPEED/RPM changes over time overlaid on calculated gears
+  - fuel at the pump compared to fueled consumed reported by the engine controller
 
 Additionally, work has begun to estimate gallons of fuel remaining in fuel tank based on the percentage of fuel the engine controller thinks is still in the tank.  It is unlikely that the percentage provided through the OBD interface is linear with respect to the actual fuel use compared to the actual volume of fuel held in the tank.  Temperature also affects fuel volume and this needs to be taken into account.
 
@@ -63,6 +64,29 @@ Five sensors are currently supported:
 - motion (9 DOF [IMU](https://en.wikipedia.org/wiki/Inertial_measurement_unit))
 - weather ([Weatherflow Tempest](https://weatherflow.com/tempest-weather-system/) weather station)
 - trailer (7-pin trailer connector)
+
+## Modules - Sensors, Common Functions, Data Management, Data Analysis and Raspberry Pi Configuration
+
+- **Vehicle Sensor Modules**
+  - [engine](./README-engine.md) (OBD)
+  - [location](./README-location.md) (GPS)
+  - [motion](./README-motion.md) (IMU)
+  - [weather](./README-weather.md) (WTHR)
+  - [trailer](./README-trailer.md) (TRLR)
+
+- **Common Functions**
+  - [utilities](./README-utility.md) (UTILITY)
+  - [audit](./README-audit.md) (COUNTER)
+
+- **Data Aggregation and Analysis**
+  - [aggregation](./README-aggregation.md) (JSON2CSV)
+  - [notebooks](./README-notebooks.md) (ANALYSIS)
+
+- **Data Collection System Configuration**
+
+    This section covers preparing a Raspberry Pi system for in vehicle use as a headless data collection system.
+
+  - [Raspberry Pi Data Collector](./README-rpdc.md)
 
 ## Data
 
@@ -83,35 +107,7 @@ Aggregating data files requires:
 - sorting the list of all records from all sensors by before and after time stamps
 - writing the sorted list to a new file with a name containing the ```hostname```, ```trip``` and VIN.
 
-### Data File Naming Conventions
-
-These conventions apply to data files collected on the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer).
-
-- **engine** consisting of ```telemetry_obd.obd_logger``` and ```telemetry_obd.obd_command_tester``` modules:
-
-```python
-  "{base_path}/{HOST_ID}/{HOST_ID}-{boot_count_string}-{application_id}-{vin}-{counter_string}.json"
-```
-
-- Everything else:
-
-```python
-  "{base_path}/{HOST_ID}/{HOST_ID}-{boot_count_string}-{application_id}-{counter_string}.json"
-```
-
-Where:
-
-- **```base_path```** defaults to the home directory (```${HOME}```) of the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer) user executing the data collection module(s).
-- **```HOST_ID```** is the host name of the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer).  See bash shell command ```hostname```.
-- **```boot_count_string```** is a zero padded string containing a number that is incremented every time the vehicle mounted Raspberry Pi (3, 4 or 5) SBC (single board computer) is booted.
-- **```vin```** is the vehicle manufacturer's Vehicle Identification Number or VIN
-- **```application_id```** is an identifier for each data collection application type.
-  - ```obd```, ```obd-cmd-test``` (engine)
-  - ```gps``` (location)
-  - ```wthr``` (weather)
-  - ```imu``` (motion)
-  - ```trlr``` (trailer)
-- **```counter_string```** is set to 0 at boot and then incremented each time the application restarts.
+[Data File Naming Conventions](./README-audit/#data-file-naming-conventions) and how to [Add Additional Sensors](./README-audit.md/#adding-additional-sensors) are described in the [Audit](./README-audit.md) module.
 
 ### Data File Format
 
@@ -245,6 +241,8 @@ Here are some examples of records pulled from multiple JSON data files:
 ```
 
 ### Aggregating Data From Multiple Sensors
+
+This method works because all of the timestamps used in the process described below come from the same computer's clock and bracket (before and after) the time the data was collected from the sensors.
 
 ```bash
 $ python -m obd_log_to_csv.json_data_integrator --help
@@ -522,5 +520,5 @@ Certain modules require configuration changes to [Raspberry Pi OS](https://www.r
 
 ## License
 
-[MIT](./LICENSE.md)
+[MIT License](./LICENSE.md)
 

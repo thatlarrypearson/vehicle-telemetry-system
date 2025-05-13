@@ -1,33 +1,12 @@
 #!/usr/bin/bash
 #
-# telemetry.rc.local.obd - This script is executed by the system /etc/rc.local script on system boot
+# vts.rc.local.engine - This script is executed by the system /etc/rc.local script on system boot
 
-export OBD_USER="lbp"
-export OBD_GROUP="dialout"
-export OBD_HOME="/home/${OBD_USER}"
-export DEBUG="True"
-export TMP_DIR="/root/tmp"
-export LOG_FILE="${TMP_DIR}/telemetry-obd_$(date '+%Y-%m-%d_%H:%M:%S').log"
+export VTS_MODULE="engine"
+
+source /root/bin/vts.root.profile
 
 rm -f /tmp/rfcomm-bind /tmp/btctl-connect
-
-if [ ! -d "${TMP_DIR}" ]
-then
-        mkdir --parents "${TMP_DIR}"
-fi
-
-# redirect all stdout and stderr to file
-exec &> "${LOG_FILE}"
-
-# Debugging support
-if [ "${DEBUG}" = "True" ]
-then
-	# enable shell debug mode
-	set -x
-fi
-
-# turn off stdin
-0<&-
 
 # Enable Bluetooth subsystem
 bluetoothctl power on
@@ -42,7 +21,7 @@ sleep 45
 ## The following tries MAC addresses until a working one is found.
 ## To make more than one attempt at each/any Bluetooth MAC address, duplicate the address(es) as shown below.
 export RtnCode=1
-for BT_MAC_ADDR in "00:04:3E:5A:A7:67" "00:19:5D:26:4B:5F"  "00:04:3E:5A:A7:67" "00:19:5D:26:4B:5F" "00:04:3E:5A:A7:67" "00:19:5D:26:4B:5F"
+for BT_MAC_ADDR in "${VTS_BT_MAC_ADDRESS}" "${VTS_BT_MAC_ADDRESS}"  "${VTS_BT_MAC_ADDRESS}" "${VTS_BT_MAC_ADDRESS}" "${VTS_BT_MAC_ADDRESS}" "${VTS_BT_MAC_ADDRESS}"
 do
 	bluetoothctl connect "${BT_MAC_ADDR}" 2>&1 >> /tmp/btctl-connect
 	grep "Connected: yes" /tmp/btctl-connect
@@ -66,7 +45,7 @@ fi
 
 echo Ready to start obd_logger.sh
 
-## Run the script obd_logger.sh as user "${OBD_USER}" and group "${OBD_GROUP}"
-runuser -u "${OBD_USER}" -g dialout "${OBD_HOME}/telemetry-obd/bin/obd_logger.sh" &
+## Run the script obd_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
+runuser -u "${VTS_USER}" -g dialout "${VTS_HOME}/vehicle-telemetry-system/bin/obd_logger.sh" &
 
 exit 0
