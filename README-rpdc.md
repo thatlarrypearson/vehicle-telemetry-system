@@ -195,7 +195,7 @@ Modify these shell variable values in ```vehicle-telemetry-system/root/bin/vts.r
 
 Other shell variables in the file can be modified to suit your needs.
 
-Once the ```vehicle-telemetry-system/root/bin/vts.root.profile``` file has been modified, it must be copied to ```/root/bin``` and the file permissions changed.
+Once the ```vehicle-telemetry-system/root/bin/vts.root.profile``` file has been modified, it and the other files must be copied to ```/root/bin``` and the file permissions changed.
 
 ```bash
 $ cd
@@ -217,7 +217,12 @@ $ ls -l
 $
 ```
 
-Make both ```obd_logger.sh``` and ```obd_tester.sh``` executable by using the command ```chmod +x obd_logger.sh obd_tester.sh```.
+## Step 9 - Raspberry Pi Headless Operation - Modify ```vehicle-telemetry-system/bin/vts.user.profile```
+
+Edit, if necessary, the ```vehicle-telemetry-system/bin/vts.user.profile``` file.
+
+Make all of the module VTS_USER launcher files executable
+by using the command ```chmod +x obd_logger.sh obd_tester.sh```.
 
 ## Date/Time Accuracy During Data Collection
 

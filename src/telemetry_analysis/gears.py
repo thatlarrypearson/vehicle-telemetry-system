@@ -172,7 +172,6 @@ def generate_gear_study_data(csv_file_dir:str, vin:str)->list:
                     record['mps'] = record['SPEED'] * 0.44704
                     record['theta'] = atan2(record['mps'], record['rps'])
                     record['radius'] = sqrt((record['rps'] * record['rps']) + (record['mps'] * record['mps']))
-#                    record['speed_per_rpm'] = record['SPEED'] / record['RPM']
                     if isinstance(row['iso_ts_pre'], str):
                         record['iso_ts_pre'] = parser.isoparse(row['iso_ts_pre'])
                     if isinstance(row['iso_ts_post'], str):
@@ -182,10 +181,8 @@ def generate_gear_study_data(csv_file_dir:str, vin:str)->list:
                     record['acceleration'] = 0
 
                     if previous_iso_ts_post is not None:
-                        time_delta = abs(record['iso_ts_pre'] - previous_iso_ts_post)
                         # route is current
-                        record['acceleration'] = ((record['SPEED'] * 0.44704 - previous_SPEED * 0.44704)
-                                                   / record['duration'])
+                        record['acceleration'] = ((record['SPEED'] - previous_SPEED) * 0.277778) / record['duration']
                     record['route'] = route_counter
                     previous_iso_ts_post = record['iso_ts_post']
                     previous_SPEED = record['SPEED']
