@@ -254,17 +254,28 @@ def gear_lines(xmin:float, xmax:float, ymin:float, ymax:float, theta:float)->tup
     console.print(f"No valid points: xmin:{xmin}, xmax:{xmax}, ymin:{ymin}, ymax:{ymax}, theta:{theta}")
     return None
 
+def gear_study_simple_histogram(vin:str, df:pd.DataFrame):
+
+    fig, ax = plt.subplots(figsize=(8,8))
+    plt.hist(df['theta'], bins=100, log=True)
+    plt.xlabel('theta radians')
+    plt.ylabel('count')
+    plt.title(f"Acceleration-Study-1 {vehicles[vin]['name']} Histogram", fontweight='bold')
+    plt.show()
+
+    return
+
 
 def gear_study_hexagonal_binning_chart(vin:str, df:pd.DataFrame):
     theta_data = read_theta_data_file(theta_file_name)
 
     # apply filters to better improve results by reducing error
     df2D = df
-    df2D = df2D[(df2D['acceleration'] > 0)]
+    df2D = df2D[(df2D['acceleration'] > -0.1)]
 
-    xmin = df2D['rps'].min()
+    xmin = df2D['rps'].min(skipna=True)
     xmax = df2D['rps'].max()
-    ymin = df2D['mps'].min()
+    ymin = df2D['mps'].min(skipna=True)
     ymax = df2D['mps'].max()
 
     if xmin == xmax or ymin == ymax:
@@ -305,11 +316,11 @@ def gear_study_rps_mps_kde_chart(vin:str, df:pd.DataFrame):
 
     # apply filters to better improve results by reducing error
     df2D = df
-    df2D = df2D[(df2D['acceleration'] > 0)]
+    df2D = df2D[(df2D['acceleration'] > -0.1)]
 
-    xmin = df2D['rps'].min()
+    xmin = df2D['rps'].min(skipna=True)
     xmax = df2D['rps'].max()
-    ymin = df2D['mps'].min()
+    ymin = df2D['mps'].min(skipna=True)
     ymax = df2D['mps'].max()
 
     if xmin == xmax or ymin == ymax:
@@ -347,11 +358,11 @@ def gear_study_kde_extrema_chart(vin:str, df:pd.DataFrame):
     # apply filters to better improve results by reducing error
     df2D = df
     df2D = df2D[(0.0 <= df2D['theta']) & (df2D['theta'] <= pi)]
-    df2D = df2D[df2D['acceleration'] > 0]
+    df2D = df2D[df2D['acceleration'] > -0.1]
 
-    xmin = df2D['theta'].min()
+    xmin = df2D['theta'].min(skipna=True)
     xmax = df2D['theta'].max()
-    ymin = df2D['radius'].min()
+    ymin = df2D['radius'].min(skipna=True)
     ymax = df2D['radius'].max()
 
     if xmin == xmax or ymin == ymax:
@@ -387,11 +398,11 @@ def gear_study_kde_extrema_chart(vin:str, df:pd.DataFrame):
     # apply filters to better improve results by reducing error
     df2D = df
     df2D = df2D[(0.0 <= df2D['theta']) & (df2D['theta'] <= pi)]
-    df2D = df2D[df2D['acceleration'] > 0]
+    df2D = df2D[df2D['acceleration'] > -0.1]
 
-    xmin = df2D['theta'].min()
+    xmin = df2D['theta'].min(skipna=True)
     xmax = df2D['theta'].max()
-    ymin = df2D['radius'].min()
+    ymin = df2D['radius'].min(skipna=True)
     ymax = df2D['radius'].max()
 
     if xmin == xmax or ymin == ymax:
@@ -477,7 +488,7 @@ def kde_plot_overlay_for_each_gear(vin:str, df:pd.DataFrame):
 
     for gear in range(1, gear_count + 1):
         # apply filters to better improve results by reducing error
-        df2D = (df)[((df)['closest_gear'] == gear) & ((df)['acceleration'] > 0.0)]
+        df2D = (df)[((df)['closest_gear'] == gear) & ((df)['acceleration'] > -0.1)]
 
         if gear == 2:
             ax2 = ax.twinx()
@@ -501,7 +512,7 @@ def kde_plot_overlay_for_each_gear(vin:str, df:pd.DataFrame):
             df_points = pd.DataFrame(points, columns=['rps', 'mps'])
             axn = plt.plot( 'rps', 'mps', data=df_points, color='black')
 
-    ax.set(title=f"{vehicles[vin]['name']} KDE plot overlay for each of {gear_count} gears where acceleration > 0 with 'theta_data' gear lines")
+    ax.set(title=f"{vehicles[vin]['name']} KDE plot overlay for each of {gear_count} gears where acceleration > -0.1 with 'theta_data' gear lines")
 
     plt.show()
     plt.close()
@@ -559,7 +570,7 @@ def gear_study_kde_plot_overlays_for_each_gear(vin:str, df:pd.DataFrame):
 
     for gear in range(1, gear_count + 1):
         # apply filters to better improve results by reducing error
-        df2D = (df)[((df)['closest_gear'] == gear) & ((df)['acceleration'] > 0.0)]
+        df2D = (df)[((df)['closest_gear'] == gear) & ((df)['acceleration'] > -0.1)]
 
         if gear == 2:
             ax2 = ax.twinx()
@@ -588,7 +599,7 @@ def gear_study_kde_plot_overlays_for_each_gear(vin:str, df:pd.DataFrame):
         ax.set_xlim(0.0, 1.2)
         ax.set_ylim(0.0, 16.0)
 
-    ax.set(title=f"{vehicles[vin]['name']} KDE plot overlays for each of {gear_count} gears when acceleration > 0")
+    ax.set(title=f"{vehicles[vin]['name']} KDE plot overlays for each of {gear_count} gears when acceleration > -0.1")
 
     plt.show()
     plt.close()
@@ -629,7 +640,7 @@ def error_rate_estimation(vin:str, df:pd.DataFrame)->pd.DataFrame:
 #    - 'acceleration' and 'distance_error'
 #    - 'acceleration' and 'rps'
 #    - 'acceleration' and 'mps'
-# when 'acceleration' > 0
+# when 'acceleration' > -0.1
 def error_relationships(vin:str, df:pd.DataFrame):
     theta_data = read_theta_data_file(theta_file_name)
     
@@ -646,12 +657,12 @@ def error_relationships(vin:str, df:pd.DataFrame):
                     continue
 
                 df2D = df
-                # df2D = df2D[df2D['acceleration'] > 0.0]
+                # df2D = df2D[df2D['acceleration'] > -0.1]
                 df2D = df2D[df2D['closest_gear'] == gear]
 
-                xmin = df2D[x_column_name].min()
+                xmin = df2D[x_column_name].min(skipna=True)
                 xmax = df2D[x_column_name].max()
-                ymin = df2D[y_column_name].min()
+                ymin = df2D[y_column_name].min(skipna=True)
                 ymax = df2D[y_column_name].max()
 
                 if xmin == xmax or ymin == ymax:
@@ -718,10 +729,10 @@ def theta_error_local_maximums(vin:str, df:pd.DataFrame, verbose=False):
         df2D = df
 
         df2D = df2D[(0.0 <= df2D['theta']) & (df2D['theta'] <= pi)]
-        # df2D = df2D[df2D['acceleration'] > 0]
+        # df2D = df2D[df2D['acceleration'] > -0.1]
         df2D = df2D[df2D['closest_gear'] == gear]
 
-        xmin = df2D['theta_error'].min()
+        xmin = df2D['theta_error'].min(skipna=True)
         xmax = df2D['theta_error'].max()
 
         if xmin == xmax:
@@ -757,7 +768,7 @@ def theta_error_local_maximums(vin:str, df:pd.DataFrame, verbose=False):
         plt.show()
         plt.close()
 
-        xmin = df2D['theta_error'].min()
+        xmin = df2D['theta_error'].min(skipna=True)
         xmax = df2D['theta_error'].max()
         ymin = (vin_gear_y_values[gear]).min()
         ymax = (vin_gear_y_values[gear]).max()
@@ -843,9 +854,9 @@ def route_report(vin:str, df:pd.DataFrame):
     routes = (df2D['route']).unique()
 
     for route in routes:
-        imin = (df2D[df2D['route'] == route])['i'].min()
+        imin = (df2D[df2D['route'] == route])['i'].min(skipna=True)
         imax = (df2D[df2D['route'] == route])['i'].max()
-        dmin = (df2D[df2D['route'] == route])['iso_ts_pre'].min()
+        dmin = (df2D[df2D['route'] == route])['iso_ts_pre'].min(skipna=True)
         dmax = (df2D[df2D['route'] == route])['iso_ts_post'].max()
         dmean = (df2D[df2D['route'] == route])['duration'].mean()
         table.add_row(
@@ -920,7 +931,7 @@ def generate_images_for_video(
     if verbose:
         console.print(f"image file full path {image_file_full_path}")
 
-    imin = (df[df['route'] == route])['i'].min()
+    imin = (df[df['route'] == route])['i'].min(skipna=True)
     imax = (df[df['route'] == route])['i'].max()
 
     for i in range(imin, imax + 1):
@@ -1049,7 +1060,7 @@ def column_range_study_column(df:pd.DataFrame, column_name:str) -> dict:
         'count': df.shape[0],
         'mean': df[column_name].mean(),
         'std':  df[column_name].std(),
-        'min': df[column_name].min(),
+        'min': df[column_name].min(skipna=True),
         'max': df[column_name].max(),
     }
 
@@ -1125,7 +1136,7 @@ def gear_study_kde_m_per_r_chart(vin:str, df:pd.DataFrame, route)->list:
     # Apply filters to better improve results by reducing error.
     df2D = df[df['route'] == route]
     df2D = df2D[(df2D['m_per_r'] > 0)]
-    df2D = df2D[df2D['acceleration'] > 0]
+    df2D = df2D[df2D['acceleration'] > -0.1]
 
     # Find maximum for m_per_r for use in xmin/xmax
     xmax = df['m_per_r'].max()
