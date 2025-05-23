@@ -48,14 +48,16 @@ The first step involved creating a data collection environment and then adding s
 - (in)validate assumptions
   - fuel use spikes in Diesel engines using DEF for emissions control
   - engine reported fuel use compared to filling up at the pump
+    - direct fuel use reporting (FUEL_RATE and FUEL_RATE_2)
+    - other (calculations involving MAF, ENGINE_LOAD and other stuff)
   - gear identification using Kernel Density Estimation (KDE) extrema
   - error calculations on identified gears
 - validate data by comparing similar data from different sources
   - GPS distance traveled (```haversine```) versus odometer versus rate (```SPEED```) times time (```iso_ts_post``` - ```iso_ts_pre```) equals distance
   - generate videos of how SPEED/RPM changes over time overlaid on calculated gears
-  - fuel at the pump compared to fueled consumed reported by the engine controller
+  - fuel at the pump (fill-ups) compared to fuel consumed reported by the engine controller
 
-Additionally, work has begun to estimate gallons of fuel remaining in fuel tank based on the percentage of fuel the engine controller thinks is still in the tank.  It is unlikely that the percentage provided through the OBD interface is linear with respect to the actual fuel use compared to the actual volume of fuel held in the tank.  Temperature also affects fuel volume and this needs to be taken into account.
+Additionally, work has begun to estimate gallons of fuel remaining in fuel tank based on the percentage of fuel the engine controller reports is still in the tank.  It is unlikely that the percentage provided through the OBD interface is linear with respect to the actual fuel use compared to the actual volume of fuel held in the tank.  Temperature also affects fuel volume and this needs to be taken into account.
 
 ![Context Diagram](./docs/VTS-Summary-ContextDiagram.jpg)
 
@@ -84,11 +86,21 @@ Five sensors are currently supported:
   - [aggregation](./README-aggregation.md) (JSON2CSV)
   - [notebooks](./README-notebooks.md) (ANALYSIS)
 
-- **Data Collection System Configuration**
+- **Hardware**
+  - Raspberry Pi 4/5
+  - Waveshare NEO-M8T GNSS USB
+  - Unexpected Maker FeatherS3
+  - Adafruit 9-DOF Orientation IMU Fusion Breakout - BNO085 (BNO080) - STEMMA QT / Qwiic PID: 4754
+  - ADS1015 12-Bit ADC - 4 Channel with Programmable Gain Amplifier - STEMMA QT / Qwiic PID: 1083
+  - Trailer Connector
+  - [WeatherFlow Tempest](https://weatherflow.com/tempest-weather-system/)
+  - [Witty Pi 4](./docs/WittyPi4-README.md)
+
+- **Data Collection**
 
     This section covers preparing a Raspberry Pi system for in vehicle use as a headless data collection system.
 
-  - [Raspberry Pi Data Collector](./README-rpdc.md)
+  - [Raspberry Pi Data Collector](./README-rpdc.md) Configuration
 
 ## Data
 
@@ -272,7 +284,7 @@ At runtime, each sensor generates its own data file.  Integrating these files in
   - translate each record from JSON to a Python dictionary called **```data_record```**
   - set **```key_value```** to the list [```json_record["iso_ts_pre"]```, ```json_record["iso_ts_post"]```, - ```json_record["command_name"]```]
   - set **```target_dictionary```**[**```key_value```**] to **```data_record```**
-- sort (ascending) the **```target_dictionary```** on its key
+- **sort** (ascending) the **```target_dictionary```** on its key
 - for each item in **```target_dictionary```**, convert the **```target_dictionary```** ```value``` to JSON format and write that as a line to an output file.
 
 When all three of the JSON record fields in two different records have the same values, then one of the records is a duplicate record.   Duplicate records are automatically removed in the process described above.
@@ -512,15 +524,14 @@ options:
   --version             Print version number and exit.
 ```
 
-## Installing On Raspberry Pi
+## Installing On The Raspberry Pi Data Collector
 
 First, complete the [Python Project Software Installation](#python-project-software-build-and-installation) instructions.
 
-Certain modules require configuration changes to [Raspberry Pi OS](https://www.raspberrypi.com/software/) to operate correctly.  No need to configure for modules not being used.
+Next, complete the [Raspberry Pi Data Collector](./README-rpdc.md) instructions.
 
-## Data Analysis
+Certain modules require configuration changes to [Raspberry Pi OS](https://www.raspberrypi.com/software/) to operate correctly.  No need to configure for modules not being used.
 
 ## License
 
 [MIT License](./LICENSE.md)
-
