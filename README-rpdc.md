@@ -296,25 +296,9 @@ The Freematics OBD-II Emulator does not cover all available OBD commands.  This 
 
 ## Manufacturer Warranty Information
 
-The 2019 Ford EcoSport manual has the following statement with respect to aftermarket OBD devices:
+The 2019 Ford EcoSport manual and other vehicles have the following statement or something similar with respect to aftermarket OBD devices:
 
-"_Your vehicle has an OBD Data Link
-Connector (DLC) that is used in
-conjunction with a diagnostic scan tool for
-vehicle diagnostics, repairs and
-reprogramming services. Installing an
-aftermarket device that uses the DLC
-during normal driving for purposes such as
-remote insurance company monitoring,
-transmission of vehicle data to other
-devices or entities, or altering the
-performance of the vehicle, may cause
-interference with or even damage to
-vehicle systems. We do not recommend
-or endorse the use of aftermarket plug-in
-devices unless approved by Ford. The
-vehicle Warranty will not cover damage
-caused by an aftermarket plug-in device._"
+- "Your vehicle has an OBD Data Link Connector (DLC) that is used in conjunction with a diagnostic scan tool for vehicle diagnostics, repairs and reprogramming services. Installing an aftermarket device that uses the DLC during normal driving for purposes such as remote insurance company monitoring, transmission of vehicle data to other devices or entities, or altering the performance of the vehicle, may cause interference with or even damage to vehicle systems. We do not recommend or endorse the use of aftermarket plug-in devices unless approved by Ford. The vehicle Warranty will not cover damage caused by an aftermarket plug-in device."
 
 You use this software at your own risk.
 

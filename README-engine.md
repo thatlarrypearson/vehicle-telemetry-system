@@ -2,7 +2,9 @@
 
 The **engine** module, also known as **Telemetry OBD Logger** captures vehicle performance data using an OBD interface device attached to the vehicle.  While the logger is running, it writes output to files.  Data from multiple vehicles can easily be logged.  Data from each different vehicle is stored in a directory/folder matching the vehicle's VIN or vehicle identification number.
 
-The software is designed to run on Raspberry Pi with Raspberry Pi OS (formerly known as Raspbian) installed.  [Bluetooth capabilities](./README-bluetooth.md) are added to the Raspberry Pi through a USB Bluetooth adapter (BT Dongle) and installed software (Bluetooth Driver and tools).
+The software sends _OBD Commands_ to the engine.  The engine responds to supported commands and ignores unsupported commands.  This software and the underlying library supporting this software ([python-OBD](https://github.com/brendan-w/python-OBD)) use names like ```SPEED``` instead of the binary numbers ```0x0D``` that the OBD standard ([J1979-DA, Digital Annex of E/E Diagnostic Test Modes J1979DA_202104](https://www.sae.org/standards/content/j1979da_202104/)) uses.
+
+The software is designed to run on Raspberry Pi with Raspberry Pi OS (formerly known as Raspbian) installed.  Bluetooth capabilities are used by a Bluetooth Adapter and must be correctly configured before this software module can function.  See [Bluetooth Installation and Configuration](./docs/README-bluetooth.md) for more information.
 
 ![High Level System View](docs/README-HighLevelSystemView.JPG)
 
@@ -87,7 +89,7 @@ The repeating part of the OBD command pattern is called a "full cycle" and has O
 
 The total number of command submissions in a full cycle is the ```count of commands in Housekeeping``` times (one plus the ```count of commands in Cycle```).
 
-The ```--full_cycles``` parameter is used to set the number of ```full_cycles``` contained in output data files.  Once the ```--full_cycles``` limit is reached, the data file is closed and a new one is opened.  This keeps data loss from unplanned Raspberry Pi shutdowns to a minimum.
+The ```--full_cycles``` parameter is used to set the number of ```full_cycles``` contained in output data files.  Once the ```--full_cycles``` limit is reached, the data file is closed and a new one is opened.  This keeps data loss from unplanned Raspberry Pi shutdowns to a minimum.  In practice, this hasn't been used since each write is followed by an operating system call causing data file writes to be written to disk (and not buffered) before the program can continue.
 
 #### Telemetry OBD Logger Configuration Files
 
@@ -102,15 +104,15 @@ Some commands will result in an OBD response value of ```"no response"``` (```"o
 For example, 2017 Ford F-450 truck ```FUEL_RATE``` command in the ```cycle``` section of the configuration file returned mixed results.  In 1,124 attempts, 1084 responded with a good value while 40 responded with ```no response```.
 
 ```bash
-human@computer:data/FT8W4DT5HED00000$ grep FUEL_RATE FT8W4DT5HED00000-20210910204443-utc.json | grep "no response" | wc -l
+human@computer:data/FT8W4DT5HED00000$ grep FUEL_RATE <VIN>-20210910204443-utc.json | grep "no response" | wc -l
 40
-human@computer:data/FT8W4DT5HED00000$ grep FUEL_RATE FT8W4DT5HED00000-20210910204443-utc.json | grep -v "no response" | wc -l
+human@computer:data/FT8W4DT5HED00000$ grep FUEL_RATE <VIN>-20210910204443-utc.json | grep -v "no response" | wc -l
 1084
 ```
 
 This problem may be solved by increasing the OBD command timeout from its default to a higher value.  Use the ```--timeout``` setting when invoking the ```obd_logger``` command.
 
-### Telemetry OBD Logger Output Data Files
+### All Output Data Files Regardless of Module
 
 Output data files are in a hybrid format.  Data files contain records separated by line feeds (```LF```) or carriage return and line feeds (```CF``` and ```LF```).  The records themselves are formatted in JSON.  Sample output follows:
 
@@ -180,7 +182,7 @@ DEBUG:obd.elm327:read: b'OK\r\r>'
 
 ### OBD Logger Data File Naming Convention
 
-See [Telemetry System Boot and Application Startup Counter](https://github.com/thatlarrypearson/telemetry-counter).
+See [Telemetry System Boot and Application Startup Counter](./README-audit.md).
 
 ## Testing All Available OBD Commands To See Which Ones Work On Your Vehicle
 
@@ -207,9 +209,9 @@ optional arguments:
   --verbose             Turn verbose output on. Default is off.
 ```
 
-The output file format is the same as ```telemetry_obd.obd_logger``` as are many of the command line arguments.  ```--cycles``` determines the number of times the full list of known OBD commands is tried.  The OBD command list needs to be run a number of times because vehicles don't alway respond to requests in a timely manner.
+The output file format is the same as ```telemetry_obd.obd_logger``` as are many of the command line arguments.  ```--cycles``` determines the number of times the full list of known OBD commands is tried.  The OBD command list needs to be run a number of times because vehicles don't alway respond to requests in a timely manner providing ambiguous results.
 
-Test output files are named differently than ```obd_logger``` data files.   Both test and ```obd_logger``` data files will be placed in the ```{BASE_PATH}/{VIN}``` directory.  For example, using ```data``` (default) as the base path, if the vehicle VIN is ```FT8W4DT5HED00000```, then test files will be of the form ```data/FT8W4DT5HED00000/FT8W4DT5HED00000-TEST-20211012141917-utc.json```.  The ```obd_logger``` files will be of the form ```data/FT8W4DT5HED00000/FT8W4DT5HED00000-20211012141917-utc.json```.
+Test output files are named differently than ```obd_logger``` data files.  See [Data File Naming Conventions](./README-audit.md/#data-file-naming-conventions).
 
 ## Issues Surfaced During Vehicle Testing
 
@@ -232,11 +234,19 @@ Problems like the above can be found by running ```telemetry_obd.obd_logger``` a
 
 When a VIN (vehicle identification number) specific configuration file doesn't exist, the OBD Logger program defaults to using the ```"default.ini"``` configuration file.  This file, included in the software distribution under ```"config/default.ini"``` contains most known OBD commands.  Because of the wide variations in supported command sets by manufacturer, model, trim level and year made, it is difficult to know what OBD commands a specific car will respond to. Additionally, manufacturers don't typically publish lists of valid OBD commands for each vehicle sold.  This "try-them-all" method seems to be the only approach to identifying which OBD commands a specific vehicle will respond to.
 
-The preferred way to *"try-them-all"*, that is try every known OBD command, is to use the ```telemetry_obd.obd_command_tester``` program. Once all the possible known OBD commands have been tried, it becomes possible to create a list of valid known commands to be used in the creation of a vehicle specific configuration file.  The OBD Logger software was written to automatically choose configuration files appropriately named ```"<VIN>.ini"``` by default.  If the ```"<VIN>.ini"``` isn't available, then the other default, ```"default.ini"```, is chosen.
+The preferred way to **"try-them-all"**, that is try every known OBD command, is to use the ```telemetry_obd.obd_command_tester``` program. Once all the possible known OBD commands have been tried, it becomes possible to create a list of valid known commands to be used in the creation of a vehicle specific configuration file.  The OBD Logger software was written to automatically choose configuration files appropriately named ```"<VIN>.ini"``` by default.  If the ```"<VIN>.ini"``` isn't available, then the other default, ```"default.ini"```, is chosen.
 
-Analysis of ```telemetry_obd.obd_command_tester``` and ```telemetry_obd.obd_logger``` output is done by ```telemetry_obd_log_to_csv.obd_log_evaluation``` found in the [Telemetry OBD Data To CSV File](https://github.com/thatlarrypearson/telemetry-obd-log-to-csv) repository.
+Analysis of ```telemetry_obd.obd_command_tester``` and ```telemetry_obd.obd_logger``` output is done by ```telemetry_obd_log_to_csv.obd_log_evaluation``` found in [Aggregation](./README-aggregation.md).
 
 When creating vehicle specific configuration files, use ```obd_log_evaluation``` to determine the list of commands providing valid vehicle responses.  Only valid OBD commands should be used long term when gathering vehicle data.
+
+## Manufacturer Warranty Information
+
+The 2019 Ford EcoSport manual and other vehicles have the following statement or something similar with respect to aftermarket OBD devices:
+
+- "Your vehicle has an OBD Data Link Connector (DLC) that is used in conjunction with a diagnostic scan tool for vehicle diagnostics, repairs and reprogramming services. Installing an aftermarket device that uses the DLC during normal driving for purposes such as remote insurance company monitoring, transmission of vehicle data to other devices or entities, or altering the performance of the vehicle, may cause interference with or even damage to vehicle systems. We do not recommend or endorse the use of aftermarket plug-in devices unless approved by Ford. The vehicle Warranty will not cover damage caused by an aftermarket plug-in device."
+
+You use this software at your own risk.
 
 ## LICENSE
 

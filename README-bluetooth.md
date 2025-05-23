@@ -71,6 +71,14 @@ crw-rw---- 1 root dialout 120, 0 Aug 13 15:47 /dev/rfcomm0
 human@hostname:~ $ sudo adduser human dialout
 ```
 
+## Manufacturer Warranty Information
+
+The 2019 Ford EcoSport manual and other vehicles have the following statement or something similar with respect to aftermarket OBD devices:
+
+- "Your vehicle has an OBD Data Link Connector (DLC) that is used in conjunction with a diagnostic scan tool for vehicle diagnostics, repairs and reprogramming services. Installing an aftermarket device that uses the DLC during normal driving for purposes such as remote insurance company monitoring, transmission of vehicle data to other devices or entities, or altering the performance of the vehicle, may cause interference with or even damage to vehicle systems. We do not recommend or endorse the use of aftermarket plug-in devices unless approved by Ford. The vehicle Warranty will not cover damage caused by an aftermarket plug-in device."
+
+You use this software at your own risk.
+
 ## LICENSE
 
 [MIT License](./LICENSE.md)
