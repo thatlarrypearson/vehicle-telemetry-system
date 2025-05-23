@@ -2,7 +2,9 @@
 
 System for collecting and processing motor vehicle data using included sensor modules.
 
-## **Under Construction**
+## **UNDER CONSTRUCTION**
+
+## **NOTE - REPOSITORY INTEGRATION WORK IS STILL ON-GOING**
 
 The following repositories have been combined to create this repository:
 
