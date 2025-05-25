@@ -20,7 +20,7 @@ Integrate GPS location and time data collection with vehicle engine data for bet
 
 Raspberry Pi 4 with 4 GB RAM (or more) and with a 32 GB (or more) SD card.
 
-## Target Hardware
+## Target GPS Hardware
 
 Devices supporting USB or **RS-232**/**UART** interfaces made from **u-blox 8** or **u-blox M8** GPS receiver chip sets are required for this application.  **u-blox** devices support the **UBX** protocol in addition to the **NMEA** protocol.  UBX is used for device configuration.  **NMEA** is used to decode **NMEA** location data.  The libraries used to support this application are bilingual.  That is, the libraries speak both **UBX** and **NMEA**.
 
@@ -29,6 +29,8 @@ Interfaces not supported include **SPI**, **I2C** and **DDC**.
 The reference hardware is [Waveshare NEO-M8T GNSS TIMING HAT for Raspberry Pi, Single-Satellite Timing, Concurrent Reception of GPS, Beidou, Galileo, GLONASS](https://www.waveshare.com/neo-m8t-gnss-timing-hat.htm).  The board has a USB interface as well as a serial RS-232/UART interface.  The correct USB cable comes in the package.  The board is also a Raspberry Pi HAT.  Using the Raspberry Pi header, the board plugs into a UART interface.  GPS board comes with an external GPS antenna, a useful feature to keep electronics off the dashboard and out of the sun.
 
 The **u-blox** device on the reference hardware is a [NEO-M8T](https://www.u-blox.com/en/product/neolea-m8t-series) chip.
+
+In theory, any **u-blox** GPS devices supporting a USB interface should work fine with this software.  RS232 serial may work but might need some modifications to code to get the BAUD rate, data bits and parity right.
 
 ## Usage
 
@@ -214,7 +216,7 @@ With both the GPS (_u-blox GNSS receiver_) and IMU (_Unexpected Maker FeatherS3_
 In the event that your ```u-blox``` GPS device is plugged in but it isn't showing as found, use ```gps_logger.usb_devices``` to get the correct values for ```DEFAULT_USB_VID``` and ```DEFAULT_USB_PID```.  Change these values in ```telemetry-gps/gps_logger/usb_devices.py``` and rebuild/reinstall the _Telemetry GPS_ package per the above instructions.
 
 ```bash
-lbp@telemetry2:~ $ python3.11 -m gps_logger.usb_devices
+human@telemetry2:~ $ python3.11 -m gps_logger.usb_devices
 Candidate Serial Device List (non-USB devices excluded)
 
 	+1 /dev/ttyACM1
@@ -244,7 +246,7 @@ Candidate Serial Device List (non-USB devices excluded)
 Found 2 USB Serial Device(s)
 
 USB Serial Device <u-blox GNSS receiver> Name /dev/ttyACM0 found
-lbp@telemetry2:~ $ 
+human@telemetry2:~ $ 
 ```
 
 ## Known Problems

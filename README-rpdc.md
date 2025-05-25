@@ -99,6 +99,23 @@ Follow the instructions found at [Python Project Software Build and Installation
 
 Run some simple tests to [validate the package build and installation](./README.md/#simple-tests-validating-build-and-installation).
 
+## Step 8 - Check for GPS Device Connection
+
+Connect the Target GPS Hardware to a USB port on the Raspberry Pi Data Collector.  Wait for a minute before checking to see if ```/dev/ttyACM0``` is created on the Raspberry Pi Data Collector.
+
+```bash
+$ ls -l /dev/ttyACM0
+ls: cannot access '/dev/ttyACM0': No such file or directory
+```
+
+If you get a response similar to the one above, then follow the instructions on [What To Do When Your GPS Device Is Not Found](./README-location.md/#what-to-do-when-your-gps-device-is-not-found).
+
+If the GPS serial device isn't ```/dev/ttyACM0```, the ```DEFAULT_GPS_SERIAL_DEVICE``` environment variable value in ```vehicle-telemetry-system/bin/vts.user.profile``` will need to be changed from ```/dev/ttyACM0``` to the correct value.
+
+```bash
+DEFAULT_GPS_SERIAL_DEVICE="/dev/ttyACM0"
+```
+
 ## Step 7 - Raspberry Pi Headless Operation - Modify ```/etc/rc.local```
 
 In order to reliably run in an automotive environment, sensor modules need to start automatically after all preconditions are satisfied.  That is, the application must start without any user interaction.  The trigger for starting the Vehicle Telemetry System is powering up the Raspberry Pi Data Collector computer.
