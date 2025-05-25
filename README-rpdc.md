@@ -48,6 +48,15 @@ If a distribution upgrade occurred, then remove all the unnecessary software fro
 sudo apt autoremove -y
 ```
 
+## Step 2 - Add User To Groups
+
+To access serial devices, the username running data collection software must be added to the ```dialout``` user group.
+
+```bash
+# add dialout group to the current user's capabilities
+sudo adduser $(whoami) dialout
+```
+
 ## Step 2 - Install Bluetooth Software
 
 Follow the instructions in the [Install System Software](./README-bluetooth.md/#install-system-software) section of the [Bluetooth Installation and Configuration](./README-bluetooth.md) document.
@@ -253,7 +262,9 @@ In environments where the following are unavailable:
 
 The function ```get_output_file_name()``` from [Telemetry System Boot and Application Startup Counter](https://github.com/thatlarrypearson/telemetry-counter) has been added to ```obd_logger``` and ```obd_tester``` to ensure the creation of data files with unique invariant identifiers.  These file names assure that data files can be processed in the order they were created.  For the file naming to work properly, ```obd_logger``` and ```obd_tester``` need to be started through the bash startup programs found in ```telemetry-obd/bin/```  named ```obd_logger.sh``` and ```obd_tester.sh```.
 
-Data timestamp information may still need downstream processing using embedded GPS data to recalibrate system timestamp data.  Examples for this type of downstream processing can be found in the ```obd_log_to_csv``` package.  See [Telemetry OBD Data To CSV File](https://github.com/thatlarrypearson/telemetry-obd-log-to-csv).
+Data timestamp information may still need downstream processing using embedded GPS data to recalibrate system timestamp data.  Examples for this type of downstream processing can be found in [Vehicle Telemetry System Data Aggregation](./README-aggregation.md).
+
+## 
 
 ## Running Raspberry Pi In Vehicle
 

@@ -1,4 +1,4 @@
-# Telemetry OBD Data To CSV File
+# Vehicle Telemetry System Data Aggregation
 
 Convert [Telemetry OBD Logger](https://github.com/thatlarrypearson/telemetry-obd) output to CSV format files suitable for importation into Python [Pandas](https://pandas.pydata.org/)  ```dataframe``` using the ```from_csv()``` method.
 

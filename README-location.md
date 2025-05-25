@@ -1,8 +1,8 @@
-# Telemetry GPS Location and Time Logger
-
-## **STILL UNDER CONSTRUCTION** but it is getting closer
+# Vehicle Telemetry System Location Logger
 
 The Telemetry GPS Logger captures location and time data using a GPS receiver. While the logger is running, location and time output is written to files.
+
+## **STILL UNDER CONSTRUCTION** but it is getting closer
 
 ## Motivation
 
@@ -14,8 +14,7 @@ Integrate GPS location and time data collection with vehicle engine data for bet
 - Works with a chip set family ([u-blox]((https://www.u-blox.com)) supporting GPS, GLONASS, Galileo and BeiDou Global Navigation Satellite Systems (GNSS)
 - Works with large family of GNSS enabling multiple constellations of satellites transmitting positioning and timing data
 - Works with Python 3.10 and newer
-- Raspberry Pi 4 hardware and Raspberry Pi OS target environment
-- Two forms of data file naming based on the existence of the parameter ```--output_file_name_counter```.  The first form without the parameter is ```data/NMEA-<YYYYMMDDhhmmss>-utc.json```.  The second form with the parameter is ```data/NMEA-<counter>``` where counter would be ```0000000001``` for the first file, ```0000000002``` for the second file and so on.
+- Raspberry Pi 4/5 hardware and Raspberry Pi OS target environment
 
 ## Target System
 
@@ -76,7 +75,7 @@ Why?  When aggregating data from multiple vehicles, each with its own little com
 
 ## Output Data File Format
 
-The output data file format is the same format used by [Telemetry OBD Logger](https://github.com/thatlarrypearson/telemetry-obd#telemetry-obd-logger-output-data-files).  Downstream processing of data captured by both **Telemetry OBD Logger** and **Telemetry GPS Logger** and other data sources can be processed using the same analysis tools.
+The output data file format is the same format for all data collection modules in the [Vehicle Telemetry System](https://github.com/thatlarrypearson/vehicle-telemetry-system).  Downstream processing of captured data can be processed using the same analysis tools.
 
 Records in the log files are separated by line feeds ```<LF>```.  Each record is in JSON format representing the key/value pairs described below under [JSON Fields](#json-fields).
 
@@ -186,155 +185,19 @@ $ cat NMEA-20220525142137-utc.json
 $
 ```
 
-## Installation
+######################################
+######################################
+######################################
+######################################
+######################################
 
-Installation instructions were written for Raspberry Pi OS 64 bit:
+CONTINUE HERE to fill in README-rpdc.md
 
-- ```/etc/debian_version``` shows *11.3*
-- ```/etc/release``` shows *bullseye*
-
-With some, little or no modification, the installation instructions should work for other Linux based systems.  The amount of effort will vary by Linux distribution with Debian based distributions the easiest.
-
-### Dependencies
-
-*telemetry-gps* requires a number of Libraries and Python packages that need to be installed before installing this package.  Follow installation instruction links for the following:
-
-- [Python 3.10 and 3.11](https://github.com/thatlarrypearson/telemetry-obd#raspberry-pi-system-installation)
-  - provides the runtime environment for the application
-  - follow the above link
-- [PyGPSClient](docs/PyGPSClient.md)
-  - provides a method to debug GPS connection and configuration issues
-  - follow the above link
-
-Then install the following in no particular order.
-
-- [pyserial](https://pyserial.readthedocs.io/en/latest)
-- [pyubx2](https://github.com/semuconsulting/pyubx2)
-- [pynmeagps](https://github.com/semuconsulting/pynmeagps)
-- [telemetry-obd](https://github.com/thatlarrypearson/telemetry-obd)
-- [telemetry-counter](https://github.com/thatlarrypearson/telemetry-counter)
-
-```bash
-# Serial Interface Library
-python3.11 -m pip install pyserial
-
-# UBX and NMEA Libraries
-python3.11 -m pip install --user --upgrade pyubx2 pynmeagps
-```
-
-### Install Telemetry Counter
-
-The [telemetry counter](https://github.com/thatlarrypearson/telemetry-counter) application needs to be installed before this application.
-
-To install ```telemetry-counter```, follow the installation instructions found [here](https://github.com/thatlarrypearson/telemetry-counter#installation).
-
-### Building and Installing ```gps_logger``` Python Package
-
-```bash
-cd
-git clone https://github.com/thatlarrypearson/telemetry-gps.git
-cd telemetry-gps
-python3.11 -m build .
-python3.11 -m pip install dist/ telemetry_gps-0.1.0-py3-none-any.whl
-```
-
-### Raspberry Pi Headless Operation
-
-To access the GPS, the username running ```gps_logger``` will need to be a member of the ```dialout``` group.
-
-```bash
-# add dialout group to the current user's capabilities
-sudo adduser $(whoami) dialout
-```
-
-To start ```gps_logger.gps_logger``` at boot on a Raspberry Pi, add the section of code from below starting with ```# BEGIN TELEMETRY SUPPORT``` and ending with ```# END TELEMETRY SUPPORT``` to ```/etc/rc.local```.
-
-```bash
-#!/bin/sh -e
-#
-# rc.local
-#
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-#
-# In order to enable or disable this script just change the execution
-# bits.
-#
-# By default this script does nothing.
-
-# Print the IP address
-_IP=$(hostname -I) || true
-if [ "$_IP" ]; then
-  printf "My IP address is %s\n" "$_IP"
-fi
-
-# BEGIN TELEMETRY SUPPORT
-
-if [ -x "/root/bin/telemetry.rc.local.counter" ]
-then
-  /bin/nohup "/root/bin/telemetry.rc.local.counter" &
-fi
-
-if [ -x "/root/bin/telemetry.rc.local.gps" ]
-then
-  /bin/nohup "/root/bin/telemetry.rc.local.gps" &
-fi
-
-if [ -x "/root/bin/telemetry.rc.local.imu" ]
-then
-  /bin/nohup "/root/bin/telemetry.rc.local.imu" &
-fi
-
-if [ -x "/root/bin/telemetry.rc.local.wthr" ]
-then
-  /bin/nohup "/root/bin/telemetry.rc.local.wthr" &
-fi
-
-if [ -x "/root/bin/telemetry.rc.local.obd" ]
-then
-  /bin/nohup "/root/bin/telemetry.rc.local.obd" &
-fi
-
-# END TELEMETRY SUPPORT
-
-exit 0
-```
-
-```/etc/rc.local``` executes both ```/root/bin/telemetry.rc.local.system``` and ```/root/bin/telemetry.rc.local.gps```.  In both files, the value for ```GPS_USER``` and ```SYSTEM_USER``` will need to be changed to match the username responsible for running this application.
-
-To ready the system to autostart GPS logging, copy ```telemetry.rc.local.gps``` to ```/root/bin``` and set its file system permissions as shown below.
-
-```bash
-$ cd
-$ cd telemetry-gps/root/bin
-$ sudo mkdir /root/bin
-$ sudo cp telemetry.rc.local.gps /root/bin/
-$ sudo chmod 0755 /root/bin/telemetry0rc.local.gps
-$ sudo chmod 0755 /root/bin/telemetry.rc.local.gps
-$ cd
-```
-
-```/root/bin/telemetry.rc.local``` executes ```telemetry-gps/bin/gps_logger.sh```.  You may change these parameters as needed.
-
-If logging to a file is needed, leave that line in place.  Otherwise, remove the unwanted argument lines.  One final note.  Lines ending in ```\``` indicate a line continuation in the shell environment.  The last line shouldn't have a ```\``` at the end as there wouldn't be any lines to continue to.
 
 If the GPS serial device isn't ```/dev/ttyACM0```, the serial device command line option will need to be added to the list of parameters (remember to at the line continuation backslash ```\``` if needed).  If adding the default device, the added line might look like:
 
 ```bash
     --serial /dev/ttyACM0
-```
-
-Don't forget.  Lines ending in ```\``` indicate a line continuation.  A line continuation may be needed for the line above ```--serial```.
-
-Finally, set ```gps_logger.sh``` file permissions to executable.
-
-```bash
-$ cd telemetry-gps
-$ cd bin
-$ chmod 0755 gps_logger.sh
-$ cd
-$
 ```
 
 ## What To Do When Your GPS Device Is Not Found
@@ -383,10 +246,6 @@ Found 2 USB Serial Device(s)
 USB Serial Device <u-blox GNSS receiver> Name /dev/ttyACM0 found
 lbp@telemetry2:~ $ 
 ```
-
-## Examples
-
-See the ```bin/gps_logger.sh``` ```bash``` shell program for an example.
 
 ## Known Problems
 
@@ -474,25 +333,6 @@ $ find . -type f -name '*.json' -size 0 -print | while read filename
 ./NMEA-20220910171003-utc.json
 $
 ```
-
-## Related
-
-- [Telemetry OBD Data To CSV File](https://github.com/thatlarrypearson/telemetry-obd-log-to-csv)
-  - Convert [Telemetry OBD Logger] and [Telemetry GPS Logger]() output to CSV format files suitable for importation into Python Pandas dataframes using the from_csv() method
-  - Provides initial data analysis programs for ```telemetry_obd.obd_command_tester```, ```telemetry_obd.obd_logger``` and ```gps_logger.gps_logger``` output
-
-- [Telemetry OBD Logger](https://github.com/thatlarrypearson/telemetry-obd)
-  - Logs vehicle engine data gathered using OBD interface
-  - Accepts shared dictionary/memory information from this library for integration into its own log files
-
-- [Telemetry Weather Logging](https://github.com/thatlarrypearson/telemetry-wthr)
-  - Logs weather data gathered from WeatherFlow Tempest weather station
-
-- [Telemetry Inertial Motion Unit (IMU) Logger](https://github.com/thatlarrypearson/telemetry-imu)
-  - Logs 9 degrees of freedom motion data from IMU device
-
-- [Telemetry Trailer Connector Logger](https://github.com/thatlarrypearson/telemetry-trailer-connector)
-  - Logs braking information provided by 4 and 7 pin trailer connector plugs
 
 ## License
 
