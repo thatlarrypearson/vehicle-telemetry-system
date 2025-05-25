@@ -254,13 +254,13 @@ def gear_lines(xmin:float, xmax:float, ymin:float, ymax:float, theta:float)->tup
     console.print(f"No valid points: xmin:{xmin}, xmax:{xmax}, ymin:{ymin}, ymax:{ymax}, theta:{theta}")
     return None
 
-def gear_study_simple_histogram(vin:str, df:pd.DataFrame):
+def gear_study_simple_histogram(vin:str, df:pd.DataFrame, title="Histogram", column='theta'):
 
     fig, ax = plt.subplots(figsize=(8,8))
-    plt.hist(df['theta'], bins=100, log=True)
-    plt.xlabel('theta radians')
+    plt.hist(df[column], bins=100, log=True)
+    plt.xlabel(column)
     plt.ylabel('count')
-    plt.title(f"Acceleration-Study-1 {vehicles[vin]['name']} Histogram", fontweight='bold')
+    plt.title(title, fontweight='bold')
     plt.show()
 
     return
