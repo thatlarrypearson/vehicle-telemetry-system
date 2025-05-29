@@ -254,6 +254,39 @@ def gear_lines(xmin:float, xmax:float, ymin:float, ymax:float, theta:float)->tup
     console.print(f"No valid points: xmin:{xmin}, xmax:{xmax}, ymin:{ymin}, ymax:{ymax}, theta:{theta}")
     return None
 
+def gear_study_df_filter(vin:str, df:pd.DataFrame)->pd.DataFrame:
+    """
+    Gear Study DataFrame Filter:
+    All of the graphs use the same filter and this just keeps it consistent.
+
+    Apply filters to better improve results by reducing error
+    """
+    # Original working Maverick filter breaks all other vehicles
+    # df = df[df['acceleration'] > -0.1]
+    # Change breaks F-450
+    # df = df[(df['acceleration'] >= 0.0)]
+
+
+    if 'gear_study_dataframe_filter' in vehicles[vin]:
+
+        if vehicles[vin]['gear_study_dataframe_filter']['operator'] == 'ge':
+            console.print(
+                f"{vehicles[vin]['name']} DataFrame filter df[(df['acceleration'] >= " +
+                f"{vehicles[vin]['gear_study_dataframe_filter']['value']})]"
+            )
+            return df[(df['acceleration'] >= vehicles[vin]['gear_study_dataframe_filter']['value'])]
+
+        elif vehicles[vin]['gear_study_dataframe_filter']['operator'] == 'gt':
+            console.print(
+                f"{vehicles[vin]['name']} DataFrame filter df[(df['acceleration'] > " +
+                f"{vehicles[vin]['gear_study_dataframe_filter']['value']})]"
+            )
+            return df[(df['acceleration'] > vehicles[vin]['gear_study_dataframe_filter']['value'])]
+
+    # use default
+    console.print(f"{vehicles[vin]['name']} DataFrame filter df[(df['acceleration'] > 0.0")
+    return df[(df['acceleration'] > 0.0)]
+
 def gear_study_simple_histogram(vin:str, df:pd.DataFrame, title="Histogram", column='theta'):
 
     fig, ax = plt.subplots(figsize=(8,8))
@@ -265,13 +298,11 @@ def gear_study_simple_histogram(vin:str, df:pd.DataFrame, title="Histogram", col
 
     return
 
-
 def gear_study_hexagonal_binning_chart(vin:str, df:pd.DataFrame):
     theta_data = read_theta_data_file(theta_file_name)
 
     # apply filters to better improve results by reducing error
-    df2D = df
-    df2D = df2D[(df2D['acceleration'] > -0.1)]
+    df2D = gear_study_df_filter(vin, df)
 
     xmin = df2D['rps'].min(skipna=True)
     xmax = df2D['rps'].max()
@@ -315,8 +346,7 @@ def gear_study_rps_mps_kde_chart(vin:str, df:pd.DataFrame):
     theta_data = read_theta_data_file(theta_file_name)
 
     # apply filters to better improve results by reducing error
-    df2D = df
-    df2D = df2D[(df2D['acceleration'] > -0.1)]
+    df2D = gear_study_df_filter(vin, df)
 
     xmin = df2D['rps'].min(skipna=True)
     xmax = df2D['rps'].max()
@@ -356,9 +386,7 @@ def gear_study_kde_extrema_chart(vin:str, df:pd.DataFrame):
     # sourcery skip: flip-comparison, identity-comprehension, merge-dict-assign, move-assign-in-block
     # This computes the local maximums for 'theta' column kernel density estimation (KDE)
     # apply filters to better improve results by reducing error
-    df2D = df
-    df2D = df2D[(0.0 <= df2D['theta']) & (df2D['theta'] <= pi)]
-    df2D = df2D[df2D['acceleration'] > -0.1]
+    df2D = gear_study_df_filter(vin, df)
 
     xmin = df2D['theta'].min(skipna=True)
     xmax = df2D['theta'].max()
@@ -368,8 +396,6 @@ def gear_study_kde_extrema_chart(vin:str, df:pd.DataFrame):
     if xmin == xmax or ymin == ymax:
         console.print(f"Gear Study KDE Extrema Chart: Skipping {vehicles[vin]['name']} 'theta' KDE")
         return
-
-    # df_theta_count = (df[vin]).groupby(['theta',]).size().reset_index().rename(columns={0:'count'})
 
     fig, ax = plt.subplots(figsize=(12,12))
     sns.set_theme(style="ticks")
@@ -396,9 +422,8 @@ def gear_study_kde_extrema_chart(vin:str, df:pd.DataFrame):
     plt.close()
 
     # apply filters to better improve results by reducing error
-    df2D = df
+    df2D = gear_study_df_filter(vin, df)
     df2D = df2D[(0.0 <= df2D['theta']) & (df2D['theta'] <= pi)]
-    df2D = df2D[df2D['acceleration'] > -0.1]
 
     xmin = df2D['theta'].min(skipna=True)
     xmax = df2D['theta'].max()
@@ -748,7 +773,12 @@ def theta_error_local_maximums(vin:str, df:pd.DataFrame, verbose=False):
 
         fig, ax = plt.subplots(figsize=(12,12))
         sns.set_theme(style="ticks")
-        ax.set_xlim(xmin, xmax)
+        try:
+            ax.set_xlim(xmin, xmax)
+        except ValueError:
+            console.print("\n{vehicles[vin]['name']} gear {gear} 'theta_error' kernel density estimation (KDE)")
+            console.print("ValueError: UNABLE TO SET X AXIS LIMITS\nBAILING OUT\n")
+            return
 
         ax.set(title=f"{vehicles[vin]['name']} gear {gear} 'theta_error' kernel density estimation (KDE)")
 

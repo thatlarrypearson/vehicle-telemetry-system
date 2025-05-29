@@ -41,15 +41,35 @@ Launch the Jupyter Notebook from the repository directory.
 uv run jupyter notebook
 ```
 
-Go to the ```notebook``` directory in the repository.  If this is the first time launching a particular Jupyter notebook (extension ```.ipynb```), find the corresponding Python source file (extension ```.py```) in the same directory and launch that.  Changes made to the notebook will be automatically pushed into the Python source file when notebooks are saved.
-
 ## Jupyter Notebooks
 
-In this repository, notebooks, encoded as [jupytext](https://jupytext.readthedocs.io/en/latest/) [```py:percent``` format](https://jupytext.readthedocs.io/en/latest/formats-scripts.html) files, are found in the ```scripts/``` directory and support ```git``` based source code control.  ```py:percent``` format files use the ```.py``` suffix like regular Python programs.  The ```py:percent``` encoding is in structured comments so that developer tools such as Visual Studio Code can easily edit  ```py:percent``` format files.
+Using the Jupyter web user interface, go to the ```notebooks``` directory in the repository.  If this is the first time launching a particular Jupyter notebook (extension ```.ipynb```), find the corresponding Python source file (extension ```.py```) in the same directory and launch that.  Changes made to the notebook will be automatically pushed into the Python source file when notebooks are saved.
+
+In this repository, notebooks, encoded as **[jupytext](https://jupytext.readthedocs.io/en/latest/) [```py:percent``` format](https://jupytext.readthedocs.io/en/latest/formats-scripts.html)** files, are found in the ```notebooks/``` directory and support ```git``` based source code control.  ```py:percent``` or **jupytext** format files use the ```.py``` suffix like regular Python programs.  The ```py:percent``` encoding is in structured comments so that developer tools such as Visual Studio Code can easily edit  ```py:percent``` format files.
 
 Recreating ```.ipynb``` notebook files can be done in a Jupyter Notebook by opening a  ```py:percent``` format file and saving it.  In fact, Jupyter will automatically synchronize any changes in ```.ipynb``` notebooks to ```py:percent``` format files automatically.
 
 IDE's such as [Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=congyiwu.vscode-jupytext) support Jupytext extensions/plugins.
+
+The command line tool ```nbconvert``` is capable of converting ```*.ipynb``` notebooks into a variety of different formats including **jupytext**.  Look for [Executable script](https://nbconvert.readthedocs.io/en/latest/usage.html#convert-script) in the [```nbconvert``` documentation](https://nbconvert.readthedocs.io/en/latest/)
+
+To save ```*.ipynb``` Jupyter notebooks that didn't start out as **jupytext** ```*.py``` notebooks:
+
+```bash
+cd vehicle-telemetry-system
+source .venv\Scripts\activate
+cd notebooks
+uv run python -m nbconvert --to script <notebook-name>.ipynb
+```
+
+For example, to convert ```vehicle-telemetry-systgem/notebooks/Gear-Study-1.ipynb``` to ```vehicle-telemetry-systgem/notebooks/Gear-Study-1.py```:
+
+```bash
+(vehicle-telemetry-system) vehicle-telemetry-system/notebooks $ uv run python -m nbconvert --to script Gear-Study-1.ipynb
+[NbConvertApp] Converting notebook Gear-Study-1.ipynb to script
+[NbConvertApp] Writing 9294 bytes to Gear-Study-1.py
+(vehicle-telemetry-system) vehicle-telemetry-system/notebooks> $
+```
 
 ## Marimo Notebooks
 
@@ -79,8 +99,8 @@ Determining the current transmission gear in real time is the *Gear Study*'s goa
 
 I still don't know if it is hubris to think a better method, one that improves fuel efficiency, for making shifting decisions can be built.  But I *do* know a way to figure out what gear the vehicle is in.
 
-- ```Gear-Study-0``` - summary
-- ```Gear-Study-1``` - summary
+- ```Gear-Study-0``` - Per Vehicle OBD Log Evaluation Reports
+- ```Gear-Study-1``` - Gear Determination And Error Estimation
 - ```Gear-Study-2``` - summary
 - ```Gear-Study-3``` - summary
 

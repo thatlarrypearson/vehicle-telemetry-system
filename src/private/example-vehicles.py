@@ -104,6 +104,10 @@ vehicles = {
             'THROTTLE_POS_B', 'TIMING_ADVANCE', 
         ],
         'fuel_type': 'Gasoline',
+        'gear_study_dataframe_filter': {
+            'operator': 'gt',               # greater than
+            'value': 0.0,                   # 0.0
+        }
     },
     'MAJ6-------------': {
         'name': '2019 Ford EcoSport Platinum',
