@@ -111,6 +111,8 @@ I still don't know if it is hubris to think a better method, one that improves f
 
 ## Fuel Study
 
+- ```Fuel-Study-1``` - Fuel Study Basic Statistics Report
+
 ## Supporting Code
 
 ## Private Data
