@@ -53,7 +53,7 @@ IDE's such as [Visual Studio Code](https://marketplace.visualstudio.com/items?it
 
 The command line tool ```nbconvert``` is capable of converting ```*.ipynb``` notebooks into a variety of different formats including **jupytext**.  Look for [Executable script](https://nbconvert.readthedocs.io/en/latest/usage.html#convert-script) in the [```nbconvert``` documentation](https://nbconvert.readthedocs.io/en/latest/)
 
-To save ```*.ipynb``` Jupyter notebooks that didn't start out as **jupytext** ```*.py``` notebooks:
+To save ```*.ipynb``` Jupyter notebooks as **jupytext** ```*.py``` notebooks:
 
 ```bash
 cd vehicle-telemetry-system
@@ -71,6 +71,11 @@ For example, to convert ```vehicle-telemetry-systgem/notebooks/Gear-Study-1.ipyn
 (vehicle-telemetry-system) vehicle-telemetry-system/notebooks> $
 ```
 
+Saving ```*.ipynb``` Jupyter notebooks as **jupytext** ```*.py``` notebooks can be done in notebook development/runtime environment (browser) as well.:
+
+![Executable Scripts Menu](docs/executable-scripts.png)
+
+
 ## Marimo Notebooks
 
 There are some advantages to using the Marimo notebook system over Jupyter Notebooks.  **Under Construction** I've placed a single example in the repository under the ```marimo-notebooks``` directory.  The notebook failed to work the last time I tried it.  It may be a while before I get back into it to see what I screwed up.
@@ -87,7 +92,7 @@ To edit/create Marimo notebooks:
 uv run marimo edit
 ```
 
-### Gear Study
+## Gear Study
 
 I had this crazy idea that I could get better gas mileage if I managed the shifting instead of letting the engine and automatic transmission decide when to shift.  This notion was especially strong while driving through hilly terrain.  Notably on Interstate 44 through Missouri and Interstate 10 between San Antonio and Fort Stockton Texas.
 
@@ -104,7 +109,7 @@ I still don't know if it is hubris to think a better method, one that improves f
 - ```Gear-Study-2``` - summary
 - ```Gear-Study-3``` - summary
 
-### Fuel Study
+## Fuel Study
 
 ## Supporting Code
 
