@@ -6,9 +6,7 @@ export VTS_MODULE="utility"
 
 source /root/bin/vts.root.profile
 
-echo Ready to start file_system_info.sh
-
 ## Run the script file_system_info.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
-runuser -u "${VTS_USER}" -g ${VTS_GROUP} "${VTS_HOME}/vehicle-telemetry-system/bin/file_system_info.sh" &
+runuser -u "${VTS_USER}" -g ${VTS_GROUP} "${VTS_HOME}/${VTS}/bin/file_system_info.sh" &
 
 exit 0

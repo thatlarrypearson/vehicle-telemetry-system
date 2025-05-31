@@ -1,12 +1,12 @@
 #!/usr/bin/bash
 #
-# vehicle-telemetry-system/root/bin/vts.rc.local.location - This script is executed by the system /etc/rc.local script on system boot
+# vts.rc.local.location - This script is executed by the system /etc/rc.local script on system boot
 
 export VTS_MODULE="location"
 
 source /root/bin/vts.root.profile
 
 # Run the script gps_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
-runuser -u "${VTS_USER}" -g dialout "${VTS_HOME}/vehicle-telemetry-system/bin/gps_logger.sh" &
+runuser -u "${VTS_USER}" -g dialout "${VTS_HOME}/${VTS}/bin/gps_logger.sh" &
 
 exit 0

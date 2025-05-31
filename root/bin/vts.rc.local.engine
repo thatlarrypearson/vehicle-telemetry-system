@@ -46,6 +46,6 @@ fi
 echo Ready to start obd_logger.sh
 
 ## Run the script obd_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
-runuser -u "${VTS_USER}" -g dialout "${VTS_HOME}/vehicle-telemetry-system/bin/obd_logger.sh" &
+runuser -u "${VTS_USER}" -g dialout "${VTS_HOME}/${VTS}/bin/obd_logger.sh" &
 
 exit 0

@@ -1,12 +1,13 @@
 #!/bin/bash
 # vehicle-telemetry-system/root/bin/vts.root.profile
 
+export VTS_USER="human"
+
 export VTS_MODULE="${VTS_MODULE:-unknown}"
 export VTS_TMP_DIR="/root/tmp"
 export VTS_LOG_FILE="${TMP_DIR}/vts-${VTS_MODULE}-$(date '+%Y-%m-%d_%H-%M-%S').log"
 export VTS_DEBUG="True"
 export VTS_GROUP="dialout"
-export VTS_USER="human"
 export VTS_HOME="/home/${VTS_USER}"
 export VTS_BT_MAC_ADDRESS="00:04:3E:5A:A7:67"
 

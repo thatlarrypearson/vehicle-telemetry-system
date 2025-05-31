@@ -196,6 +196,8 @@ fi
 exit 0
 ```
 
+Those who are familiar with UNIX/Linux shell scripts will notice that only executable scripts (```if [ -x "<SCRIPT-PATH>" ]```) will get executed.  When scripts are not supposed to be started just mark the script file as not-executable (```chmod -x "<SCRIPT-PATH>"```).
+
 ```/etc/rc.local``` invokes ```/root/bin/telemetry.rc.<module-name>```.  The functionality in ```/root/bin/telemetry.rc.local.<module-name``` is not placed in ```/etc/rc.local``` for these reasons:
 
 - Rasberry Pi OS (```Bullseye```) invokes /etc/rc.local with ```/bin/sh``` (soft link to ```/bin/dash```) which is not the same as ```/usr/bin/bash```, the required shell.
@@ -203,7 +205,7 @@ exit 0
 - The command ```bluetoothctl```, required to automatically detect and connect to the correct Bluetooth device, generates a pipe failure fault when run in ```/etc/rc.local```.  It will run fine as ```root``` in the terminal.
 - Modules (e.g. ```vehicle-telemetry-system/root/bin/telemetry.rc.local.<module-name>```) must be started as root.  In some cases this is required to initialize and configure Raspberry Pi OS subsystems (e.g. Bluetooth and the time clock) in addition to setting the username and group of the user executing the Python software.
 
-AFter any required OS subsystems are initialized/configured, then root invokes the module specific start script  ```vehicle-telemetry-system/bin/<module-script>.sh``` which then invokes the corresponding Python program.
+After any required OS subsystems are initialized/configured, then root invokes the module specific start script  ```vehicle-telemetry-system/bin/<module-script>.sh``` which then invokes the corresponding Python program.
 
 Shell variables, like ```VTS_USER``` used by module startups scripts (e.g. ```vehicle-telemetry-system/root/bin/vts.rc.local.<module-name>```) are set in ```vehicle-telemetry-system/root/bin/vts.root.profile``` to match the Raspberry Pi Data Collector system being built.  Some of these environment variables may be overridden in individual startup scripts.  See ```vehicle-telemetry-system/root/bin/vts.rc.local.WittyPi4```'s ```export VTS_GROUP='i2c'``` for an example.
 
