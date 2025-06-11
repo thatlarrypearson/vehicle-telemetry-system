@@ -1,7 +1,8 @@
 #! /usr/bin/bash
-# telemetry-WittyPi4/bin/boot_config.sh
+# bin/WittyPi4-boot_config.sh
 
 export WittyPi4_DIR="/home/$(whoami)/wittypi"
+
 source "${WittyPi4_DIR}/utilities.sh"
 
 # 3. Synchronize with network time
