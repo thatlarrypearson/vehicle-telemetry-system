@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# bin/gps_logger.sh
+# vehicle-telemetry-system/bin/location.sh
 
 export APP_ID="gps"
 

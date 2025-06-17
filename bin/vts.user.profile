@@ -37,6 +37,13 @@ then
     mkdir --parents "${APP_HOME}"
 fi
 
+if [ "${APP_ID}" == "audit" ]
+then
+	# increment the boot counter
+	echo incrementing the boot counter
+	echo New BOOT_COUNT = $(${APP_PYTHON} -m tcounter.boot_counter)
+fi
+
 # get next application startup counter
 export APP_COUNT=$(${APP_PYTHON} -m tcounter.app_counter ${APP_ID})
 

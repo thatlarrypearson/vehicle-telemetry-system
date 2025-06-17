@@ -35,7 +35,7 @@ In theory, any **u-blox** GPS devices supporting a USB interface should work fin
 ## Usage
 
 ```bash
-$ python3.11 -m gps_logger.gps_logger --help
+$ uv run -m gps_logger.gps_logger --help
 usage: gps_logger.py [-h] [--log_file_directory LOG_FILE_DIRECTORY]
                      [--serial SERIAL] [--verbose] [--version]
 
@@ -203,7 +203,7 @@ With both the GPS (_u-blox GNSS receiver_) and IMU (_Unexpected Maker FeatherS3_
 In the event that your ```u-blox``` GPS device is plugged in but it isn't showing as found, use ```gps_logger.usb_devices``` to get the correct values for ```DEFAULT_USB_VID``` and ```DEFAULT_USB_PID```.  Change these values in ```telemetry-gps/gps_logger/usb_devices.py``` and rebuild/reinstall the _Telemetry GPS_ package per the above instructions.
 
 ```bash
-human@telemetry2:~ $ python3.11 -m gps_logger.usb_devices
+human@telemetry2:~ $ uv run -m gps_logger.usb_devices
 Candidate Serial Device List (non-USB devices excluded)
 
 	+1 /dev/ttyACM1

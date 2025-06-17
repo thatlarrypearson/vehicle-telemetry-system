@@ -82,7 +82,7 @@ Once the addition has been made, remake the package following the [Python Projec
 ### ```tcounter.boot_counter```
 
 ```bash
-$ python3.11 -m tcounter.boot_counter --help
+$ uv run -m tcounter.boot_counter --help
 usage: boot_counter.py [-h] [--boot_count_file_location] [--current_boot_count] [--version]
 
 Telemetry Boot Counter
@@ -99,7 +99,7 @@ $
 ### ```tcounter.app_counter```
 
 ```bash
-$ python3.11 -m tcounter.app_counter --help
+$ uv run -m tcounter.app_counter --help
 usage: app_counter.py [-h] [--app_count_file_location] [--current_app_count] [--version] application_id
 
 Telemetry Application Start Counter
