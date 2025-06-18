@@ -6,7 +6,12 @@ export VTS_MODULE="motion"
 
 source /root/bin/vts.root.profile
 
-## Run the script imu_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
-runuser -u "${VTS_USER}" -g "${VTS_GROUP}" "${VTS_HOME}/${VTS}/bin/imu_logger.sh" &
+# Run the script imu_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
+# This is the version that uses WIFI for communication
+runuser -u "${VTS_USER}" -g "${VTS_GROUP}" "${VTS_HOME}/${VTS}/bin/motion-WIFI.sh" &
+
+# Run the script imu_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
+# This is the version that uses USB (serial) communication
+# runuser -u "${VTS_USER}" -g "${VTS_GROUP}" "${VTS_HOME}/${VTS}/bin/motion-USB.sh" &
 
 exit 0

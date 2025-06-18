@@ -12,5 +12,5 @@ export VTS_GROUP="i2c"
 sleep "${START_DELAY}"
 
 ## Run the script boot_config.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
-runuser -u "${VTS_USER}" -g "${VTS_GROUP}" "${VTS_HOME}/${VTS}/bin/boot_config.sh" &
+runuser -u "${VTS_USER}" -g "${VTS_GROUP}" "${VTS_HOME}/${VTS}/bin/WittyPi4" &
 

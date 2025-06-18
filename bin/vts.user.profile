@@ -31,6 +31,7 @@ export APP_HOME="${VTS_HOME}/telemetry-data"
 export APP_TMP_DIR="${APP_HOME}/tmp"
 export APP_BASE_PATH="${APP_HOME}/data"
 export DEBUG="True"
+export HOSTNAME="$(hostname)"
 
 if [ ! -d "${APP_HOME}" ]
 then

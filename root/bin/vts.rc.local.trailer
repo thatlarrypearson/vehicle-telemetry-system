@@ -6,7 +6,7 @@ export VTS_MODULE="trailer"
 
 source /root/bin/vts.root.profile
 
-## Run the script trlr_logger.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
-runuser -u "${VTS_USER}" -g dialout "${VTS_HOME}/${VTS}/bin/trlr_logger.sh" &
+# Run the script trailer.sh as user "${VTS_USER}" and group "${VTS_GROUP}"
+runuser -u "${VTS_USER}" -g "${VTS_GROUP}" "${VTS_HOME}/${VTS}/bin/trailer.sh" &
 
 exit 0
