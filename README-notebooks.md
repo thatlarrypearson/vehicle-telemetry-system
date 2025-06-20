@@ -75,7 +75,6 @@ Saving ```*.ipynb``` Jupyter notebooks as **jupytext** ```*.py``` notebooks can 
 
 ![Executable Scripts Menu](docs/executable-scripts.png)
 
-
 ## Marimo Notebooks
 
 There are some advantages to using the Marimo notebook system over Jupyter Notebooks.  **Under Construction** I've placed a single example in the repository under the ```marimo-notebooks``` directory.  The notebook failed to work the last time I tried it.  It may be a while before I get back into it to see what I screwed up.
@@ -92,7 +91,7 @@ To edit/create Marimo notebooks:
 uv run marimo edit
 ```
 
-## Gear Study
+## Gear Study - Gear Identification Analysis and Visualizations
 
 I had this crazy idea that I could get better gas mileage if I managed the shifting instead of letting the engine and automatic transmission decide when to shift.  This notion was especially strong while driving through hilly terrain.  Notably on Interstate 44 through Missouri and Interstate 10 between San Antonio and Fort Stockton Texas.
 
@@ -106,16 +105,39 @@ I still don't know if it is hubris to think a better method, one that improves f
 
 - ```Gear-Study-0``` - Per Vehicle OBD Log Evaluation Reports
 - ```Gear-Study-1``` - Gear Determination And Error Estimation
-- ```Gear-Study-2``` - summary
-- ```Gear-Study-3``` - summary
+- ```Gear-Study-2``` - Vehicle Route Videos Showing SPEED, RPM and Gear Transitions
 
-## Fuel Study
+## Acceleration Study - Acceleration Statistics and Plots
+
+- ```Acceleration-Study-1``` - Acceleration Statistics and Histograms
+
+## Fuel Study - Fuel Use, Analysis and Visualizations
 
 - ```Fuel-Study-1``` - Fuel Study Basic Statistics Report
 
+## Mileage Spreadsheet - Data Integration and Analysis with Visualizations
+
+- ```Mileage-Spreadsheet-1``` - Data Integration Between Microsoft Excel Mileage Spreadsheet, Fuel Fill Photos and Engine Data
+
 ## Supporting Code
 
+The code supporting analysis is found primarily in the ```vehicle-telemetry-system/src/telemetry-analysis``` directory.  While code from any of the other modules may be used in places (e.g. ```vehicle-telemetry-system/src/obd_log_to_csv``` for combining JSON records into CSV records).
+
 ## Private Data
+
+Private data is data used by notebooks that I don't want to share with others.  One example is the Vehicle Identification Number or VIN.  VINs are personally identifiable information that doesn't need to be on the internet.
+
+- ```vehicle-telemetry-system/private/example-vehicles.py``` - Dictionary With ```vin``` Keys for Vehicle Related Data
+
+  Copy the example to ```vehicles.py```, use the example as a template to complete with your vehicle data.
+
+- ```vehicle-telemetry-system/private/example-spreadsheet.py``` - Dictionary With ```vin``` Keys to Spreadsheet Column
+
+  Copy the example to ```spreadsheet.py```, use the example as a template to complete with your vehicle data and spreadsheet layout.
+
+## Known Problems
+
+## Known Limitations
 
 ## LICENSE
 

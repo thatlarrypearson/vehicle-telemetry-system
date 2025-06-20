@@ -2,36 +2,9 @@
 
 Raspberry Pi OS has recently changed the way Internet network connections are configured.  Most sources on the Internet still reflect the older configuration methods making it extremely difficult for people new to Linux to configure a working Access Point (AP), also called a WIFI hotspot.  The following instructions, although tedious, should allow anyone with modest computer skills to successfully configure an AP (WIFI hotspot) on their Raspberry Pi.
 
-The following Access Point (AP) (WIFI/Hotspot/Router) configuration instructions only apply to the Debian variant Raspberry Pi OS Bookworm version 12.4 or newer.
+The following Access Point (AP) (WIFI/Hotspot/Router) configuration instructions only apply to the Debian variant Raspberry Pi OS Bookworm version 12.11 or newer.
 
 ## **Under Construction**
-
-## Operating System Version Check
-
-Check your operating system version information to make certain that your system shows the following or something more recent:
-
-* ```/etc/debian_version``` shows ```12.4```
-* ```/etc/os-release``` shows ```VERSION="12 (bookworm)"```
-
-```bash
-lbp@telemetry4:~ $ cat /etc/debian_version
-12.4
-lbp@telemetry4:~ $
-```
-
-```bash
-lbp@telemetry4:~ $ cat /etc/os-release
-PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
-NAME="Debian GNU/Linux"
-VERSION_ID="12"
-VERSION="12 (bookworm)"
-VERSION_CODENAME=bookworm
-ID=debian
-HOME_URL="https://www.debian.org/"
-SUPPORT_URL="https://www.debian.org/support"
-BUG_REPORT_URL="https://bugs.debian.org/"
-lbp@telemetry4:~ $
-```
 
 ## WIFI Interface Availability Check
 
@@ -45,7 +18,7 @@ Hotspot support on a Raspberry Pi requires a WIFI network interface.  On the Ras
 For most access point applications, only ```eth0```, ```lo``` and ```wlan0``` need be present.
 
 ```bash
-lbp@telemetry4:~ $ ifconfig -a
+$ ifconfig -a
 eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 192.168.1.244  netmask 255.255.255.0  broadcast 192.168.1.255
         inet6 2600:1700:9a20:1810::1a  prefixlen 128  scopeid 0x0<global>
@@ -80,7 +53,7 @@ wlan1: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
         TX packets 0  bytes 0 (0.0 B)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
-lbp@telemetry4:~ $
+$
 ```
 
 ## Adding USB WIFI Dongles
@@ -100,7 +73,7 @@ The second USB WIFI dongle is from [CanaKit](https://www.canakit.com).  The [Can
 Is [Network Manager](https://networkmanager.dev/) installed and working?  The ```systemctl status NetworkManager``` command shows a working Network Manager below.
 
 ```bash
-lbp@telemetry4:~ $ systemctl status NetworkManager
+$ systemctl status NetworkManager
 ● NetworkManager.service - Network Manager
      Loaded: loaded (/lib/systemd/system/NetworkManager.service; enabled; preset: enabled)
      Active: active (running) since Sun 2023-12-31 14:08:53 CST; 1h 1min ago
@@ -121,7 +94,7 @@ Dec 31 14:08:57 telemetry4 NetworkManager[592]: <info>  [1704053337.3353] dhcp6 
 Dec 31 14:09:03 telemetry4 NetworkManager[592]: <info>  [1704053343.0800] agent-manager: agent[eea1b5776a3e0d44,:1.41/org.>
 Dec 31 14:36:27 telemetry4 NetworkManager[592]: <info>  [1704054987.8515] dhcp6 (end0): state changed new lease, address=2>
 Dec 31 15:05:47 telemetry4 NetworkManager[592]: <info>  [1704056747.8501] dhcp6 (end0): state changed new lease, address=2>
-lbp@telemetry4:~ $
+$
 ```
 
 ## Special Instructions for Two or More WIFI Network Interfaces
@@ -129,68 +102,72 @@ lbp@telemetry4:~ $
 If there is a need for an additional (more than one) WIFI network interface (like ```wlan1```), a good practice is to set Raspberry Pi OS to use predictable network interface names as shown below:
 
 ```bash
-lbp@telemetry4:~ $ sudo raspi-config
+$ sudo raspi-config
 ```
 
-![raspi-config panel 11](docs/../raspi-config-11.png)
+![raspi-config panel 11](./raspi-config-11.png)
 
-![raspi-config panel 12](docs/../raspi-config-12.png)
+![raspi-config panel 12](./raspi-config-12.png)
 
-![raspi-config panel 13](docs/../raspi-config-13.png)
+![raspi-config panel 13](./raspi-config-13.png)
 
-![raspi-config panel 14](docs/../raspi-config-14.png)
+![raspi-config panel 14](./raspi-config-14.png)
 
-![raspi-config panel 15](docs/../raspi-config-5.png)
+![raspi-config panel 15](./raspi-config-5.png)
 
-![raspi-config panel 16](docs/../raspi-config-16.png)
+![raspi-config panel 16](./raspi-config-16.png)
 
 ## WIFI Localization Instructions
 
 Check your WIFI country localization settings and change them when necessary to match your actual country.  Your computer's network software will not start any sort of WIFI services without this setting.
 
 ```bash
-lbp@telemetry4:~ $ sudo raspi-config
+$ sudo raspi-config
 ```
 
 The following walks through the ```raspi-config``` menu structure to select ```US``` as the country.
 
-![raspi-config panel 1](docs/../raspi-config-1.png)
+![raspi-config panel 1](./raspi-config-1.png)
 
-![raspi-config panel 2](docs/../raspi-config-2.png)
+![raspi-config panel 2](./raspi-config-2.png)
 
-![raspi-config panel 3](docs/../raspi-config-3.png)
+![raspi-config panel 3](./raspi-config-3.png)
 
-![raspi-config panel 4](docs/../raspi-config-4.png)
+![raspi-config panel 4](./raspi-config-4.png)
 
-![raspi-config panel 5](docs/../raspi-config-5.png)
+![raspi-config panel 5](./raspi-config-5.png)
 
 The above is enough to get client side WIFI working but not enough to support an Access Point (AP).  Yet another step is required to set the WIFI country.  See [Hotspot Network Creation Takes Too Long, Activation Failed](https://unix.stackexchange.com/questions/612498/hotspot-network-creation-took-too-long-and-failed-activation) for more info.
 
 Check to see if the file ```/etc/default/crda``` exists and make sure that ```REGDOMAIN``` is set to your country (```US```).
 
 ```bash
-lbp@telemetry4:~ $ sudo ls -l /etc/default/crda
+$ sudo ls -l /etc/default/crda
 ls: cannot access 'crda': No such file or directory
-lbp@telemetry4:~ $
-# The file isn't there so create the file with the correct setting in it.
-# If the file is there, you will need to edit the file and make sure that
-# one of the lines has "REGDOMAIN=US" where "US" can/should be replaced
-# with the correct country.
-lbp@telemetry4:~ $ sudo -i
-root@telemetry4:~# cd /etc/default
-root@telemetry4:/etc/default# echo REGDOMAIN=US > crda
-root@telemetry4:/etc/default# ls -l crda
+$
+```
+
+The file isn't there so create the file with the correct setting in it.
+If the file is there, you will need to edit the file and make sure that
+one of the lines has "REGDOMAIN=US" where "US" can/should be replaced
+with the correct country.
+
+```bash
+$ sudo -i
+# cd /etc/default
+# echo REGDOMAIN=US > crda
+# ls -l crda
 -rw-r--r-- 1 root root   13 Dec 27 10:11 crda
-root@telemetry4:/etc/default# cat crda
+# cat crda
 REGDOMAIN=US
-root@telemetry4:/etc/default# exit
-lbp@telemetry4:~ $
+# exit
+$
 ```
 
 Another layer of country configuration is required.  Using ```iw``` to show and/or manipulate wireless devices and their configurations, perform the following ```iw reg get``` command to retrieve the current regulatory agent WIFI setting.  
 
 ```bash
-lbp@telemetry4:~ $ iw reg get
+$ iw reg get
 global
 country 00: DFS-UNSET
         (755 - 928 @ 2), (N/A, 20), (N/A), PASSIVE-SCAN
@@ -210,20 +187,20 @@ country 99: DFS-UNSET
         (5140 - 5360 @ 160), (6, 20), (N/A)
         (5460 - 5860 @ 160), (6, 20), (N/A)
 
-lbp@telemetry4:~ $
+$
 ```
 
 If don't see your country setting (e.g. ```country US: DFS-FCC```), then use ```iw reg set``` command to set the current regulatory agent WIFI setting.
 
 ```bash
-lbp@telemetry4:~ $ sudo iw reg set US
-lbp@telemetry4:~ $
+$ sudo iw reg set US
+$
 ```
 
 Now rerun the ```iw reg get``` command to retrieve the current regulatory agent WIFI setting.
 
 ```bash
-lbp@telemetry4:~ $ iw reg get
+$ iw reg get
 global
 country US: DFS-FCC
         (902 - 904 @ 2), (N/A, 30), (N/A)
@@ -245,14 +222,22 @@ country 99: DFS-UNSET
         (5140 - 5360 @ 160), (6, 20), (N/A)
         (5460 - 5860 @ 160), (6, 20), (N/A)
 
-lbp@telemetry4:~ $
+$
 ```
 
 Now the WIFI regulatory agent :poop: is all happy.
 
 ## Internet Access Information
 
-Even though the Internet may not be available to the Raspberry Pi while gathering data, the Weather Station's base station will need Internet access while it is being configured to use a Raspberry Pi as its WIFI hotspot.  To get hotspot Internet access configured, some basic information will need to be gathered about the connection.
+Even though the Internet may not be available to the Raspberry Pi while gathering data, different modules may need Internet access while they are being configured to use a Raspberry Pi as its WIFI hotspot.
+
+* ```motion``` Internet access during configuration not typically required
+* ```trailer``` Internet access during configuration not typically required
+* **```weather``` Internet access during configuration of the weather station is required**
+
+To get hotspot Internet access configured, some basic information will need to be gathered about the connection.
+
+The following diagrams and discussion apply to the ```motion``` and ```trailer``` modules as well.
 
 ![Telemetry Weather Logging - Networking](TelemetryWeatherLogging-Networking.png)
 
@@ -282,15 +267,17 @@ The image below shows ```route -n``` command after the hotspot had been configur
 
 ![```route -n``` Command](route-n-1.jpg)
 
-Even though this screen shot was taken after the hotspot was setup, it still shows the core information I used during hotspot setup with one exception.  Before hotspot configuration ```iface``` was ```eth0```.  After hotspot configuration ```iface``` changed to ```end0```.
+Even though this screen shot was taken after the hotspot was setup, it still shows the core information needed during hotspot setup with one exception.  Before hotspot configuration ```iface``` was ```eth0```.  After hotspot configuration ```iface``` changed to ```end0```.
 
-In the instructions below, the ```<gateway-address>``` will be used in the configuration.  **Write your ```<gateway-address>``` down.**
+In the instructions below, the ```<gateway-address>``` will be used in the configuration.
 
-The first row under ```Destination``` shows ```0.0.0.0``` in a black box.  The zero IP address indicates that this is a route to the Internet.  ```Iface```, short for network interface, is the network device name used.   In the image, the interface name is ```end0```.  In the example ```route -n``` example above the screenshot, The interface name is ```eth0```  During the configuration process, a new virtual device (```end0```) will be created to handle routing for Raspberry Pi as well as the hotspot the Raspberry Pi is hosting.  Also on that first row, you will see a box around the ```Gateway``` IP address.  The value of the ```<gateway-address>``` shown in the black box below the heading ```Gateway``` is ```192.168.1.254```.  This is my ```<gateway-address```.
+**Write your ```<gateway-address>``` down.  You will need it later (more than once).**
+
+The first row under ```Destination``` shows ```0.0.0.0``` in a black box.  The zero IP address indicates that this is a route to the Internet.  ```Iface```, short for network interface, is the network device name used.   In the image, the interface name is ```end0```.  In the example ```route -n``` example above the screenshot, The interface name is ```eth0```  During the configuration process, a new virtual device (```end0```) will be created to handle routing for Raspberry Pi as well as the hotspot the Raspberry Pi is hosting.  Also on that first row, you will see a box around the ```Gateway``` IP address.  The value of the ```<gateway-address>``` shown in the black box below the heading ```Gateway``` is ```192.168.1.254```.  This is my ```<gateway-address```.  Yours may be different based on your Internet provider's gateway device.
 
 In the instructions below, the ```<hotspot-network-address>``` will be used in the configuration.
 
-**Write your ```<hotspot-network-address>``` down.**
+**Write your ```<hotspot-network-address>``` down.  You will need it later (more than once).**
 
 ![```route -n``` Command](route-n-2.jpg)
 
@@ -311,13 +298,15 @@ For reasons I won't explain or justify here, the new hotspot network address mus
 * B = 168
 * D = 0
 
+Note: C can be any number greater than 1 and less than 255.  However, to keep things safe, do what I've shown below.
+
 ### ```<hotspot-network-address>```
 
 Choose a new hotspot network address ```192.168.C.0``` where the resulting address isn't the same as the ```eth0```/```end0``` network address.  For example, ```192.168.1.0``` becomes ```192.168.2.0```.
 
 Take the ```<hotspot-network-address>``` and change the D position value from 0 to 1.  This new address is the ```<hotspot-ip-address>```.  For example, ```192.168.2.0``` becomes ```192.168.2.1```.
 
-**Write your ```<hotspot-ip-address>``` down.**
+**Write your ```<hotspot-ip-address>``` down.  You will need it later (more than once).**
 
 ## Working Directly With NetworkManager
 
@@ -369,7 +358,11 @@ Example:
 ```bash
 sudo wpa_cli -i wlan0 log_level debug
 sudo systemctl restart NetworkManager
-# do your stuff
+```
+
+**Do your stuff...**
+
+```bash
 sudo wpa_cli -i wlan0 log_level error
 sudo systemctl restart NetworkManager
 ```
@@ -425,9 +418,9 @@ sudo nmcli connection add con-name <connection-name> ifname <interface-name> typ
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con add con-name hotspot ifname wlan0 type wifi ssid telemetry
+$ sudo nmcli con add con-name hotspot ifname wlan0 type wifi ssid telemetry
 Connection 'hotspot' (97129f02-1fbf-4361-bbf3-258cb320fe57) successfully added.
-lbp@telemetry4:~ $
+$
 ```
 
 The following sets the type of security offered by the hotspot.
@@ -439,8 +432,8 @@ sudo nmcli con modify <connection-name> wifi-sec.key-mgmt wpa-psk
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot wifi-sec.key-mgmt wpa-psk
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot wifi-sec.key-mgmt wpa-psk
+$ 
 ```
 
 * ```wifi-password``` is the WIFI password (wifi-sec psk).  This should be a real password and *not something silly*.
@@ -452,8 +445,8 @@ sudo nmcli con modify <connection-name> wifi-sec.psk <wifi-password>
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot wifi-sec.psk "not-something-silly"
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot wifi-sec.psk "not-something-silly"
+$ 
 ```
 
 * Make this connection's ```802-11-wireless.mode``` into an ```ap``` (Access Point).
@@ -465,8 +458,8 @@ sudo nmcli con modify <connection-name> 802-11-wireless.mode ap
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot 802-11-wireless.mode ap
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot 802-11-wireless.mode ap
+$
 ```
 
 * Limit the ```802-11-wireless.band``` (wireless frequency band) to ```bg``` (2.4 Ghz).
@@ -478,8 +471,8 @@ sudo nmcli con modify <connection-name> 802-11-wireless.band bg
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot 802-11-wireless.band bg
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot 802-11-wireless.band bg
+$
 ```
 
 * Configure the interface to *share* the internet (protocol version 4) to a subnet using ```ipv4.method``` ```shared```.
@@ -491,8 +484,8 @@ sudo nmcli con modify <connection-name> ipv4.method shared
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot ipv4.method shared
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot ipv4.method shared
+$
 ```
 
 * Succeed or fail, start the connection.
@@ -504,8 +497,8 @@ sudo nmcli con modify <connection-name> ipv4.may-fail yes
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot ipv4.may-fail yes
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot ipv4.may-fail yes
+$
 ```
 
 * Disable Internet Protocol Version 6.
@@ -517,8 +510,8 @@ sudo nmcli con modify <connection-name> ipv6.method disabled
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot ipv6.method disabled
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot ipv6.method disabled
+$
 ```
 
 * Set the hotspot's IP address and network mask.
@@ -530,8 +523,8 @@ sudo nmcli con modify <connection-name> ipv4.addresses <hotspot-ip-address>/24
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot ipv4.addresses 192.168.2.1/24
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot ipv4.addresses 192.168.2.1/24
+$
 ```
 
 * Set the Raspberry Pi's gateway router address.
@@ -543,8 +536,8 @@ sudo nmcli con modify <connection-name> ipv4.gateway <gateway-address>
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot ipv4.gateway 192.168.1.254
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot ipv4.gateway 192.168.1.254
+$
 ```
 
 * Never allow this connection to be the default route.
@@ -556,8 +549,8 @@ sudo nmcli con modify <connection-name> ipv4.never-default yes
 Example:
 
 ```bash
-lbp@telemetry4:~ $ sudo nmcli con modify hotspot ipv4.never-default yes
-lbp@telemetry4:~ $ 
+$ sudo nmcli con modify hotspot ipv4.never-default yes
+$
 ```
 
 After finishing with ```nmtui```,  ```NetworkManager```:
@@ -579,7 +572,7 @@ iw dev wlan0 station dump
 Example:
 
 ```bash
-lbp@telemetry4:~ $ iw dev wlan0 station dump
+$ iw dev wlan0 station dump
 Station c0:ee:40:70:b4:d7 (on wlan0)
         inactive time:  0 ms
         rx bytes:       26260579
@@ -599,7 +592,7 @@ Station c0:ee:40:70:b4:d7 (on wlan0)
         short slot time:yes
         connected time: 64874 seconds
         current time:   1704553088728 ms
-lbp@telemetry4:~ $
+$
 ```
 
 * Translate MAC address to IP address
@@ -611,18 +604,18 @@ arp -n -e -i <interface-name>
 Example:
 
 ```bash
-lbp@telemetry4:~ $ arp -n -e -i wlan0
+$ arp -n -e -i wlan0
 Address                  HWtype  HWaddress           Flags Mask            Iface
 192.168.2.100                    (incomplete)                              wlan0
 192.168.2.119            ether   c0:ee:40:70:b4:d7   C                     wlan0
-lbp@telemetry4:~ $
+$
 ```
 
 From the station dump (```iw dev wlan0 station dump``` command), the output MAC (media access control) address was shown as ```c0:ee:40:70:b4:d7``` (see the line ```Station c0:ee:40:70:b4:d7 (on wlan0)```).  Looking at the table created by the ```arp -n -e -i wlan0```, that same MAC address appears and is associated with IP address ```192.168.2.119``` (see the line ```192.168.2.119 ether c0:ee:40:70:b4:d7 C wlan0```).
 
 ## Hotspot Test
 
-Test the hotspot using your phone or another computer to connect to the hotspot.  The test will be successful when you can access any of the big social networking sites using the hotspot.
+Test the hotspot using your phone or another computer to connect to the hotspot.  The test will be successful when you can access any of the big social networking sites using the hotspot.  When you are done, get your smart phone or computer to forget this network.
 
 The following images show how the hotspot looks to my iPhone.
 
@@ -630,11 +623,32 @@ The following images show how the hotspot looks to my iPhone.
 
 ![iPhone WIFI Settings 2](iPhone-2.jpg)
 
-## Weather Station Configuration
+## Configuring ```weather``` Module
 
 The [WeatherFlow Tempest Weather Station](https://shop.weatherflow.com/products/tempest) is able to use the hotspot provided through a Raspberry Pi 4B after following these instructions.  All you need for the weather station setup is to have your Raspberry Pi connected to the Internet through its Ethernet port and the hotspot configured on its WIFI interface.  
 
 To connect the weather station to the hotspot, first download and install the [Tempest Weather](https://apps.apple.com/us/app/tempest-weather/id1125427067) application to your smartphone.  Before completing the installation/configuration steps requiring the mobile phone application, configure your mobile phone to the Raspberry Pi hotspot.  Then follow the installation and configuration instructions that came with the weather station.
+
+## Configuring ```motion``` and/or ```trailer``` Modules
+
+WIFI configuration information for FeatherS3 (ESP32-S3) CircuitPython microcontrollers is found:
+
+* ```vehicle-telemetry-system/CircuitPython/motion/settings.toml```
+* ```vehicle-telemetry-system/CircuitPython/trailer/settings.toml```
+
+The ```settings.toml``` file will be installed directly in the CircuitPython runtime environment during the FeatherS3 (ESP32-S3) CircuitPython microcontroller application software installation.
+
+Aspects of the settings file related to WIFI configuration are:
+
+```toml
+UDP_HOST="192.168.2.1"
+WIFI_SSID="telemetry"
+WIFI_PASSWORD="not-something-silly"
+```
+
+Using the information saved from the Raspberry Pi Data Collection System WIFI configuration, modify the WIFI network settings in ```settings.toml``` file to match the Raspberry Pi Data Collection System WIFI configuration.
+
+Note that there are application differences between the two CircuitPython ```settings.toml``` files so always start with the correct file from the correct part of the repository.
 
 ## LICENSE
 

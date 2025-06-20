@@ -544,7 +544,6 @@ def match_location_by_datetime(
 
     return (before_key, after_key)
 
-
 def combine_data(
         vins, spreadsheet_data, location_data, engine_data, fuel_fill_picture_data,
         maximum_time_difference=DEFAULT_MAXIMUM_TIME_DIFFERENCE,

@@ -2,9 +2,7 @@
 
 System for collecting and processing motor vehicle data using included sensor modules.
 
-## **UNDER CONSTRUCTION**
-
-## **NOTE - REPOSITORY INTEGRATION WORK IS STILL ON-GOING**
+## **UNDER CONSTRUCTION - REPOSITORY INTEGRATION WORK IS STILL ON-GOING**
 
 The following repositories have been combined to create this repository:
 
@@ -92,7 +90,7 @@ Five sensors are currently supported:
   - Unexpected Maker FeatherS3
   - Adafruit 9-DOF Orientation IMU Fusion Breakout - BNO085 (BNO080) - STEMMA QT / Qwiic PID: 4754
   - ADS1015 12-Bit ADC - 4 Channel with Programmable Gain Amplifier - STEMMA QT / Qwiic PID: 1083
-  - Trailer Connector
+  - [Trailer Connector](./README-trailer.md)
   - [WeatherFlow Tempest](https://weatherflow.com/tempest-weather-system/)
   - [Witty Pi 4](./docs/WittyPi4-README.md)
 
@@ -112,7 +110,7 @@ Data from each sensor is captured by one vehicle mounted Raspberry Pi (3, 4 or 5
   - ```trip```, a period of time starting when the Raspberry Pi boots and ends when the Raspberry Pi halts (graceful or otherwise)
   - ```session```, a counter starting with 0 that increments each time a sensor collection program restarts during a ```trip```
 - the engine sensor collection program adds a VIN (vehicle identification number) to its data file name but otherwise conforms to the aforementioned data file naming conventions
-  - this VIN is used by analysis programs to identify and aggregate all of the data files associated with an individual ```trip``` into individual data files associated with that VIN
+  - this VIN is used by analysis programs to identify and aggregate all of the data files associated with an individual ```trip``` into individual data files associated with that VIN's trip
 
 Aggregating data files requires:
 
@@ -132,11 +130,13 @@ All sensor generated data conforms to the following standard format:
 ```json
 {
   "command_name": STRING,
-  "obd_response_value": [LIST|DICTIONARY|FLOAT|INTEGER|STRING|PINT_ENCODED_VALUE|None|"no response"],
+  "obd_response_value": (LIST|DICTIONARY|FLOAT|INTEGER|STRING|PINT_ENCODED_VALUE|None|"no response"),
   "iso_ts_pre": ISO_FORMATTED_TIMESTAMP,
   "iso_ts_post": ISO_FORMATTED_TIMESTAMP
 }
 ```
+
+```obd_response_value``` data types lists and dictionaries can include embedded ```(LIST|DICTIONARY|FLOAT|INTEGER|STRING|PINT_ENCODED_VALUE|None|"no response")``` as values.
 
 ### JSON Fields
 
@@ -356,7 +356,8 @@ source .venv/Scripts/activate
 
 uv build .
 
-# Developers may want to install the software such that changes are reflected in the virtual runtime environment automatically.
+# Developers and data analysts install the software such that changes are reflected
+# in the virtual runtime environment automatically.
 uv pip install -e .
 
 # For production use, install the software as a Python package.
@@ -524,7 +525,13 @@ options:
   --version             Print version number and exit.
 ```
 
-## Installing On The Raspberry Pi Data Collector
+## Installing On The Raspberry Pi Data Collector Target System
+
+Raspberry Pi 4 with 4 GB RAM (or more) and with a 32 GB (or more) SD card.
+
+## Target Hardware
+
+The software is made to work with [WeatherFlow Tempest](https://weatherflow.com/tempest-weather-system/) weather station.  The software is being tested on a Raspberry Pi 4 running Raspberry Pi OS ```bookworm```.
 
 First, complete the [Python Project Software Installation](#python-project-software-build-and-installation) instructions.
 
@@ -534,7 +541,7 @@ Certain modules require configuration changes to [Raspberry Pi OS](https://www.r
 
 ## Manufacturer Warranty Information
 
-The 2019 Ford EcoSport manual and other vehicles have the following statement or something similar with respect to aftermarket OBD devices:
+The owners manuals for 2019 Ford EcoSport and other vehicles have the following statement or something similar with respect to aftermarket OBD devices:
 
 - "Your vehicle has an OBD Data Link Connector (DLC) that is used in conjunction with a diagnostic scan tool for vehicle diagnostics, repairs and reprogramming services. Installing an aftermarket device that uses the DLC during normal driving for purposes such as remote insurance company monitoring, transmission of vehicle data to other devices or entities, or altering the performance of the vehicle, may cause interference with or even damage to vehicle systems. We do not recommend or endorse the use of aftermarket plug-in devices unless approved by Ford. The vehicle Warranty will not cover damage caused by an aftermarket plug-in device."
 

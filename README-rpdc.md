@@ -71,6 +71,45 @@ After completing the OBD adapter pairing, make a note of the Bluetooth Media Acc
 
 The yellow arrow points to where the Bluetooth MAC address is found on the ```Devices``` dialog box.  Make a note of the Bluetooth MAC address.  This will be needed in a configuration step below.
 
+## Step 4 - Configure WIFI Hotspot
+
+Add a WIFI hotspot to your Raspberry Pi 3, 4 or 5 to support ```motion```, ```weather``` and ```trailer``` modules.
+
+These WIFI hotspot installation instructions were written for Raspberry Pi OS 64 bit.  Make sure that your Raspberry Pi OS is updated to the latest version.
+
+* ```/etc/debian_version``` shows ```12.11``` or greater
+* ```/etc/os-release``` shows ```VERSION="12 (bookworm)"``` or greater
+
+With some, little or no modification, the installation instructions should work for other Linux based systems.  The amount of effort will vary by Linux distribution with Debian based distributions the easiest.
+
+```bash
+$ cat /etc/debian_version
+12.11
+$ cat /etc/os-release | grep VERSION=
+VERSION="12 (bookworm)"
+$
+```
+
+If you are running Raspberry a Pi OS version less than ```12.11``` (```bookworm```), upgrade the Rasberry Pi OS by following these instructions.
+
+```bash
+sudo apt update
+sudo apt dist-upgrade -y
+sudo shutdown -r now
+```
+
+Once the Raspberry Pi reboots, remove unused packages.
+
+```bash
+sudo apt autoremove -y
+```
+
+Configuring a WIFI Access Point on a Raspberry Pi 4 running ```Debian 12 bookworm``` is tricky because, in release 12 of Raspberry Pi OS, network configuration was dramatically changed to a new configuration subsystem called [Network Manager](https://networkmanager.dev/).   More rough spots need to be smoothed out. **Beware - documentation regarding how to create a WIFI access point found on the Internet refers to the old way of configuring networks.**
+
+Follow the instruction found in [Configuring Raspberry Pi WIFI/Hotspot/Router](docs/wifi-hotspot-router.md).  Once you have a hotspot up and running, 
+
+the weather station needs to be reconfigured/configured to work with the in-vehicle hotspot.  Follow the instructions provided by [WeatherFlow](https://tempest.earth/).
+
 ## Step 4 - Install Optional Software
 
 Install an IDE (Integrated Development Environment).
@@ -81,6 +120,12 @@ sudo apt install -y code
 ```
 
 If you choose ```code```, then use the Raspberry Pi GUI to launch ```code``` from the ```menu->Programming Tools->code``` to add Python and bash shell support.
+
+If you plan to do data analysis, install ```ffmpeg```.  ```ffmpeg``` is needed to process graphs showing RPM, SPEED, active gear, elapsed route time.
+
+```bash
+sudo apt install -y ffmpeg
+```
 
 Are there other tools you like to have on your Linux based computers?  Install them now.
 
@@ -232,48 +277,94 @@ $ sudo mkdir /root/bin
 $ sudo cp  vts.* /root/bin
 $ sudo chmod 0755 /root/bin/vts.*
 $ sudo ls -l /root/bin
-$ ls -l
--rwxr-xr-x 1 human human  747 May 12 15:53 vts.rc.local.WittyPi4*
--rwxr-xr-x 1 human human  329 May 12 15:57 vts.rc.local.audit*
--rwxr-xr-x 1 human human 2153 May 12 15:48 vts.rc.local.engine*
--rwxr-xr-x 1 human human  796 May 12 13:56 vts.rc.local.location*
--rwxr-xr-x 1 human human  680 May 12 13:57 vts.rc.local.motion*
--rwxr-xr-x 1 human human  693 May 12 13:57 vts.rc.local.trailer*
--rwxr-xr-x 1 human human  854 May 12 13:57 vts.rc.local.utility*
--rwxr-xr-x 1 human human  680 May 12 13:58 vts.rc.local.weather*
+-rwxr-xr-x 1 human human  747 May 12 15:53 vts.rc.local.WittyPi4
+-rwxr-xr-x 1 human human  329 May 12 15:57 vts.rc.local.audit
+-rwxr-xr-x 1 human human 2153 May 12 15:48 vts.rc.local.engine
+-rwxr-xr-x 1 human human  796 May 12 13:56 vts.rc.local.location
+-rwxr-xr-x 1 human human  680 May 12 13:57 vts.rc.local.motion
+-rwxr-xr-x 1 human human  693 May 12 13:57 vts.rc.local.trailer
+-rwxr-xr-x 1 human human  854 May 12 13:57 vts.rc.local.utility
+-rwxr-xr-x 1 human human  680 May 12 13:58 vts.rc.local.weather
 -rwxr-xr-x 1 human human  657 May 13 13:23 vts.root.profile*
+$
+```
+
+If you don't want or need a particular module, don't make it executable.  Modules that are not marked executable don't get executed by design.  **Make sure that ```/root/bin/vts.root.profile``` is executable.**
+
+For example, to keep the ```trailer``` module from executing: 
+
+```bash
+$ sudo chmod 0644 /root/bin/vts.rc.local/trailer
+$ sudo ls -l /root/bin/vts.rc.local/trailer
+-rw-r--r-- 1 human human  693 May 12 13:57 vts.rc.local.trailer
 $
 ```
 
 ## Step 9 - Raspberry Pi Headless Operation - Modify ```vehicle-telemetry-system/bin/vts.user.profile```
 
-Edit, if necessary, the ```vehicle-telemetry-system/bin/vts.user.profile``` file.
+Edit, if necessary, the ```vehicle-telemetry-system/bin/vts.user.profile``` file.  This picks up necessary environment variables from ```/root/bin/vts.root.profile``` through the ```runuser``` command issued by one of the ```/root/bin/vts.rc.local.*``` files.
 
 Make all of the module VTS_USER launcher files executable
-by using the command ```chmod +x obd_logger.sh obd_tester.sh```.
+by using the following commands:
 
-## Date/Time Accuracy During Data Collection
+```bash
+$ cd
+$ cd vehicle-telemetry-system/bin
+$ ls -l
+total 37
+-rwxr-xr-x 1 runar 197609  444 Jun 18 09:59 WittyPi4.sh
+-rwxr-xr-x 1 runar 197609  418 Jun 17 15:02 audit.sh
+-rwxr-xr-x 1 runar 197609 1708 Jun 17 14:13 engine.sh
+-rwxr-xr-x 1 runar 197609  928 Jun 17 13:53 location.sh
+-rwxr-xr-x 1 runar 197609  458 Jun 18 11:00 motion-USB.sh
+-rwxr-xr-x 1 runar 197609  344 Jun 18 11:00 motion-WIFI.sh
+-rwxr-xr-x 1 runar 197609  308 Jun 18 11:16 trailer.sh
+-rwxr-xr-x 1 runar 197609 1130 Jun 18 10:45 utility.sh
+-rwxr-xr-x 1 runar 197609 1998 Jun 18 11:04 vts.user.profile
+-rwxr-xr-x 1 runar 197609  542 Jun 18 11:10 weather.sh*
+$
+$ # The following will make these bash shell scripts executable.
+$ chmod 0755 WittyPi4.sh
+$ chmod 0755 audit.sh
+$ chmod 0755 engine.sh
+$ chmod 0755 location.sh
+$ chmod 0755 motion-USB.sh
+$ chmod 0755 motion-WIFI.sh
+$ chmod 0755 trailer.sh
+$ chmod 0755 utility.sh
+$ chmod 0755 vts.user.profile
+$ chmod 0755 weather.sh
+$
+```
 
-After the power has been off, an unmodified Raspberry Pi will do one of the following to determine the time it starts up with:
+If you don't want or need a particular module, don't make it executable.  Modules that are not marked executable don't get executed by design.  **Make sure that ```vts.user.profile``` is executable.**
+
+## Step 10 - Date/Time Accuracy During Data Collection
+
+After the power has been off, an unmodified Raspberry Pi 3 or 4 will do one of the following to determine the time it starts up with:
 
 - starts up with the time value stored on disk
 - goes out to the Internet to a Network Time Protocol (NTP) server to get the current time
 
-While the Raspberry Pi runs, time updates as expected in its built-in clock and it periodically saves the current time value to disk.  Because the built-in clock only works while the power is on, when the power goes off, the clock stops working.  When power comes back on, the clock starts up from zero time.  During the boot process, the clock gets updated from the disk and later, after the network starts up, an NTP server.  No network, no time update.
+While the Raspberry Pi 3 or 4 runs, time updates as expected in its built-in clock and it periodically saves the current time value to disk.  Because the built-in clock only works while the power is on, when the power goes off, the clock stops working.  When power comes back on, the clock starts up from zero time.  During the boot process, the clock gets updated from the disk and later, after the network starts up, an NTP server.  No network, no time update.
 
 Each bit of data collected is collected with timestamps.  Data and log file names have embedded timestamps in them.  When the clock is hours or even weeks behind the actual time, data analysis becomes more difficult as it is hard to connect OBD data with driver activity such as stops for fuel or stops at destinations.
 
-One solution to consider is to always provide the Raspberry Pi with Internet access, especially during the boot process.  For example, mobile phones (with the correct carrier plan) support mobile WIFI hotspot capability.  In iPhone settings, this shows up in the **Settings** app as **Personal Hotspot**.
+One solution to consider is to always provide the Raspberry Pi 3 or 4 with Internet access, especially during the boot process.  For example, mobile phones (with the correct carrier plan) support mobile WIFI hotspot capability.  In iPhone settings, this shows up in the **Settings** app as **Personal Hotspot**.
 
 On an iPhone, the **Personal Hotspot** times out and goes to sleep when no devices are connected to it.  Before starting the vehicle, disable the hotspot and reenable it through the iPhone **Settings** app.  This approach worked flawlessly on a two day, 1,000 mile trip with seven fuel stops, one overnight stop and several random health stops.
 
-Running Raspberry Pi's in headless mode requires WIFI to be configured in advance.  For example, put each phone or tablet into mobile hotspot mode and then configure the Raspberry Pi to automatically connect to them before using the logging system in a vehicle.
+Running Raspberry Pi 3 or 4's in headless mode requires WIFI to be configured in advance.  For example, put each phone or tablet into mobile hotspot mode and then configure the Raspberry Pi to automatically connect to them before using the logging system in a vehicle.
 
-A possible solution is to use add a GPS receiver to the Raspberry Pi to add [Stratum-1 NTP Server](https://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html) capability to the Raspberry Pi.  This works in remote environments were mobile wireless signals are unavailable.  It also requires less work on behalf of the vehicle operator.
+A possible solution is to use add a GPS receiver to the Raspberry Pi k3 or 4 to add [Stratum-1 NTP Server](https://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html) capability to the Raspberry Pi.  This works in remote environments were mobile wireless signals are unavailable.  It also requires less work on behalf of the vehicle operator.
 
-The solution currently in use a Raspberry Pi UPS HAT with a built-in real-time clock.  This option, using the [Raspberry Pi UPS HAT](https://www.pishop.us/product/raspberry-pi-ups-hat/) had been working well with no operator intervention required.  However, once the Lithium battery got funky, the built-in real-time clock often lost power.  Power loss resets the clock to 1970 almost every time the system boots.
+The solution currently in use in my system is a Raspberry Pi UPS HAT with a built-in real-time clock made to provide accurate time for Raspberry Pi 4's.  This option, using the [Raspberry Pi UPS HAT](https://www.pishop.us/product/raspberry-pi-ups-hat/) had been working well with no operator intervention required.  However, once the Lithium battery got funky, the built-in real-time clock often lost power.  Power loss resets the clock to 1970 almost every time the system boots.
 
-In environments where the following are unavailable:
+Another solution is to use a Raspberry Pi 5 and add and install (with software) the optional **Official** [Raspberry Pi RTC Battery](https://www.raspberrypi.com/products/rtc-battery/).
+
+The battery backed real-time (RTC) clock used in the current Raspberry Pi 4 solution is the [UUGear Witty Pi 4](./docs/WittyPi4-README.md) and this project provides the integration bash scripts to make this work on the Raspberry Pi 4.
+
+Mitigation is available in environments where the following are unavailable:
 
 - battery backed real-time clock
 - Internet access
@@ -331,6 +422,10 @@ The 2019 Ford EcoSport manual and other vehicles have the following statement or
 - "Your vehicle has an OBD Data Link Connector (DLC) that is used in conjunction with a diagnostic scan tool for vehicle diagnostics, repairs and reprogramming services. Installing an aftermarket device that uses the DLC during normal driving for purposes such as remote insurance company monitoring, transmission of vehicle data to other devices or entities, or altering the performance of the vehicle, may cause interference with or even damage to vehicle systems. We do not recommend or endorse the use of aftermarket plug-in devices unless approved by Ford. The vehicle Warranty will not cover damage caused by an aftermarket plug-in device."
 
 You use this software at your own risk.
+
+## Known Problems
+
+## Known Limitations
 
 ## LICENSE
 
