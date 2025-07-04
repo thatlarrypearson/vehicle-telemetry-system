@@ -10,6 +10,10 @@ Integrate weather data with vehicle engine and location data for better, more ac
 
 At higher speeds, wind speed and direction relative to vehicle motion become material in fuel usage.  Additionally, changes in vehicle configuration affecting wind resistance can be inferred by changes in fuel usage.
 
+## Context
+
+Coming soon...
+
 ## Features
 
 * Collects all weather data provided by [WeatherFlow Tempest](https://weatherflow.com/tempest-weather-system/) weather station.

@@ -1,0 +1,10 @@
+# telemetyry-trailer-connector/CircuitPython/settings.toml
+# Modify the environment variables in this file to suit your needs.
+# Install this file onto a FeatherS3 (ESP32-S3) CircuitPython microcontroller as settings.toml.
+UDP_HOST="192.168.2.1"
+UDP_PORT=50223
+WIFI_SSID="telemetry"
+WIFI_PASSWORD="ThatLarryPearson"
+CONNECTION_FAILED_SLEEP_TIME=15
+ADS_GAIN=1
+CYCLE_SLEEP=800
