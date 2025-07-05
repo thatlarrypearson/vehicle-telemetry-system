@@ -253,7 +253,7 @@ wheels = [
 
 [[package]]
 name = "circup"
-version = "2.2.0"
+version = "2.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appdirs" },
@@ -263,9 +263,9 @@ dependencies = [
     { name = "toml" },
     { name = "update-checker" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9d/82/4b826360c441ee544240419e0826626c59ccbc1e7df451a69017c20035fc/circup-2.2.0.tar.gz", hash = "sha256:4a3e2329713eb1398316bc181344d76bfa7926479f26222e5577f30963ec4392", size = 117550 }
+sdist = { url = "https://files.pythonhosted.org/packages/60/7f/d352ed1c7d15e1816d8bdc262aaccb57a62d3d07fc7a14dcb208b6dbaf21/circup-2.2.2.tar.gz", hash = "sha256:dca8227703f177644333a56338748389ce2db2de0939fe8ca6f247da898c5dda", size = 117556 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/74/40/c590a2949eec7835eee9049b476cf56d1416190e74aaf8a674ab18126bc7/circup-2.2.0-py3-none-any.whl", hash = "sha256:9e7547a53029a4538621a006b258687b8ab7e3197f5f77abe8191de1d8698b3f", size = 45092 },
+    { url = "https://files.pythonhosted.org/packages/24/68/7bb6e15734f2c7813b97a3d346d8fe991920adfac221f123d8c0ea13445c/circup-2.2.2-py3-none-any.whl", hash = "sha256:7574ddad723453d97d0f4b284344291e3447f2aae5bc58221bb4c976061ff363", size = 45086 },
 ]
 
 [[package]]
@@ -1627,11 +1627,11 @@ wheels = [
 
 [[package]]
 name = "pynmeagps"
-version = "1.0.10"
+version = "1.0.50"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/78/27/296f900b11c78af1db57a979f81770b384baa01407342a973645f5a9b62f/pynmeagps-1.0.10.tar.gz", hash = "sha256:f21e8be1bc15e6b4e74ef2dc6e10db8009eb85357415a9aea5d6fe064f4e257b", size = 28161 }
+sdist = { url = "https://files.pythonhosted.org/packages/8d/d3/dc24ed8a0e429105b20bfbf5d8155659d4f1439bad203ad46a9cdd1fc9d0/pynmeagps-1.0.50.tar.gz", hash = "sha256:7ebefbe697fa71c939df176631674c15879863c0362af21f062bc9ff352ad246", size = 76539 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ac/f5/8aeed1e97852ada8912d67cd18200d62af81284f7f3b1e6572d7bbe91fa9/pynmeagps-1.0.10-py3-none-any.whl", hash = "sha256:1e47f82bf161c3ed3827221c3d7afff28b2d24474cb09e4ec4d9b0435daddf26", size = 27322 },
+    { url = "https://files.pythonhosted.org/packages/e4/5f/15afebad449cfe563e8d1e5dfe2c307abbecdff34dbc6d0e4c8d453741b5/pynmeagps-1.0.50-py3-none-any.whl", hash = "sha256:24f6389f77f9d5f583bc677f141d7e7a76d48abb9a3a968dab26f77efe59fb1e", size = 52951 },
 ]
 
 [[package]]
@@ -1654,11 +1654,11 @@ wheels = [
 
 [[package]]
 name = "pyrtcm"
-version = "1.1.6"
+version = "1.1.8"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6d/a6/bfb276afaaca29cb2355ec6f48fdd723a69d1bf66a1f5f4d9320929dfe59/pyrtcm-1.1.6.tar.gz", hash = "sha256:b0674078dbe32f4811f7f95949e66dc7f237533f344c11876c5834df614e2da3", size = 102275 }
+sdist = { url = "https://files.pythonhosted.org/packages/f2/12/89328426aba396aff0642d0af1ab62b5a3d333cea3da373a596918d76b24/pyrtcm-1.1.8.tar.gz", hash = "sha256:33f3525e518b05bd1afdfa7a7e02c1ff5364a49c68bf0feda49c9626f0a214da", size = 102995 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2a/b9/d40e61750894fa7d93998f8044734465cd96f86108dc5916cdb5b6ff06b7/pyrtcm-1.1.6-py3-none-any.whl", hash = "sha256:1c8eab092f1076a0ce090b6a578fa58c1503a7369e4045aa3c43c0f18da0982f", size = 45164 },
+    { url = "https://files.pythonhosted.org/packages/0e/00/1a055045f1ba855e64fbb31c42c7201fdab20a5e31d780c390426e81efd6/pyrtcm-1.1.8-py3-none-any.whl", hash = "sha256:8eb0f35c76b1e6af474564d533b3499f133ffeed72d1ada664b78730643293d9", size = 44749 },
 ]
 
 [[package]]
@@ -1702,16 +1702,15 @@ wheels = [
 
 [[package]]
 name = "pyubx2"
-version = "1.2.7"
+version = "1.2.53"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pynmeagps" },
     { name = "pyrtcm" },
-    { name = "pyserial" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/62/90/147b9ab254b19c58c4c72eeb75c9ceae798d6ed0663a5fb196393d2553b1/pyubx2-1.2.7.tar.gz", hash = "sha256:38c73557bc173e94d6c053d4ca5e349712bfdbd71db80b7b8152b2757c4e6915", size = 71995 }
+sdist = { url = "https://files.pythonhosted.org/packages/30/a9/36dd4b06a0f75983c06bfbad177e5ef025cb2f122aeb40f8cfd1c28daf64/pyubx2-1.2.53.tar.gz", hash = "sha256:d812fa39ebd9c21cb9e77cc604e271d655ed0f74761a3287830991dd8bcc8954", size = 157077 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3e/a8/d327f5d0a312f7dc6b163dd61e9a4d037b79d67f55df5eb21dff4e30e6fb/pyubx2-1.2.7-py3-none-any.whl", hash = "sha256:a300c73c6b8f2f2efb1fdd238639826ca0ecbd9965711cbb8f21f0474e13f6fc", size = 67633 },
+    { url = "https://files.pythonhosted.org/packages/1c/c0/1d042d0cc26ee8045cdf7bd41c16147fd9ab6581870807e0e9fe1f19ac31/pyubx2-1.2.53-py3-none-any.whl", hash = "sha256:11656c7f62f4216a4abbbe08e01fef4e027fd3421ce84bbfe377a299863bf45d", size = 75739 },
 ]
 
 [[package]]
@@ -2311,7 +2310,7 @@ requires-dist = [
     { name = "build", specifier = "==1.2.2" },
     { name = "certifi", specifier = "==2024.7.4" },
     { name = "charset-normalizer", specifier = "==3.3.2" },
-    { name = "circup", specifier = "==2.2" },
+    { name = "circup", specifier = ">=2.2" },
     { name = "click", specifier = "==8.1.7" },
     { name = "cython", specifier = "==3.0.11" },
     { name = "haversine", specifier = "==2.8.1" },
@@ -2329,11 +2328,11 @@ requires-dist = [
     { name = "pillow", specifier = "==10.2.0" },
     { name = "pint", specifier = "==0.20.1" },
     { name = "psutil", specifier = "==6.1.0" },
-    { name = "pynmeagps", specifier = "==1.0.10" },
+    { name = "pynmeagps", specifier = ">=1.0.10" },
     { name = "pyserial", specifier = "==3.5" },
     { name = "python-dateutil", specifier = "==2.8.2" },
     { name = "pytz", specifier = "==2023.3" },
-    { name = "pyubx2", specifier = "==1.2.7" },
+    { name = "pyubx2", specifier = ">=1.2.7" },
     { name = "pyusb", specifier = "==1.2.1" },
     { name = "rich", specifier = "==13.6.0" },
     { name = "scikit-learn", specifier = "==1.4.2" },

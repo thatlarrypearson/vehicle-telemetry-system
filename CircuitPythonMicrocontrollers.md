@@ -241,7 +241,180 @@ print("    " + str(sys.implementation.version) + "\n")
 
 ![Results of Rerunning code.py](./docs/MuEditor-05.png)
 
-## Installing Required Libraries on CircuitPython Microcontroller
+## Install Required Libraries on CircuitPython Microcontroller
+
+By now, you should have already performed the [Python Project Software Build and Installation](./README.md#python-project-software-build-and-installation) from this project's [README](./README.md) on your desktop computer and/or Raspberry Pi.  If you haven't, do it now.
+
+Don't use ```pip``` to install CircuitPython libraries.  Instead, use ```circup```.  ```circup``` installs and/or updates CircuitPython libraries on CircuitPython microcontrollers.  The ```circup``` utility should already be installed in your desktop computer and/or Raspberry Pi.
+
+In the [Windows Powershell](#windows-powershell-instructions) or [Mac, Linux and Raspberry Pi Bash](#mac-linux-and-raspberry-pi-bash-instructions) instructions below, you will install the CircuitPython libraries to support both the [```trailer```](./README-trailer) and [```motion```](./README-motion.md) modules.
+
+### Windows Powershell Instructions
+
+Here is the summary:
+
+```powershell
+cd vehicle-telemetry-system
+.\.venv\Scripts\activate
+uv run circup
+uv run circup install adafruit_bno08x
+uv run circup install adafruit_ads1x15
+```
+
+The following is the Windows output:
+
+```powershell
+> cd vehicle-telemetry-system
+> .\.venv\Scripts\activate
+(vehicle-telemetry-system) PS vehicle-telemetry-system> uv run circup
+Usage: circup [OPTIONS] COMMAND [ARGS]...
+
+  A tool to manage and update libraries on a CircuitPython device.
+
+Options:
+  --verbose           Comprehensive logging is sent to stdout.
+  --path DIRECTORY    Path to CircuitPython directory. Overrides automatic
+                      path detection.
+  --host TEXT         Hostname or IP address of a device. Overrides automatic
+                      path detection.
+  --port INTEGER      Port to contact. Overrides automatic path detection.
+  --password TEXT     Password to use for authentication when --host is used.
+                      You can optionally set an environment variable
+                      CIRCUP_WEBWORKFLOW_PASSWORD instead of passing this
+                      argument. If both exist the CLI arg takes precedent.
+  --timeout INTEGER   Specify the timeout in seconds for any network
+                      operations.
+  --board-id TEXT     Manual Board ID of the CircuitPython device. If provided
+                      in combination with --cpy-version, it overrides the
+                      detected board ID.
+  --cpy-version TEXT  Manual CircuitPython version. If provided in combination
+                      with --board-id, it overrides the detected CPy version.
+  --version           Show the version and exit.
+  --help              Show this message and exit.
+
+Commands:
+  bundle-add     Add bundles to the local bundles list, by "user/repo"...
+  bundle-remove  Remove one or more bundles from the local bundles list.
+  bundle-show    Show the list of bundles, default and local, with URL,...
+  example        Copy named example(s) from a bundle onto the device.
+  freeze         Output details of all the modules found on the connected...
+  install        Install a named module(s) onto the device.
+  list           Lists all out of date modules found on the connected...
+  show           Show a list of available modules in the bundle.
+  uninstall      Uninstall a named module(s) from the connected device.
+  update         Update modules on the device. Use --all to automatically
+                 update all modules without Major Version warnings.
+
+(vehicle-telemetry-system) PS vehicle-telemetry-system>
+(vehicle-telemetry-system) PS vehicle-telemetry-system> uv run circup install adafruit_bno08x
+Uninstalled 3 packages in 169ms
+Installed 3 packages in 32ms
+Version 2.2.0 of circup is outdated. Version 2.2.2 was released Friday April 18, 2025.
+Found device unexpectedmaker_feathers3 at D:\, running CircuitPython 9.2.8.
+Downloading latest bundles for adafruit/Adafruit_CircuitPython_Bundle (20250702).
+py:
+Extracting:  [####################################]  100%
+9.x-mpy:
+Extracting:  [####################################]  100%
+
+OK
+
+Downloading latest bundles for adafruit/CircuitPython_Community_Bundle (20250705).
+py:
+Extracting:  [####################################]  100%
+9.x-mpy:
+Extracting:  [####################################]  100%
+
+OK
+
+Downloading latest bundles for circuitpython/CircuitPython_Org_Bundle (20231031.2).
+py:
+Extracting:  [####################################]  100%
+9.x-mpy:
+Extracting:  [####################################]  100%
+
+OK
+
+Searching for dependencies for: ['adafruit_bno08x']
+Ready to install: ['adafruit_bno08x', 'adafruit_bus_device']
+
+Installed 'adafruit_bno08x'.
+Installed 'adafruit_bus_device'.
+
+(vehicle-telemetry-system) PS vehicle-telemetry-system> 
+(vehicle-telemetry-system) PS vehicle-telemetry-system> uv run circup install adafruit_ads1x15
+Uninstalled 2 packages in 7ms
+Installed 1 package in 31ms
+Version 2.2.0 of circup is outdated. Version 2.2.2 was released Friday April 18, 2025.
+Found device unexpectedmaker_feathers3 at D:\, running CircuitPython 9.2.8.
+Searching for dependencies for: ['adafruit_ads1x15']
+Ready to install: ['adafruit_ads1x15', 'adafruit_bus_device']
+
+Installed 'adafruit_ads1x15'.
+'adafruit_bus_device' is already installed.
+
+(vehicle-telemetry-system) PS vehicle-telemetry-system>
+```
+
+### Mac, Linux and Raspberry Pi Bash Instructions
+
+This is the summary of commands.  The output is substantively similar to the above Windows output.
+
+```bash
+cd vehicle-telemetry-system
+source .venv/Scripts/activate
+uv run circup
+uv run circup install adafruit_bno08x
+uv run circup install adafruit_ads1x15
+```
 
 ## Installing Application Software on CircuitPython Microcontroller
 
+The following files may be installed on your CircuitPython microcontroller:
+
+- **```boot.py```**
+
+  Special configuration instructions that must occur at boot.  One example is to ensure that the USB connection is used as a serial communications interface.  This file is not needed if you are planning to use WIFI instead of USB.
+
+- **```settings.toml```**
+
+  Environment variables that can/should be set to specific values to match your configuration.  For example, WIFI SSID and password settings are stored in this file.
+
+- **```code.py```**
+
+  The program that uses settings information from ```settings.toml``` for configuration, interacts with a sensor and sends the sensor data to the [Raspberry Pi Data Collection](./README-rpdc.md) system via WIFI or serial (USB) link.
+
+### [```trailer```](./README-trailer) Module
+
+Make any desired changes to ```settings.toml```.  Any changes to this file may also need be reflected in Raspberry Pi configuration changes and/or changes in the ```trailer``` module startup script ```vehicle-telemetry-system/bin/trailer.sh```.
+
+Plug your CircuitPython microcontroller into the USB on your Desktop or Raspberry Pi computer.  You will need to have gotten the CircuitPython directory from [Determining Microcontroller CircuitPython Release Number](#determining-microcontroller-circuitpython-release-number).  This directory is shown as ```/media/$(whoami)/CIRCUITPY``` below.
+
+```bash
+cd vehicle-telemetry-system/CircuitPython/trailer
+cp settings.toml /media/$(whoami)/CIRCUITPY
+cp code.py /media/$(whoami)/CIRCUITPY
+```
+
+### [```motion```](./README-motion.md) Module
+
+Make any desired changes to ```settings.toml```.  Any changes to this file may also need be reflected in Raspberry Pi configuration changes and/or changes in the ```motion``` module startup script ```vehicle-telemetry-system/bin/motion-WIFI.sh```.
+
+Plug your CircuitPython microcontroller into the USB on your Desktop or Raspberry Pi computer.  You will need to have gotten the CircuitPython directory from [Determining Microcontroller CircuitPython Release Number](#determining-microcontroller-circuitpython-release-number).  This directory is shown as ```/media/$(whoami)/CIRCUITPY``` below.
+
+### WIFI Version
+
+```bash
+cd vehicle-telemetry-system/CircuitPython/motion
+cp settings.toml /media/$(whoami)/CIRCUITPY
+cp wifi_code.py /media/$(whoami)/CIRCUITPY/code.py
+```
+
+### USB Version
+
+```bash
+cd vehicle-telemetry-system/CircuitPython/motion
+cp boot.py /media/$(whoami)/CIRCUITPY
+cp settings.toml code.py /media/$(whoami)/CIRCUITPY
+cp usb_code.py /media/$(whoami)/CIRCUITPY/code.py
+```
