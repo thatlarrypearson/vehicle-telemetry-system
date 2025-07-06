@@ -358,7 +358,7 @@ Installed 'adafruit_ads1x15'.
 
 ### Mac, Linux and Raspberry Pi Bash Instructions
 
-This is the summary of commands.  The output is substantively similar to the above Windows output.
+The output these commands are substantively similar to the above Windows output.
 
 ```bash
 cd vehicle-telemetry-system
