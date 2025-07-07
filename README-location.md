@@ -1,8 +1,6 @@
 # Vehicle Telemetry System Location Logger
 
-The Telemetry GPS Logger captures location and time data using a GPS receiver. While the logger is running, location and time output is written to files.
-
-## **STILL UNDER CONSTRUCTION** but it is getting closer
+The location module captures location and time data using a GPS receiver. While the logger is running, location and time output is written to files.
 
 ## Motivation
 
@@ -22,7 +20,7 @@ Raspberry Pi 4 or 5 with 4 GB RAM (or more) and with a 32 GB (or more) SD card.
 
 ## Target GPS Hardware
 
-Devices supporting USB or **RS-232**/**UART** interfaces made from **u-blox 8** or **u-blox M8** GPS receiver chip sets are required for this application.  **u-blox** devices support the **UBX** protocol in addition to the **NMEA** protocol.  UBX is used for device configuration.  **NMEA** is used to decode **NMEA** location data.  The libraries used to support this application are bilingual.  That is, the libraries speak both **UBX** and **NMEA**.
+Devices supporting USB or **RS-232**/**UART** interfaces made from **u-blox 8** or **u-blox M8** or newer GPS receiver chip sets are required for this application.  **u-blox** devices support the **UBX** protocol in addition to the **NMEA** protocol.  UBX is used for device configuration.  **NMEA** is used to decode **NMEA** location data.  The libraries used to support this application are bilingual.  That is, the libraries speak both **UBX** and **NMEA**.
 
 Interfaces not supported include **SPI**, **I2C** and **DDC**.
 
@@ -50,10 +48,6 @@ options:
   --version             Print version number and exit.
 $
 ```
-
-### ```--version```
-
-Responds with the version and exits.
 
 ## Output Data File Naming
 
@@ -203,7 +197,7 @@ With both the GPS (_u-blox GNSS receiver_) and IMU (_Unexpected Maker FeatherS3_
 In the event that your ```u-blox``` GPS device is plugged in but it isn't showing as found, use ```gps_logger.usb_devices``` to get the correct values for ```DEFAULT_USB_VID``` and ```DEFAULT_USB_PID```.  Change these values in ```telemetry-gps/gps_logger/usb_devices.py``` and rebuild/reinstall the _Telemetry GPS_ package per the above instructions.
 
 ```bash
-human@telemetry2:~ $ uv run -m gps_logger.usb_devices
+$ uv run -m gps_logger.usb_devices
 Candidate Serial Device List (non-USB devices excluded)
 
 	+1 /dev/ttyACM1
@@ -233,7 +227,7 @@ Candidate Serial Device List (non-USB devices excluded)
 Found 2 USB Serial Device(s)
 
 USB Serial Device <u-blox GNSS receiver> Name /dev/ttyACM0 found
-human@telemetry2:~ $ 
+$ 
 ```
 
 ## Known Problems
@@ -321,6 +315,9 @@ $ find . -type f -name '*.json' -size 0 -print | while read filename
 ./NMEA-20220910170952-utc.json
 ./NMEA-20220910171003-utc.json
 $
+$ # If you have a LARGE NUMBER of zero length JSON files, this may run out of memory.
+$ # To do the find and delete operation on a single line:
+$ rm -f $(find . -type f -name '*.json' -size 0 -print)
 ```
 
 ## License
