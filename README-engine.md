@@ -8,9 +8,7 @@ The software is designed to run on Raspberry Pi with Raspberry Pi OS (formerly k
 
 ![High Level System View](docs/README-HighLevelSystemView.JPG)
 
-## OBD Logger
-
-### Command Line Usage
+## OBD Logger Command Line Usage
 
 The Telemetry OBD Logger application command line interface (CLI) is as follows:
 
@@ -46,19 +44,19 @@ options:
 $
 ```
 
-#### ```--timeout TIMEOUT```
+### ```--timeout TIMEOUT```
 
 The timeout value determines how long a read request can take between the underlying ```python-OBD``` library and the OBD reader device.  If one or more individual commands are causing problems by intermittently responding with ```"no response"``` instead of a real value, an increase in the ```timeout``` value may help alleviate the problem.
 
-#### ```--no_fast```
+### ```--no_fast```
 
 ```--no_fast``` can also be used to reduce the number of ```"no response"```s but be aware of the consequences.  For commands that are not available on the vehicle being instrumented, the software may just wait forever for a response that will never come.
 
-#### ```--version```
+### ```--version```
 
 Responds with the version and exits.
 
-#### Telemetry OBD Logger Run Cycles
+### Telemetry OBD Logger Run Cycles
 
 While logging, OBD Logger submits a pattern of OBD commands to the vehicle and stores the vehicle's responses.  There are three patterns:
 
@@ -68,22 +66,22 @@ While logging, OBD Logger submits a pattern of OBD commands to the vehicle and s
 
 ![Run Cycles](docs/README-RunCycles.JPG)
 
-##### Startup
+#### Startup
 
 The startup list of OBD commands is only executed when the program starts up.  Typically, this list of OBD commands includes:
 
 - OBD commands whose return values never change (e.g. ```ECU_NAME```, ```ELM_VERSION```, ```ELM_VOLTAGE```)
 - OBD commands with slow changing return values that might be needed for startup baseline like ```AMBIANT_AIR_TEMP``` and ```BAROMETRIC_PRESSURE```.
 
-##### Housekeeping
+#### Housekeeping
 
 A list of OBD commands that have ("relatively") "slow changing" return values such as  ```AMBIANT_AIR_TEMP``` and ```BAROMETRIC_PRESSURE```.  These are commands that need to be run over and over again but in a slower loop.
 
-##### Cycle
+#### Cycle
 
 A list of OBD commands that have fast changing return values such as ```RPM```, ```MAF``` (Mass Air Flow) and ```PERCENT_TORQUE```.  The idea is for these commands to run over and over again in relatively fast loops.
 
-##### Full Cycle
+#### Full Cycle
 
 The repeating part of the OBD command pattern is called a "full cycle" and has OBD commands from Cycle executed in a group followed by the next Housekeeping command.  This basic pattern repeats over and over.  When the end of the Housekeeping commands is reached, a "Full Cycle" has been achieved.
 
@@ -91,11 +89,11 @@ The total number of command submissions in a full cycle is the ```count of comma
 
 The ```--full_cycles``` parameter is used to set the number of ```full_cycles``` contained in output data files.  Once the ```--full_cycles``` limit is reached, the data file is closed and a new one is opened.  This keeps data loss from unplanned Raspberry Pi shutdowns to a minimum.  In practice, this hasn't been used since each write is followed by an operating system call causing data file writes to be written to disk (and not buffered) before the program can continue.
 
-#### Telemetry OBD Logger Configuration Files
+### Telemetry OBD Logger Configuration Files
 
 Configuration files are used to tell OBD Logger what OBD commands to send the vehicle and the order to send those commands in.  A sample configuration file is shown below and another one is included in the source code.
 
-##### Default Configuration File
+#### Default Configuration File
 
 A default configuration file is included in the repository at ```config/default.ini```.  This configuration file contains most OBD commands.  There are wide variations in supported command sets by manufacturer, model, trim level and year.  By starting out with this configuration file, OBD Logger will try all commands.  After a full cycle is run, unsupported commands will respond with ```"obd_response_value": "no response"``` in the output data.  
 
@@ -104,15 +102,17 @@ Some commands will result in an OBD response value of ```"no response"``` (```"o
 For example, 2017 Ford F-450 truck ```FUEL_RATE``` command in the ```cycle``` section of the configuration file returned mixed results.  In 1,124 attempts, 1084 responded with a good value while 40 responded with ```no response```.
 
 ```bash
-human@computer:data/FT8W4DT5HED00000$ grep FUEL_RATE <VIN>-20210910204443-utc.json | grep "no response" | wc -l
+$ grep FUEL_RATE <VIN>-20210910204443-utc.json | grep "no response" | wc -l
 40
-human@computer:data/FT8W4DT5HED00000$ grep FUEL_RATE <VIN>-20210910204443-utc.json | grep -v "no response" | wc -l
+$ grep FUEL_RATE <VIN>-20210910204443-utc.json | grep -v "no response" | wc -l
 1084
 ```
 
 This problem may be solved by increasing the OBD command timeout from its default to a higher value.  Use the ```--timeout``` setting when invoking the ```obd_logger``` command.
 
-### All Output Data Files Regardless of Module
+## All Output Data Files Regardless of Module
+
+For a general discussion of the data file format, see [Vehicle Telemetry System Data File Format](./README.md/#data-file-format).
 
 Output data files are in a hybrid format.  Data files contain records separated by line feeds (```LF```) or carriage return and line feeds (```CF``` and ```LF```).  The records themselves are formatted in JSON.  Sample output follows:
 
@@ -124,7 +124,7 @@ Output data files are in a hybrid format.  Data files contain records separated 
 {"command_name": "FUEL_STATUS", "obd_response_value": "no response", "iso_ts_pre": "2020-09-09T15:38:29.771997+00:00", "iso_ts_post": "2020-09-09T15:38:29.824129+00:00"}
 ```
 
-#### JSON Fields
+### JSON Fields
 
 - ```command_name```
   OBD command name submitted to vehicle.
@@ -142,7 +142,7 @@ Output data files are in a hybrid format.  Data files contain records separated 
 
 [Pint](https://pint.readthedocs.io/en/stable/) encoded values are strings with a numeric part followed by the unit.  For example, ```"25 degC"``` represents 25 degrees Centigrade.  ```"101 kilopascal"``` is around 14.6 PSI (pounds per square inch).  Pint values are used so that the units are always kept with the data and so that unit conversions can easily be done in downstream analysis software.  These strings are easy to deserialize to Pint objects for use in Python programs.
 
-### Telemetry OBD Logger Debug Output
+## Telemetry OBD Logger Debug Output
 
 OBD Logger provides additional information while running when the ```--verbose``` option is used.  Additionally, The underlying python ```obd``` library (```python-obd```) supports detailed low-level logging capabilities which can be enabled within OBD Logger with the ```--logging``` option.
 
@@ -180,7 +180,7 @@ DEBUG:obd.elm327:read: b'OK\r\r>'
 [obd.elm327] write: b'ATL0\r'
 ```
 
-### OBD Logger Data File Naming Convention
+## OBD Logger Data File Naming Convention
 
 See [Telemetry System Boot and Application Startup Counter](./README-audit.md).
 
