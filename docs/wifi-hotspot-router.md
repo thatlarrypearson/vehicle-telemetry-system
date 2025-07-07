@@ -1,6 +1,23 @@
-# Raspberry Pi OS Bookworm 12.4 Access Point Configuration
+# Raspberry Pi OS Bookworm 12.4 (and newer) Access Point Configuration
 
 Raspberry Pi OS has recently changed the way Internet network connections are configured.  Most sources on the Internet still reflect the older configuration methods making it extremely difficult for people new to Linux to configure a working Access Point (AP), also called a WIFI hotspot.  The following instructions, although tedious, should allow anyone with modest computer skills to successfully configure an AP (WIFI hotspot) on their Raspberry Pi.
+
+## Context
+
+#### Raspberry Pi WIFI Network Configuration
+
+In order to receive data from a microcontroller or Tempest Weather Station, the deployment system and the FeatherS3 and weather station need to be on the same LAN (local area network).  The following network context diagram provides two network views.  The first view shows the FeatherS3 sending UDP broadcast messages to the deployment system on the local network.  When the deployment computer on the LAN actively listens for broadcast messages on a specific port, ti can process these messages.  Otherwise, the messages will be discarded.
+
+![Telemetry Weather Logging - Networking](TelemetryTrailerConnectorLogging-Networking1.JPG)
+
+The second view shows more of a hardware view.  Weather data originates from WeatherFlow Tempest sensors and is transmitted to a WeatherFlow Tempest base station via a proprietary communications method.  Using a smart phone application, the base station is configured to use WIFI provided by the computer running this software, a Raspberry Pi 4 Model B.  This Raspberry Pi provided local area network behaves like a normal WIFI/hotspot/router that may or may not be connected via Ethernet to the Internet through an optional WIFI/hotspot/router.
+
+![Telemetry Weather Logging - Networking](TelemetryTrailerConnectorLogging-Networking2.JPG)
+
+This method is being used for automotive trailer connector data collection.  Configuring a WIFI Access Point on a Raspberry Pi 4 running ```Debian 12 bookworm``` is tricky because, in this latest release of Raspberry Pi, network configuration has been dramatically changed to a new configuration subsystem called [Network Manager](https://networkmanager.dev/).   More rough spots need to be smoothed out. **Beware** - documentation regarding how to create a WIFI access point found on the Internet often mixup the old way with the new way of configuring networks.
+
+Once you have a hotspot up and running, the microcontroller and the weather station needs to be configured to work with the in-vehicle hotspot.  Follow the instructions provided in the [CircuitPython Microcontrollers](../CircuitPythonMicrocontrollers.md) or below in sections
+[Configuring Weather Module](#configuring-weather-module) on [Configuring Motion and/or Trailer Modules].(#configuring-motion-andor-trailer-modules).
 
 The following Access Point (AP) (WIFI/Hotspot/Router) configuration instructions only apply to the Debian variant Raspberry Pi OS Bookworm version 12.11 or newer.
 
@@ -237,7 +254,7 @@ Even though the Internet may not be available to the Raspberry Pi while gatherin
 
 To get hotspot Internet access configured, some basic information will need to be gathered about the connection.
 
-The following diagrams and discussion apply to the ```motion``` and ```trailer``` modules as well.
+The following diagrams and discussion apply to the ```weather```, ```motion``` and ```trailer``` modules.
 
 ![Telemetry Weather Logging - Networking](TelemetryWeatherLogging-Networking.png)
 
@@ -561,7 +578,7 @@ sudo systemctl restart NetworkManager
 
 ## Hotspot Client Info
 
-See connected hotspot clients (by WIFI MAC address) run the following command.  More info at [About iw](https://wireless.wiki.kernel.org/en/users/documentation/iw).
+See connected hotspot clients (by WIFI MAC address) run the following command.  More info at [Linux Kernel Wireless Documentation - About iw](https://wireless.wiki.kernel.org/en/users/documentation/iw).
 
 * To get hotspot client information
 

@@ -110,7 +110,7 @@ Follow the instruction found in [Configuring Raspberry Pi WIFI/Hotspot/Router](d
 
 the weather station needs to be reconfigured/configured to work with the in-vehicle hotspot.  Follow the instructions provided by [WeatherFlow](https://tempest.earth/).
 
-## Step 4 - Install Optional Software
+## Step 5 - Install Optional Software
 
 Install an IDE (Integrated Development Environment).
 
@@ -129,7 +129,7 @@ sudo apt install -y ffmpeg
 
 Are there other tools you like to have on your Linux based computers?  Install them now.
 
-## Step 5 - Build and Install Python Software
+## Step 6 - Build and Install Python Software
 
 To build and install Python software you will:
 
@@ -140,7 +140,7 @@ To build and install Python software you will:
 
 Follow the instructions found at [Python Project Software Build and Installation](./README.md/#python-project-software-build-and-installation).
 
-## Step 6 - Run Simple Tests
+## Step 7 - Run Simple Tests
 
 Run some simple tests to [validate the package build and installation](./README.md/#simple-tests-validating-build-and-installation).
 
@@ -161,7 +161,7 @@ If the GPS serial device isn't ```/dev/ttyACM0```, the ```DEFAULT_GPS_SERIAL_DEV
 DEFAULT_GPS_SERIAL_DEVICE="/dev/ttyACM0"
 ```
 
-## Step 7 - Raspberry Pi Headless Operation - Modify ```/etc/rc.local```
+## Step 9 - Raspberry Pi Headless Operation - Modify ```/etc/rc.local```
 
 In order to reliably run in an automotive environment, sensor modules need to start automatically after all preconditions are satisfied.  That is, the application must start without any user interaction.  The trigger for starting the Vehicle Telemetry System is powering up the Raspberry Pi Data Collector computer.
 
@@ -256,7 +256,7 @@ Shell variables, like ```VTS_USER``` used by module startups scripts (e.g. ```ve
 
 The ```runuser``` command in "```vehicle-telemetry-system/root/bin/telemetry.rc.local.<module-name>```" file runs the "```vehicle-telemetry-system/bin/<module-name>.sh```" ```bash``` shell program as user "```human```" and group "```dialout```".
 
-## Step 8 - Raspberry Pi Headless Operation - Modify ```vehicle-telemetry-system/root/bin/vts.root.profile```
+## Step 10 - Raspberry Pi Headless Operation - Modify ```vehicle-telemetry-system/root/bin/vts.root.profile```
 
 Modify these shell variable values in ```vehicle-telemetry-system/root/bin/vts.root.profile```:
 
@@ -300,7 +300,7 @@ $ sudo ls -l /root/bin/vts.rc.local/trailer
 $
 ```
 
-## Step 9 - Raspberry Pi Headless Operation - Modify ```vehicle-telemetry-system/bin/vts.user.profile```
+## Step 11 - Raspberry Pi Headless Operation - Modify ```vehicle-telemetry-system/bin/vts.user.profile```
 
 Edit, if necessary, the ```vehicle-telemetry-system/bin/vts.user.profile``` file.  This picks up necessary environment variables from ```/root/bin/vts.root.profile``` through the ```runuser``` command issued by one of the ```/root/bin/vts.rc.local.*``` files.
 
@@ -339,7 +339,7 @@ $
 
 If you don't want or need a particular module, don't make it executable.  Modules that are not marked executable don't get executed by design.  **Make sure that ```vts.user.profile``` is executable.**
 
-## Step 10 - Date/Time Accuracy During Data Collection
+## Step 12 - Date/Time Accuracy During Data Collection
 
 After the power has been off, an unmodified Raspberry Pi 3 or 4 will do one of the following to determine the time it starts up with:
 
@@ -373,8 +373,6 @@ Mitigation is available in environments where the following are unavailable:
 The function ```get_output_file_name()``` from [Telemetry System Boot and Application Startup Counter](https://github.com/thatlarrypearson/telemetry-counter) has been added to ```obd_logger``` and ```obd_tester``` to ensure the creation of data files with unique invariant identifiers.  These file names assure that data files can be processed in the order they were created.  For the file naming to work properly, ```obd_logger``` and ```obd_tester``` need to be started through the bash startup programs found in ```telemetry-obd/bin/```  named ```obd_logger.sh``` and ```obd_tester.sh```.
 
 Data timestamp information may still need downstream processing using embedded GPS data to recalibrate system timestamp data.  Examples for this type of downstream processing can be found in [Vehicle Telemetry System Data Aggregation](./README-aggregation.md).
-
-## 
 
 ## Running Raspberry Pi In Vehicle
 
@@ -423,15 +421,10 @@ The 2019 Ford EcoSport manual and other vehicles have the following statement or
 
 You use this software at your own risk.
 
-## Known Problems
+## Known Problems - **UNDER CONSTRUCTION**
 
-## Known Limitations
+## Known Limitations - **UNDER CONSTRUCTION**
 
 ## LICENSE
 
 [MIT License](./LICENSE.md)
-
-
-
-- [Raspberry Pi Data Collector](./README-rpdc.md)
-
