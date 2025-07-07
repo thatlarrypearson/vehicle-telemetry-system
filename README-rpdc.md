@@ -77,8 +77,8 @@ Add a WIFI hotspot to your Raspberry Pi 3, 4 or 5 to support ```motion```, ```we
 
 These WIFI hotspot installation instructions were written for Raspberry Pi OS 64 bit.  Make sure that your Raspberry Pi OS is updated to the latest version.
 
-* ```/etc/debian_version``` shows ```12.11``` or greater
-* ```/etc/os-release``` shows ```VERSION="12 (bookworm)"``` or greater
+- ```/etc/debian_version``` shows ```12.11``` or greater
+- ```/etc/os-release``` shows ```VERSION="12 (bookworm)"``` or greater
 
 With some, little or no modification, the installation instructions should work for other Linux based systems.  The amount of effort will vary by Linux distribution with Debian based distributions the easiest.
 
@@ -106,7 +106,7 @@ sudo apt autoremove -y
 
 Configuring a WIFI Access Point on a Raspberry Pi 4 running ```Debian 12 bookworm``` is tricky because, in release 12 of Raspberry Pi OS, network configuration was dramatically changed to a new configuration subsystem called [Network Manager](https://networkmanager.dev/).   More rough spots need to be smoothed out. **Beware - documentation regarding how to create a WIFI access point found on the Internet refers to the old way of configuring networks.**
 
-Follow the instruction found in [Configuring Raspberry Pi WIFI/Hotspot/Router](docs/wifi-hotspot-router.md).  Once you have a hotspot up and running, 
+Follow the instruction found in [Configuring Raspberry Pi WIFI/Hotspot/Router](docs/wifi-hotspot-router.md).  Be sure to document your WIFI hotspot configuration as the information may be required in future steps.
 
 the weather station needs to be reconfigured/configured to work with the in-vehicle hotspot.  Follow the instructions provided by [WeatherFlow](https://tempest.earth/).
 
@@ -291,7 +291,7 @@ $
 
 If you don't want or need a particular module, don't make it executable.  Modules that are not marked executable don't get executed by design.  **Make sure that ```/root/bin/vts.root.profile``` is executable.**
 
-For example, to keep the ```trailer``` module from executing: 
+For example, to keep the ```trailer``` module from executing:
 
 ```bash
 $ sudo chmod 0644 /root/bin/vts.rc.local/trailer
