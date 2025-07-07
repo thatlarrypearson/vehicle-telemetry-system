@@ -1,8 +1,6 @@
 # Bluetooth Installation and Configuration
 
-OBD II adapters are devices that attach to vehicle OBD II ports allowing a computer to query vehicle On-Board Diagnostic capabilities.  Bluetooth is the recommended method to connect an OBD II adapter the [Raspberry Pi Data Collector](./README-rpdc.md).  These instructions cover the installation and configuration of [Raspberry Pi Data Collector](./README-rpdc.md) Bluetooth software enabling communication between the [Raspberry Pi Data Collector](./README-rpdc.md) and a Bluetooth OBD II adapter.
-
-## **UNDER CONSTRUCTION**
+OBD II adapters are devices that attach to vehicle OBD II ports allowing a computer to query vehicle On-Board Diagnostic capabilities.  Bluetooth is the recommended method to connect an OBD II adapter to the [Raspberry Pi Data Collector](./README-rpdc.md).  These instructions cover the installation and configuration of [Raspberry Pi Data Collector](./README-rpdc.md) Bluetooth software enabling communication between the [Raspberry Pi Data Collector](./README-rpdc.md) and a Bluetooth OBD II adapter.
 
 ## Install System Software
 
@@ -18,6 +16,12 @@ sudo shutdown -r now
 ## Pairing Bluetooth OBD Devices
 
 Bluetooth OBD adapters must be *paired* and *trusted* before they can be used.  The *pairing* and *trust* process is covered in [Pairing Bluetooth OBD Devices](./docs/README-BluetoothPairing.md).
+
+## Raspberry Pi Data Collection System - Automatically Starting Bluetooth During System Startup
+
+If you are interested in how to automatically startup/connect a Raspberry Pi to a Bluetooth end-point during system startup, see this ```bash``` shell script ```vehicle-telemetry-system/root/bin/vts.rc.local.engine```.  This script must be run as **```root```** because it uses Linux commands that require **```root```** privilege.
+
+This shell script gets installed during the [Raspberry Pi Data Collector Installation Process](./README-rpdc.md).
 
 ## Bluetooth Trouble
 

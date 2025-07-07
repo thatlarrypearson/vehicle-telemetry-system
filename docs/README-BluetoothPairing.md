@@ -8,9 +8,9 @@ Newer Bluetooth OBD interfaces use different chip sets which work so long as the
 
 When an OBD interface emulator is available, pairing the OBD device to the Raspberry Pi worked fine using the pairing program accessible through the Pi's GUI.  The only complaint is there isn't much time to pair.  In general, from the time the OBD interface is plugged into either the car or the emulator, there is less than 20 seconds to complete the pairing before the OBD interface turns off pairing.  It can take a few attempts to pair.
 
-Pairing with the OBD device plugged into a vehicle is considerably more challenging.  OBD interface extension cords are available.  Extension cords are useful because the lights on the OBD interface can be seen.  These lights are important while trying to pair.  Lights also blink when the Pi is communicating to the OBD interface.
+Pairing with the OBD device plugged into a vehicle is considerably more challenging.  OBD interface extension cords are available.  Extension cords are useful because the lights on the OBD interface can be seen.  These lights are important while trying to pair.  Lights also blink when the Pi is communicating with the OBD interface.
 
-One important tip for Bluetooth pairing: the process works better when the Bluetooth device is less than 30 feet from the computer.  Pairing also works better with clear line of sight between device and computer.
+One important **tip for Bluetooth pairing**: the process works better when the Bluetooth device is less than 30 feet from the computer.  Pairing also works better with clear line of sight between device and computer.
 
 Starting over with the pairing process is easy.  Just unplug the OBD device from the car and plug it back in five seconds later.
 
@@ -68,7 +68,9 @@ In the *Connect* dialog, select *Serial Port* as shown and click *Next*.
 
 In the above, *Device added successfully, but failed to connect*.  It didn't really fail.  The OBD dongle is now accessible.
 
-Don't expect the Raspberry Pi to automatically connect to the OBD device after rebooting.  How to automatically reconnect to Bluetooth devices is covered later in this documentation.
+Don't expect the Raspberry Pi to automatically connect to the OBD device after rebooting.  How to automatically reconnect to Bluetooth devices is covered in this ```bash``` shell script ```vehicle-telemetry-system/root/bin/vts.rc.local.engine```.  This script must be run as **```root```** because it uses Linux commands that require **```root```** privilege.
+
+This shell script gets installed during the [Raspberry Pi Data Collector Installation Process](../README-rpdc.md).
 
 ## LICENSE
 
