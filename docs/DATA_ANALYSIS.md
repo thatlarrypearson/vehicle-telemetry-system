@@ -37,11 +37,9 @@ The generated CSV file data from ```obd_log_to_csv``` always includes:
 df.columns
 ```
 
-
-
-
+```text
     Index(['RPM', 'SPEED', 'FUEL_RATE', 'iso_ts_pre', 'iso_ts_post', 'duration'], dtype='object')
-
+```
 
 Note that OBD commands like ```FUEL_TYPE``` and ```VIN``` return non-numeric results.  As a results, it is best not to include these as output columns when generating CSV files using ```obd_log_to_csv.obd_log_to_csv```.
 
@@ -49,9 +47,7 @@ Note that OBD commands like ```FUEL_TYPE``` and ```VIN``` return non-numeric res
 df.dtypes
 ```
 
-
-
-
+```text
     RPM                        float64
     SPEED                      float64
     FUEL_RATE                  float64
@@ -59,7 +55,7 @@ df.dtypes
     iso_ts_post    datetime64[ns, UTC]
     duration            datetime64[ns]
     dtype: object
-
+```
 
 Note that the Pandas data frame object provides a table of values in columns.  The ```FUEL_RATE``` column has non-numeric values identified by ```NaN``` for *Not a Number*.  Examples of filtering out ```NaN``` values are shown in the code below.
 
@@ -68,140 +64,11 @@ Note that the Pandas data frame object provides a table of values in columns.  T
 df
 ```
 
+|   | RPM | SPEED | FUEL_RATE | iso_ts_pre | iso_ts_post | duration |
+| - | --- | ----- | --------- | ---------- | ----------- | -------- |
+| 0 | 610.0 | 0.0 | 2.15 | 2021-09-10 20:44:44.188995+00:00 | 2021-09-10 20:44:44.800469+00:00 | 2021-10-14 00:00:00.611474 |
 
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>RPM</th>
-      <th>SPEED</th>
-      <th>FUEL_RATE</th>
-      <th>iso_ts_pre</th>
-      <th>iso_ts_post</th>
-      <th>duration</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>610.0</td>
-      <td>0.0</td>
-      <td>2.15</td>
-      <td>2021-09-10 20:44:44.188995+00:00</td>
-      <td>2021-09-10 20:44:44.800469+00:00</td>
-      <td>2021-10-14 00:00:00.611474</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>610.0</td>
-      <td>0.0</td>
-      <td>2.15</td>
-      <td>2021-09-10 20:44:44.820128+00:00</td>
-      <td>2021-09-10 20:44:44.894266+00:00</td>
-      <td>2021-10-14 00:00:00.074138</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>610.0</td>
-      <td>0.0</td>
-      <td>2.15</td>
-      <td>2021-09-10 20:44:44.923545+00:00</td>
-      <td>2021-09-10 20:44:45.011782+00:00</td>
-      <td>2021-10-14 00:00:00.088237</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>608.0</td>
-      <td>0.0</td>
-      <td>2.15</td>
-      <td>2021-09-10 20:44:45.028843+00:00</td>
-      <td>2021-09-10 20:44:45.101751+00:00</td>
-      <td>2021-10-14 00:00:00.072908</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>608.0</td>
-      <td>0.0</td>
-      <td>2.15</td>
-      <td>2021-09-10 20:44:45.113836+00:00</td>
-      <td>2021-09-10 20:44:45.194225+00:00</td>
-      <td>2021-10-14 00:00:00.080389</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>20338</th>
-      <td>603.5</td>
-      <td>0.0</td>
-      <td>NaN</td>
-      <td>2021-09-10 21:19:24.902376+00:00</td>
-      <td>2021-09-10 21:19:24.987620+00:00</td>
-      <td>2021-10-14 00:00:00.085244</td>
-    </tr>
-    <tr>
-      <th>20339</th>
-      <td>603.5</td>
-      <td>0.0</td>
-      <td>NaN</td>
-      <td>2021-09-10 21:19:24.987755+00:00</td>
-      <td>2021-09-10 21:19:25.077608+00:00</td>
-      <td>2021-10-14 00:00:00.089853</td>
-    </tr>
-    <tr>
-      <th>20340</th>
-      <td>604.0</td>
-      <td>0.0</td>
-      <td>1.85</td>
-      <td>2021-09-10 21:19:25.077743+00:00</td>
-      <td>2021-09-10 21:19:25.184133+00:00</td>
-      <td>2021-10-14 00:00:00.106390</td>
-    </tr>
-    <tr>
-      <th>20341</th>
-      <td>604.0</td>
-      <td>0.0</td>
-      <td>1.55</td>
-      <td>2021-09-10 21:19:25.184813+00:00</td>
-      <td>2021-09-10 21:19:25.304246+00:00</td>
-      <td>2021-10-14 00:00:00.119433</td>
-    </tr>
-    <tr>
-      <th>20342</th>
-      <td>602.0</td>
-      <td>0.0</td>
-      <td>1.55</td>
-      <td>2021-09-10 21:19:25.304939+00:00</td>
-      <td>2021-09-10 21:19:25.421689+00:00</td>
-      <td>2021-10-14 00:00:00.116750</td>
-    </tr>
-  </tbody>
-</table>
-<p>20343 rows × 6 columns</p>
-</div>
-
+20343 rows × 6 columns
 
 Pandas data frames have a variety of useful methods and attributes some of which are shown below.
 
@@ -223,7 +90,6 @@ We create a list of columns to use in this evaluation.
 columns = ['RPM', 'SPEED', 'FUEL_RATE',]
 ```
 
-
 ```python
 # Basic Statistics - All columns except for date/time and FUEL_TYPE
 # Column/rows with NaN values are filtered out using ```notnull()```
@@ -238,14 +104,13 @@ for column in columns:
          f"not null rows: {not_null_rows} null rows: {null_rows}\n")
 ```
 
-    RPM max: 3188.5, min: 0.0, mean: 1549.1000712775894, std: 711.878713249459 not null rows: 20343 null rows: 0
+```text
+RPM max: 3188.5, min: 0.0, mean: 1549.1000712775894, std: 711.878713249459 not null rows: 20343 null rows: 0
     
-    SPEED max: 139.0, min: 0.0, mean: 68.62807845450523, std: 48.15428660191353 not null rows: 20343 null rows: 0
+SPEED max: 139.0, min: 0.0, mean: 68.62807845450523, std: 48.15428660191353 not null rows: 20343 null rows: 0
     
-    FUEL_RATE max: 1664.0, min: 0.0, mean: 13.552182080181424, std: 22.516152162568115 not null rows: 19431 null rows: 912
-    
-    
-
+FUEL_RATE max: 1664.0, min: 0.0, mean: 13.552182080181424, std: 22.516152162568115 not null rows: 19431 null rows: 912
+```
 
 ```python
 # Correlation
@@ -260,6 +125,7 @@ with pd.option_context('display.max_rows', None,
     print(corr[corr < 1].unstack().transpose().sort_values(ascending=False).drop_duplicates())
 ```
 
+```text
     Correlation
     -----------
     RPM    SPEED        0.936188
@@ -267,8 +133,7 @@ with pd.option_context('display.max_rows', None,
     SPEED  FUEL_RATE    0.362026
     RPM    RPM               NaN
     dtype: float64
-    
-
+```
 
 ```python
 # Covariance
@@ -283,6 +148,7 @@ with pd.option_context('display.max_rows', None,
     print(cov.unstack().transpose().sort_values(ascending=False).drop_duplicates())
 ```
 
+```text
     Covariance
     -----------
     RPM        RPM          506771.302378
@@ -292,8 +158,7 @@ with pd.option_context('display.max_rows', None,
     FUEL_RATE  FUEL_RATE       506.977108
     SPEED      FUEL_RATE       392.739267
     dtype: float64
-    
-
+```
 
 ```python
 # create line graph for each numeric column
@@ -312,23 +177,11 @@ for col in columns:
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    
 ![png](./DataValidation-cycle_11_0.png)
-    
 
-
-
-    
 ![png](./DataValidation-cycle_11_1.png)
-    
 
-
-
-    
 ![png](./DataValidation-cycle_11_2.png)
-    
-
 
 
 ```python
@@ -348,16 +201,7 @@ plt.show()
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_12_1.png)
-    
-
-
 
 ```python
 # create line graph for each numeric column
@@ -381,24 +225,11 @@ for col in columns:
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    
 ![png](./DataValidation-cycle_13_0.png)
-    
 
-
-
-    
 ![png](./DataValidation-cycle_13_1.png)
-    
 
-
-
-    
 ![png](./DataValidation-cycle_13_2.png)
-    
-
-
 
 ```python
 # Histogram
@@ -416,24 +247,11 @@ for col in columns:
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    
 ![png](./DataValidation-cycle_14_0.png)
-    
 
-
-
-    
 ![png](./DataValidation-cycle_14_1.png)
-    
 
-
-
-    
 ![png](./DataValidation-cycle_14_2.png)
-    
-
-
 
 ```python
 # Histogram
@@ -454,12 +272,7 @@ plt.show()
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    
 ![png](./DataValidation-cycle_15_0.png)
-    
-
-
 
 ```python
 # Scatter
@@ -480,66 +293,17 @@ for xcol in columns:
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_16_1.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_16_3.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_16_5.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_16_7.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_16_9.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_16_11.png)
-    
-
-
 
 ```python
 # Scatter
@@ -565,66 +329,17 @@ for xcol in columns:
 #                        format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_17_1.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_17_3.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_17_5.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_17_7.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_17_9.png)
-    
 
-
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_17_11.png)
-    
-
-
 
 ```python
 # Scatter
@@ -646,16 +361,7 @@ plt.show()
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_18_1.png)
-    
-
-
 
 ```python
 # Scatter
@@ -677,16 +383,7 @@ plt.show()
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_19_1.png)
-    
-
-
 
 ```python
 # Scatter
@@ -708,16 +405,7 @@ plt.show()
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_20_1.png)
-    
-
-
 
 ```python
 # Scatter
@@ -739,14 +427,7 @@ plt.show()
 #            format=None, transparent=True, bbox_inches=None, pad_inches=0.2, metadata=None)
 ```
 
-
-    <Figure size 1800x1080 with 0 Axes>
-
-
-
-    
 ![png](./DataValidation-cycle_21_1.png)
-    
 
 ## LICENSE
 

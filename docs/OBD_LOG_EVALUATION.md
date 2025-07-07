@@ -118,15 +118,6 @@ awk -F ',' '// { if ($4 == $5) {print $1}}' \
 grep -v command | grep -v '-'
 ```
 
-## Related
-
-Here are some related projects
-
-- [telemetry-obd](https://github.com/thatlarrypearson/telemetry-obd): Telemetry OBDII (Onboard Diagnostic Data 2) Logger
-  - ```telemetry_obd.obd_logger```
-  - ```telemetry_obd.obd_command_tester```
-- [telemetry-django-obd](https://github.com/thatlarrypearson/telemetry-django-obd): Django database OBD/ECU data loader
-
 ## License
 
 [MIT](../LICENSE.md)

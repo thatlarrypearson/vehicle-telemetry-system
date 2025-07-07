@@ -1,6 +1,6 @@
 # Vehicle Telemetry System Data Aggregation
 
-Convert [Telemetry OBD Logger](https://github.com/thatlarrypearson/telemetry-obd) output to CSV format files suitable for importation into Python [Pandas](https://pandas.pydata.org/)  ```dataframe``` using the ```from_csv()``` method.
+Convert [Telemetry OBD Logger](https://github.com/thatlarrypearson/telemetry-obd) output to CSV format files suitable for importation into Python [Pandas](https://pandas.pydata.org/)  ```dataframe```s using the ```from_csv()``` method.
 
 ## Features
 
@@ -10,8 +10,8 @@ Convert [Telemetry OBD Logger](https://github.com/thatlarrypearson/telemetry-obd
 - Comes with post processing programs that add in
   - rates of change in numeric columns - e.g. ```SPEED``` can become ```ACCELERATION```
   - ratios in pairs of columns - e.g. ```RPM/SPEED``` provides a current gear ratio
-- Uses Python 3.8 or newer (Testing done with Python 3.11)
-- Runs on Windows, Mac and Linux
+- Uses Python 3.11 or newer
+- Runs on Windows, Mac, Linux and Raspberry Pi OS
 
 When aggregating multiple OBD commands into records, ```obd_log_to_csv``` considers a record complete when it finds another entry for an OBD command already placed into the record.  OBD commands not found in the input by the time the record is complete are set to ```None``` in Python and that is translated to missing values in the CSV file.  In Pandas, such missing values get changed to ```NaN``` or Not a Number.
 
@@ -75,13 +75,13 @@ python3.11 -m obd_log_to_csv.obd_log_to_csv \
         data/"${VIN}"/*.json
 ```
 
-In the above example, ```--commands={List-Of-OBD-Commands``` is all on a single line.  The ```\``` (back-slashes) at the ends of lines tell the ```bash``` (and other shells) interpreter to treat the following line as part of the current line.  The back-slashes were added to separate individual options/elements with the goal of improving readability.
+In the above example, ```--commands=<LIST-OF-OBD-COMMANDS>``` is all on a single line.  The ```\``` (back-slashes) at the ends of lines tell the ```bash``` (and other shells) interpreter to treat the following line as part of the current line.  The back-slashes were added to separate individual options/elements with the goal of improving readability.
 
 Similarly, on Windows using PowerShell, the following will also process a group of files for the same vehicle assuming the same directory layout.
 
 ```powershell
 $VIN ="FT8W4DT5HED00000"
-python3.11 -m obd_log_to_csv.obd_log_to_csv --csv=${VIN}.csv --commands=RPM,SPEED,FUEL_RATE data/${VIN}/*.json
+python3.11 -m obd_log_to_csv.obd_log_to_csv --csv=${VIN}.csv --commands=RPM,SPEED,FUEL_RATE data\${VIN}\*.json
 ```
 
 ### ```ValueError: dict contains fields not in fieldnames```
@@ -92,30 +92,32 @@ If you get a value error in the Python ```csv``` module as shown below, then you
 - Look at the ```fieldnames``` listed in the ```ValueError``` message.  Add these field names to your ```--commands``` list of commands.
 
 ```bash
-lbp@telemetry4:telemetry-data/data/telemetry2$ python3.11 -m obd_log_to_csv.obd_log_to_csv --commands "WTHR_obs_st,WTHR_rapid_wind" telemetry2-000
+telemetry4:telemetry-data/data/telemetry2$ python3.11 -m obd_log_to_csv.obd_log_to_csv --commands "WTHR_obs_st,WTHR_rapid_wind" telemetry2-000
 0000076-wthr-0000000070.json
 WTHR_obs_st,WTHR_rapid_wind,iso_ts_pre,iso_ts_post,duration
 Traceback (most recent call last):
   File "<frozen runpy>", line 198, in _run_module_as_main
   File "<frozen runpy>", line 88, in _run_code
-  File "/home/lbp/.local/lib/python3.11/site-packages/obd_log_to_csv/obd_log_to_csv.py", line 236, in <module>
+  File ".local/lib/python3.11/site-packages/obd_log_to_csv/obd_log_to_csv.py", line 236, in <module>
     main()
-  File "/home/lbp/.local/lib/python3.11/site-packages/obd_log_to_csv/obd_log_to_csv.py", line 233, in main
+  File ".local/lib/python3.11/site-packages/obd_log_to_csv/obd_log_to_csv.py", line 233, in main
     cycle_through_input_files(json_input_files, commands, header, stdout, verbose=verbose)
-  File "/home/lbp/.local/lib/python3.11/site-packages/obd_log_to_csv/obd_log_to_csv.py", line 153, in cycle_through_input_files
+  File ".local/lib/python3.11/site-packages/obd_log_to_csv/obd_log_to_csv.py", line 153, in cycle_through_input_files
     input_file(json_input, commands, csv_output_file,
-  File "/home/lbp/.local/lib/python3.11/site-packages/obd_log_to_csv/obd_log_to_csv.py", line 110, in input_file
+  File ".local/lib/python3.11/site-packages/obd_log_to_csv/obd_log_to_csv.py", line 110, in input_file
     writer.writerow(output_record)
-  File "/home/lbp/.local/lib/python3.11/csv.py", line 154, in writerow
+  File ".local/lib/python3.11/csv.py", line 154, in writerow
     return self.writer.writerow(self._dict_to_list(rowdict))
                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/lbp/.local/lib/python3.11/csv.py", line 149, in _dict_to_list
+  File ".local/lib/python3.11/csv.py", line 149, in _dict_to_list
     raise ValueError("dict contains fields not in fieldnames: "
 ValueError: dict contains fields not in fieldnames: 'WTHR_rapid_wind-wind_speed', 'WTHR_rapid_wind-time_epoch', 'WTHR_rapid_wind-wind_direction'
-lbp@telemetry4:telemetry-data/data/telemetry2$
+telemetry4:telemetry-data/data/telemetry2$
 ```
 
 ## ```obd_log_to_csv.obd_log_to_csv``` Jupyter Notebook Usage Example
+
+In the example below, replace ```<vin>``` with your recorded Vehicle Identification Number (VIN).
 
 ```python
 from obd_log_to_csv.obd_log_to_csv import main as obd_log_to_csv_main
@@ -130,31 +132,13 @@ obd_log_to_csv_main(
 
 ## Installation
 
-Clone this repository from `git` and install using Python pip where the Python version is 3.11 or higher.
+This module installs automatically when installing the project.  See [Python Project Software Build and Installation](./README.md/#python-project-software-build-and-installation) to install the project.
 
-In some newer version of Python, ```pip``` is handled differently and not necessarily better which is why the two following ```pip``` installations have the command line options they do.
-
-```bash
-git clone https://github.com/thatlarrypearson/telemetry-obd-log-to-csv.git
-python3.11 --version
-
-# Python pip Install Support
-python3.11 -m pip install --upgrade --force-reinstall --user pip
-python3.11 -m pip install --upgrade --force-reinstall --user wheel setuptools markdown build
-cd telemetry-obd-log-to-csv
-python3.11 -m build
-python3.11 -m pip install --user dist/telemetry_obd_log_to_csv-0.3.3-py3-none-any.whl
-```
-
-## Documentation
-
-This [README](./README.md) has other companion documents as shown below in [OBD Log Evaluation](#OBD-LOG-EVALUATION), [Post Processing](#Post-Processing) and [Data Analysis](#Data-Analysis).
-
-### OBD Log Evaluation
+## OBD Log Evaluation
 
 As an aid to determining which OBD commands should be in ```obd_logger``` configuration files, [```obd_log_evaluation```](./docs/OBD_LOG_EVALUATION.md) analyses output from  ```telemetry_obd.obd_command_tester``` and ```telemetry_obd.obd_logger```.
 
-### JSON Data Integrator
+## JSON Data Integrator
 
 The [JSON Data Integrator](./docs/JSON_DATA_INTEGRATOR.md) integrates telemetry JSON data from multiple sources into a single data file from multiple data sources:
 
@@ -164,11 +148,11 @@ The [JSON Data Integrator](./docs/JSON_DATA_INTEGRATOR.md) integrates telemetry 
 - imu_logger.imu_logger
 - other sources conforming to [Telemetry OBD Logger Output Data Files](https://github.com/thatlarrypearson/telemetry-obd#telemetry-obd-logger-output-data-files)
 
-### Post Processing
+## Post Processing
 
 Additional data manipulation tools are available as part of this library and are described in [CSV File Post Processing](./docs/POST_PROCESSING.md).
 
-### Data Analysis
+## Data Analysis
 
 Simple analysis tools based on [Python Pandas](https://pandas.pydata.org/) are shown in [CSV File Data Analysis](./docs/DATA_ANALYSIS.md).
 
