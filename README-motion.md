@@ -1,8 +1,6 @@
 # Telemetry Motion Logging
 
-Logs 9 DOF (degrees of freedom) IMU (inertial motion unit) captured from [ESP32-S3 processor](https://en.wikipedia.org/wiki/ESP32#ESP32-S3) based [CircuitPython](https://circuitpython.org/) enabled feather micro-controller connected to [I2C enabled 9 DOF IMU feather wing](https://www.adafruit.com/product/4754).
-
-## **UNDER CONSTRUCTION**
+Logs 9 DOF (degrees of freedom) IMU (inertial motion unit) captured by [ESP32-S3 processor](https://en.wikipedia.org/wiki/ESP32#ESP32-S3) based [CircuitPython](https://circuitpython.org/) enabled feather micro-controller connected to [I2C enabled 9 DOF IMU feather wing](https://www.adafruit.com/product/4754).
 
 ## Motivation
 
@@ -12,7 +10,13 @@ In this application, 9 DOF (degrees of freedom) IMUs (inertial motion units) mea
 
 ## Context
 
-Coming soon...
+Data from a 9-DOF IMU provides a comprehensive understanding of an object's motion from a [Physics Kinematics](https://simple.wikipedia.org/wiki/Kinematics) perspective.  This includes its orientation (compass heading, roll, pitch and yaw) and acceleration in 3D space.
+
+This data can explain, to some degree, what is happening in the physical world as a vehicle travels over a roadway.  It it going up or down a hill.  Is the vehicle leaning to the left or right?  Going around a corner?  Accelerating rapidly or performing a panic stop.  Depending on the vehicle and sensor placement, one might even be able to tell what the vehicle's load is.
+
+Measures the strength and direction of the magnetic field in three axes (X, Y, and Z), often used as a compass to determine heading.
+
+By combining the data from these three sensors, a 9-DOF IMU can provide a comprehensive understanding of an object's motion, including its orientation (yaw, pitch, and roll) and acceleration in 3D space. This is useful in a variety of applications, such as robotics, drones, virtual reality, and wearable technology.
 
 ## Context Diagram
 
@@ -20,109 +24,37 @@ Coming soon...
 
 ## Features
 
-Coming soon...
+This solution provides:
+
+- Three axes of acceleration (gravity + linear motion) in m/s^2
+
+- Three axes of linear acceleration data (acceleration minus gravity) in m/s^2
+
+- Three axes of gravitational acceleration (minus any movement) in m/s^2
+
+- Magnetic Field Strength Vector / Magnetometer - Three axes of magnetic field sensing in micro Tesla (uT)
+
+- Three axes of 'rotation speed' in rad/s
+
+- Absolute Orientation / Rotation Vector - Four point quaternion output for accurate data manipulation
+
+- Roll, pitch and yaw in radians
 
 ## Target Hardware
 
-The Raspberry Pi Data Collector and Hotspot hardware is Raspberry Pi 4 or 5 with 4 GB RAM (or more) and with a 32 GB (or more) SD card running Raspberry Pi OS with the latest ```bookworm``` release installed.
+The [Raspberry Pi Data Collector](./README-rpdc.md) and Hotspot hardware is a Raspberry Pi 4 or 5 with 4 GB RAM (or more) and with a 32 GB (or more) SD card running Raspberry Pi OS with the latest ```bookworm``` release installed.
 
 ![Realtime Telemetry Data Collector and Hotspot Context Diagram](docs/VTS-MotionModuleRpdcHotspot.JPG)
 
-## WIFI/USB Enabled Microcontroller/Sensors
-
-If this is your first time working with CircuitPython, read started with [Getting Started](https://esp32s3.com/getting-started.html) to learn how to work with the [Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html).  You may need to upgrade the CircuitPython software on the [Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html).  The software for all CircuitPython supported microcontrollers is found at [CircuitPython downloads page](https://circuitpython.org/downloads).  This is where the [latest stable release of CircuitPython that will work with the Unexpected Maker FeatherS3](https://circuitpython.org/board/unexpectedmaker_feathers3/) can be found.
-
-```powershell
-PS C:\> D:
-PS D:\> dir
-
-
-    Directory: D:\
-
-
-Mode                 LastWriteTime         Length Name
-----                 -------------         ------ ----
-d-----        12/31/1999  11:00 PM                .fseventsd
-d-----        12/31/1999  11:00 PM                lib
--a----        12/31/1999  11:00 PM              0 .metadata_never_index
--a----        12/31/1999  11:00 PM              0 .Trashes
--a----        12/31/1999  11:00 PM              0 settings.toml
--a----          7/2/2025   9:31 AM           1560 code.py
--a----        12/31/1999  11:00 PM            122 boot_out.txt
--a----         6/30/2023   5:55 AM           2135 feathers3.py
--a----         6/30/2023   5:55 AM            455 test_results.txt
-
-
-PS D:\> type boot_out.txt
-Adafruit CircuitPython 8.1.0 on 2023-05-22; FeatherS3 with ESP32S3
-Board ID:unexpectedmaker_feathers3
-UID:CEADB314FBC2
-PS D:\>
-```
-
-```bash
-$ df -h
-$ cd /media/<username>/CIRCUITPI
-$ ls -l
-$ cat boot_out.txt
-Adafruit CircuitPython 8.1.0 on 2023-05-22; FeatherS3 with ESP32S3
-Board ID:unexpectedmaker_feathers3
-UID:CEADB314FBC2
-$
-```
-
-In order to check the CircuitPython version running on a [Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html), you will need to create a console session.  One easy way to do that on Windows, Mac, Raspberry Pi and Linux based systems is to install the [Mu Editor](https://learn.adafruit.com/welcome-to-circuitpython/installing-mu-editor).  Follow these steps:
-
-- Plug the [Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html) into your computer's USB port.
-- Launch [Mu](https://codewith.mu/)
-- Select **Load** from the top menu bar
-- Select the file ```code.py``` from the **Open File** dialog box
-
-![Mu Startup Screen](./docs/MuEditor-01.png)
-
-- Add additional code above line 14 ```# Show available memory```
-
-![Original Code.py Loaded in Mu Editor](./docs/MuEditor-02.png)
-
-```python
-# Show CircuitPython Version
-import sys
-print("CircuitPython Version")
-print("---------------------")
-print("    " + str(sys.implementation.version) + "\n")
-```
-
-![Code.py Updated in Mu Editor to Print CircuitPython Version](./docs/MuEditor-03.png)
-
-- Select **Serial** from the top menu bar
-
-![Serial Mode in MuEditor](./docs/MuEditor-04.png)
-
-- Select **Save** from the top menu bar
-
-  The **Save** action causes the ```code.py``` code to run with the results showing up in the [**CircuitPython REPL**](https://codewith.mu/en/tutorials/1.2/repl).
-
-![Results of Rerunning code.py](./docs/MuEditor-05.png)
-
-- From the above, ```[8, 1, 0]``` means CircuitPython version ```8.1.0```.
-- Go to the [[latest stable release of CircuitPython that will work with the Unexpected Maker FeatherS3]](https://circuitpython.org/board/unexpectedmaker_feathers3/) and record the most recent available version
-
-![latest stable release of CircuitPython that will work with the Unexpected Maker FeatherS3](./docs/MuEditor-06.png)
-
-- Compare the two versions and if there is a newer version, upgrade your microcontroller CircuitPython software
-
-
-
-[Adafruit 9-DOF Orientation IMU Fusion Breakout - BNO085 - STEMMA QT/Qwiic](https://www.adafruit.com/product/4754) requires software libraries installed on the [Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html).  Instructions on how best to install the required Adafruit libraries can be found at [CircuitPython Installation of BNO08x Library](https://learn.adafruit.com/adafruit-9-dof-orientation-imu-fusion-breakout-bno085/python-circuitpython#circuitpython-installation-of-bno08x-library-3072328).  To make sure you have each of the required dependencies, read through the [CircuitPython Libraries](https://learn.adafruit.com/welcome-to-circuitpython/circuitpython-libraries).
-
-Be sure to install each of the dependencies onto the [Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html):
-
-- adafruit_BNO08x
-- adafruit_bus_device
+A microcontroller ([Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html)) running [CircuitPython](https://circuitpython.org) is connected via I2C to a sensor ([Adafruit 9-DOF Orientation IMU Fusion Breakout - BNO085 (BNO080) - STEMMA QT / Qwiic](https://www.adafruit.com/product/4754)).
 
 ![WIFI Enabled Microcontroller and Sensor Context Diagram](docs/VTS-MotionMicrocontrollerSensor.JPG)
 
-The USB interface to the [Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html), can be used for power only as shown above and below assuming WIFI is the data transport protocol from the microcontroller **or** the microcontroller can be connected directly to the Raspberry Pi Data Collector's USB.  That is, USB can be used for data transport.  However, during initial testing microcontroller/sensor placement in the vehicle was an issue.  The sensor moved around in the vehicle making data analysis more difficult.  After switching to WIFI, the microcontroller/sensor was fixed securely to a painted surface using two-sided tape as shown below.
+The USB interface to the [Unexpected Maker FeatherS3](https://esp32s3.com/feathers3.html) is used for 5 volt power as shown above.  For this configuration, WIFI is used for data transport connecting the microcontroller/sensor to the [Raspberry Pi Data Collector](./README-rpdc.md).
+
+Alternatively, the microcontroller can be connected directly to the Raspberry Pi Data Collector's USB.  That is, USB can be used for data transport.  However, during initial testing microcontroller/sensor placement in the vehicle was an issue.  The sensor moved around in the vehicle making data analysis more difficult.
+
+After switching to WIFI, the microcontroller/sensor was fixed securely to a painted surface using two-sided tape as shown below.
 
 ![FeatherS3 and Sensor Mounted In Vehicle](docs/VTS-MotionModuleInVehicleMotionSensorImage.jpg)
 
@@ -130,13 +62,19 @@ When mounting the microcontroller and sensor in the vehicle, be sure to orient t
 
 ![Adafruit 9-DOF Orientation IMU Fusion Breakout - BNO085 - STEMMA QT/Qwiic Orientation ](docs/AdafruitBNO08x.jpg)
 
-The image above shows the [I2C enabled 9 DOF IMU feather wing](https://www.adafruit.com/product/4754) with the orientation bit copied to the side to make it easier to find.  ```x``` should be forward making positive ```y``` to the left and positive ```z``` up.
+The image above shows the [I2C enabled 9 DOF IMU feather wing](https://www.adafruit.com/product/4754) with an image of the orientation printed on the board overlaid on the image.  ```x``` should be forward making positive ```y``` to the left and positive ```z``` up.
 
-## Microcontroller Application Software
+## Microcontroller System and Application Software
 
+CircuitPython based microcontrollers are used to integrate with sensors supporting the I2C data communication protocol.  This module uses microcontrollers for sensor integration.
 
+[CircuitPython Microcontrollers](./CircuitPythonMicrocontrollers.md) covers microcontroller software installation and configuration topics to support microcontroller/sensor applications that use USB and/or WIFI to communicate with data collection software running on a [Raspberry Pi Data Collector](./README-rpdc.md).
+
+Read and follow [CircuitPython Microcontrollers](./CircuitPythonMicrocontrollers.md) before attempting to integrate your microcontroller/sensor into this project.
 
 ## Usage
+
+This is the data collection software that runs on your in vehicle [Raspberry Pi Data Collector](./README-rpdc.md).
 
 ```bash
 $ uv run -m imu_logger.imu_logger --help
@@ -162,6 +100,8 @@ $
 ```
 
 ## Sample Log Data
+
+See [Data](./README.md/#data) for a general description and discussion of the log data format.
 
 ```json
 {
@@ -233,7 +173,135 @@ $
 }
 ```
 
-## Log Data Description
+## Log Data Description - ```obd_response_value```
+
+See [Data](./README.md/#data) for a general description and discussion of the log data format.
+
+In this module, ```obd_response_value``` is a JSON encoded Python dictionary.  Each of the different ```command_name```s contains the ```key``` of ```record_number``` that contains a monotonically increasing integer value representing the number of times a record with this particular ```command_name``` has been transmitted via WIFI or USB.  This provides a way to determine if WIFI UDP IP packets are being dropped during data transmission.  That is, if the collector doesn't get all the transmitted records, there will be gaps in the ```record_number``` count at the [Raspberry Pi Data Collector](./README-rpdc.md).
+
+- **```record["command_name"] = "acceleration"```**
+
+  Three axes of acceleration (gravity + linear motion) in m/s^2
+
+  - ```record["obd_response_value"]["record_number"]```
+
+    See above.
+
+  - ```record["obd_response_value"]["x"]```
+
+    Floating point number, x acceleration vector
+
+  - ```record["obd_response_value"]["y"]```
+
+    Floating point number, y acceleration vector
+
+  - ```record["obd_response_value"]["z"]```
+
+    Floating point number, z acceleration vector
+
+- **```record["command_name"] = "gravity"```**
+
+  Three axes of gravitational acceleration (minus any movement) in m/s^2
+
+  - ```record["obd_response_value"]["record_number"]```
+
+    See above.
+
+  - ```record["obd_response_value"]["x"]```
+
+    Floating point number, x acceleration vector
+
+  - ```record["obd_response_value"]["y"]```
+
+    Floating point number, y acceleration vector
+
+  - ```record["obd_response_value"]["z"]```
+
+    Floating point number, z acceleration vector
+
+- **```record["command_name"] = "gyroscope"```**
+
+  Three axes of 'rotation speed' in rad/s
+
+  - ```record["obd_response_value"]["record_number"]```
+
+    See above.
+
+  - ```record["obd_response_value"]["x"]```
+
+    Floating point number, x angular velocity
+
+  - ```record["obd_response_value"]["y"]```
+
+    Floating point number, y angular velocity
+
+  - ```record["obd_response_value"]["z"]```
+
+    Floating point number, z angular velocity
+
+- **```record["command_name"] = "linear_acceleration"```**
+
+  Three axes of linear acceleration data (acceleration minus gravity) in m/s^2
+
+  - ```record["obd_response_value"]["record_number"]```
+
+    See above.
+
+  - ```record["obd_response_value"]["x"]```
+
+    Floating point number, x acceleration vector
+
+  - ```record["obd_response_value"]["y"]```
+
+    Floating point number, y acceleration vector
+
+  - ```record["obd_response_value"]["z"]```
+
+    Floating point number, z acceleration vector
+
+- **```record["command_name"] = "magnetometer"```**
+
+  Magnetic Field Strength Vector / Magnetometer - Three axes of magnetic field sensing in micro Tesla (uT)
+
+  - ```record["obd_response_value"]["record_number"]```
+
+    See above.
+
+  - ```record["obd_response_value"]["x"]```
+
+    Floating point number, x axis magnetic field strength
+
+  - ```record["obd_response_value"]["y"]```
+
+    Floating point number, y axis magnetic field strength
+
+  - ```record["obd_response_value"]["z"]```
+
+    Floating point number, z axis magnetic field strength
+
+- **```record["command_name"] = "rotation_vector"```**
+
+  Absolute Orientation / Rotation Vector - Four point quaternion output for accurate data manipulation
+
+  - ```record["obd_response_value"]["record_number"]```
+
+    See above.
+
+  - ```record["obd_response_value"]["vector"]```
+
+    Array of floating point numbers, Four point [quaternion](https://en.wikipedia.org/wiki/Quaternion) output with calculated roll, pitch and yaw using [Conversion between quaternions and Euler angles](https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles)
+
+  - ```record["obd_response_value"]["roll"]```
+
+    Floating point number, [roll](https://simple.wikipedia.org/wiki/Pitch,_yaw,_and_roll) in radians
+
+  - ```record["obd_response_value"]["pitch"]```
+
+    Floating point number, [pitch](https://simple.wikipedia.org/wiki/Pitch,_yaw,_and_roll) in radians
+
+  - ```record["obd_response_value"]["yaw"]```
+
+    Floating point number, [yaw](https://simple.wikipedia.org/wiki/Pitch,_yaw,_and_roll) in radians
 
 ## Raspberry Pi System and Installation
 
@@ -245,7 +313,7 @@ As part of preparing the Raspberry Pi Data Collection system to support this mod
 
 Configuring a WIFI Access Point on a Raspberry Pi 4 or 5 running ```Debian 12 bookworm``` is tricky because, in this latest release of Raspberry Pi, network configuration has been dramatically changed to a new configuration subsystem called [Network Manager](https://networkmanager.dev/).   More rough spots need to be smoothed out. **Beware - WIFI access point creation instructions found on the Internet often refer to the old way of configuring networks or worse.  Old and new ways of configuring are mixed together.**
 
-Follow the instruction found in [Configuring Raspberry Pi WIFI/Hotspot/Router](docs/wifi-hotspot-router.md).  Once you have a hotspot up and running on your Raspberry Pi, the CircuitPython microcontroller may need to be reconfigured/configured to work with the Raspberry Pi Data Collection system in-vehicle hotspot.  Follow the instructions provided by [WeatherFlow](https://tempest.earth/).
+Follow the instruction found in [Configuring Raspberry Pi WIFI/Hotspot/Router](docs/wifi-hotspot-router.md).  Once you have a hotspot up and running on your Raspberry Pi, the CircuitPython microcontroller may need to be reconfigured/configured to work with the Raspberry Pi Data Collection system in-vehicle hotspot.  To change WIFI settings in the microcontroller, read [Installing Application Software on CircuitPython Microcontroller](./CircuitPythonMicrocontrollers.md#installing-application-software-on-circuitpython-microcontroller).
 
 ### Selecting USB Connection
 
@@ -288,7 +356,11 @@ DEFAULT_USB_PID = 32983
 CIRCUITPYTHON_DEVICE_NAME = "Unexpected Maker FeatherS3"
 ```
 
-## Unexpected Maker Feather S3 CircuitPython Installation
+## Unexpected Maker Feather S3 CircuitPython Microcontroller Installation
+
+CircuitPython based microcontrollers are used to integrate with sensors supporting the I2C data communication protocol.  This module uses microcontrollers for sensor integration.
+
+See [CircuitPython Microcontroller](./CircuitPythonMicrocontrollers.md) for software installation and configuration information.
 
 ## LICENSE
 
