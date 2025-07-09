@@ -9,8 +9,6 @@ Code, Jupyter Notebooks and Marimo Notebooks supporting analysis of data generat
 - [Trailer](./README-trailer.md)
 - [Aggregation](./README-aggregation.md)
 
-## **UNDER CONSTRUCTION**
-
 ## Launching Jupyter Notebooks
 
 Complete the [Python Project Software Installation](./README.md/#python-project-software-build-and-installation) before continuing.
@@ -95,33 +93,83 @@ uv run marimo edit
 
 I had this crazy idea that I could get better gas mileage if I managed the shifting instead of letting the engine and automatic transmission decide when to shift.  This notion was especially strong while driving through hilly terrain.  Notably on Interstate 44 through Missouri and Interstate 10 between San Antonio and Fort Stockton Texas.
 
-Then I thought that better controlling the shift points would also be beneficial when vehicles were loaded, experiencing adverse weather (headwinds) or running at high elevation.
+Then I thought that better control over shift points would also be beneficial when vehicles were loaded, experiencing adverse weather (headwinds) or running at high elevation.
 
-Even though the OBD standard, [J1979-DA, Digital Annex of E/E Diagnostic Test Modes J1979DA_202104](https://www.sae.org/standards/content/j1979da_202104/), documents an OBD command to retrieve the current gear from the vehicle, none of the vehicles tested support this particular command.  Also, vehicle manufacturers don't always document the different transmission gear ratios in the cars they sell.  It is difficult to determine how a vehicle actually works (or doesn't work).
+Even though the OBD standard [J1979-DA, Digital Annex of E/E Diagnostic Test Modes J1979DA_202104](https://www.sae.org/standards/content/j1979da_202104/) documents an OBD command for retrieving the current gear from the vehicle, none of the vehicles tested support this particular command.  Also, vehicle manufacturers don't always document the different transmission gear ratios in the cars they sell.  It is difficult to determine how a vehicle works (or doesn't).
 
-Determining the current transmission gear in real time is the *Gear Study*'s goal.
+Being able to determine the current transmission gear in real time is the *Gear Study*'s goal.
 
-I still don't know if it is hubris to think a better method, one that improves fuel efficiency, for making shifting decisions can be built.  But I *do* know a way to figure out what gear the vehicle is in.
+I still don't know yet if it is hubris to think a better method, one that improves fuel efficiency, for making shifting decisions can be built.  But I *do* know a way to figure out what gear the vehicle is in.
 
-- ```Gear-Study-0``` - Per Vehicle OBD Log Evaluation Reports
-- ```Gear-Study-1``` - Gear Determination And Error Estimation
-- ```Gear-Study-2``` - Vehicle Route Videos Showing SPEED, RPM and Gear Transitions
+- ```Gear-Study-0.ipynb``` - Per Vehicle OBD Log Evaluation Reports
+
+- ```Gear-Study-1.ipynb``` - Gear Determination And Error Estimation
+
+    Produces/updates a JSON file containing gear info for each ```VIN``` (```~/testing/work-product-files/Studies/Gear-Study/theta-file.json"```).  ```telemetry_analysis.theta.read_theta_data_file()``` function pulls in the JSON file and returns a dictionary.
+
+- File ```theta-file.json``` format is shown below.  
+  - ```theta``` is the gear angle
+  - ```a``` is the least squares y = ax reflecting the ratio of y/x = a
+  - This is from a vehicle with 8 gears
+  - When using ```telemetry_analysis.theta.read_theta_data_file()``` to ingest the JSON file, the gear number keys (```"1"```, ```"2"```, etc.) encoded as strings are converted to integers (```1```, ```2```, etc.).
+
+```python
+{
+    "<VIN>": {
+        "1": {
+            "theta": 0.023660944618538057,
+            "a": 0.11099054336039733
+        },
+        "2": {
+            "theta": 0.10250557759621197,
+            "a": 0.34048684111496674
+        },
+        "3": {
+            "theta": 0.16820943841094022,
+            "a": 0.5111403332487807
+        },
+        "4": {
+            "theta": 0.2864763878774511,
+            "a": 0.5655924691361037
+        },
+        "5": {
+            "theta": 0.37846179301807065,
+            "a": 0.5765638149929576
+        },
+        "6": {
+            "theta": 0.5273905441981214,
+            "a": 0.5824170770862995
+        },
+        "7": {
+            "theta": 0.6587982658275778,
+            "a": 0.5806358406370479
+        },
+        "8": {
+            "theta": 0.755163928355846,
+            "a": 0.5835990123976057
+        }
+    },
+}
+```
+
+
+- ```Gear-Study-2.ipynb``` - Vehicle Route Videos Showing SPEED, RPM and Gear Transitions
 
 ## Acceleration Study - Acceleration Statistics and Plots
 
-- ```Acceleration-Study-1``` - Acceleration Statistics and Histograms
+- ```Acceleration-Study-1.ipynb``` - Acceleration Statistics and Histograms that uses data produced by ```Gear-Study-1.ipynb```
 
 ## Fuel Study - Fuel Use, Analysis and Visualizations
 
-- ```Fuel-Study-1``` - Fuel Study Basic Statistics Report
+- ```Fuel-Study-1.ipynb``` - Fuel Study Basic Statistics Report
 
 ## Mileage Spreadsheet - Data Integration and Analysis with Visualizations
 
-- ```Mileage-Spreadsheet-1``` - Data Integration Between Microsoft Excel Mileage Spreadsheet, Fuel Fill Photos and Engine Data
+- ```Mileage-Spreadsheet-1.ipynb``` - Data Integration Between Microsoft Excel Mileage Spreadsheet, Fuel Fill Photos and Engine Data.  Output is in dictionary/JSON format.  Needs further work.
 
 ## Supporting Code
 
-The code supporting analysis is found primarily in the ```vehicle-telemetry-system/src/telemetry-analysis``` directory.  While code from any of the other modules may be used in places (e.g. ```vehicle-telemetry-system/src/obd_log_to_csv``` for combining JSON records into CSV records).
+The code supporting analysis is found primarily in the ```vehicle-telemetry-system/src/telemetry-analysis``` directory.  While code from any of the other modules may be used as well (e.g. ```vehicle-telemetry-system/src/obd_log_to_csv``` for combining JSON records into CSV records).
 
 ## Private Data
 
@@ -134,6 +182,100 @@ Private data is data used by notebooks that I don't want to share with others.  
 - ```vehicle-telemetry-system/private/example-spreadsheet.py``` - Dictionary With ```vin``` Keys to Spreadsheet Column
 
   Copy the example to ```spreadsheet.py```, use the example as a template to complete with your vehicle data and spreadsheet layout.
+
+## ```vehicle-telemetry-system/src/private/vehicle.py
+
+```vehicle.py``` is manually updated by analysts.  Information comes from multiple sources depending on the vehicle:
+
+- Owners manual
+- Physical examination of the vehicle
+- Internet searches
+- Notebooks
+
+```python
+# Vehicle Data
+vehicles = {
+    # Vehicle-Identification-Number or VIN
+    # Unique Invariant Identifier for all vehicles manufactured in modern times.
+    '<VIN>': {
+        'name': 'What you call this vehicle - should be unique to your set of vehicles',
+        # Transmission should be auto or manual
+        'transmission': 'auto',
+        # Number of forward gears
+        # Don't count low range on 4X4 vehicles that have a low range transfer case unless you regularly use low range
+        # The more gears you have, the more data you need to collect before the algorithm can identify all of the gears.
+        # This advice goes for 'gears' and for 'forward_gear_ratios'.
+        # No allowance is made for having more than one 'reverse_gear_ratio'.
+        # Documenting the number of transmission 'gears' is critical to Gear-Study-1.ipynb notebook
+        # 'forward_gear_ratios' is critical to calculating gear identification error rates in Gear-Study-1.ipynb notebook
+        'gears': 5,
+        'forward_gear_ratios': {
+            1: 3.59,
+            2: 2.19,
+            3: 1.41,
+            4: 1.00,
+            5: 0.83,
+        },
+        'reverse_gear_ratio': 3.165,
+        # 'final_gear_ratio' refers to the drive axle differential gear ratio.
+        'final_gear_ratio': 4.10,
+        # Not using '4L_transfer_case_gear_ratio' yet.
+        # Value should be None if there is no transfer case.
+        '4L_transfer_case_gear_ratio': 4.00,
+        # Tire data is used to compare milage to RPM based distance traveled.
+        # A tire with the size 235/65R17 has a diameter of 29.0 inches.
+        # The first number, 235, is the cross-section width of the tire in millimeters.
+        # The second number, 65, is the ratio of the sidewall height to the cross-section width.
+        # The letter R stands for radial, which is the type of construction of the tire.
+        # The last number, 17, is the wheel diameter in inches.
+        # To calculate the diameter of the tire, you can use the following formula:
+        # Diameter = 25.4 * (cross-section width + sidewall height)
+        # Plugging in the values for the tire size 235/65R17, we get the following:
+        # Diameter = 25.4 * (235 mm + 65 mm) = 25.4 * 290 mm = 29.0 inches
+        # Diameter = 29 inches * 0.0254 m/inch = 0.737 m
+        'tires': {
+            'label': '235/65R17 104H',
+            'diameter': 0.737,                                              # meters
+            'circumference': pi * 0.737,                                    # meters
+        },
+        # Known good OBD commands that the OBD interface responds to.
+        'command_list': [
+            'ABSOLUTE_LOAD', 'ACCELERATOR_POS_D', 'ACCELERATOR_POS_E', 'AMBIANT_AIR_TEMP', 'BAROMETRIC_PRESSURE',
+            'CATALYST_TEMP_B1S1', 'CATALYST_TEMP_B2S1', 'COMMANDED_EQUIV_RATIO', 
+            'CONTROL_MODULE_VOLTAGE', 'COOLANT_TEMP', 
+            'DISTANCE_SINCE_DTC_CLEAR', 'DISTANCE_W_MIL',
+            'ELM_VOLTAGE', 'ENGINE_LOAD', 'EVAPORATIVE_PURGE', 
+            'EVAP_VAPOR_PRESSURE', 'FUEL_LEVEL',
+            'INTAKE_PRESSURE', 'INTAKE_TEMP', 
+            'LONG_FUEL_TRIM_1', 'LONG_FUEL_TRIM_2', 
+            'O2_B1S1', 'O2_B1S2', 'O2_B2S1', 'O2_B2S2', 
+            'ODOMETER',
+            'RELATIVE_THROTTLE_POS', 'RPM', 'RUN_TIME', 
+            'SHORT_FUEL_TRIM_1', 'SHORT_FUEL_TRIM_2', 
+            'SPEED', 'THROTTLE_ACTUATOR', 'THROTTLE_POS', 
+            'THROTTLE_POS_B', 'TIMING_ADVANCE', 
+        ],
+        # 'fuel_type' is 'Gasoline' or 'Diesel'
+        'fuel_type': 'Gasoline',
+    },
+}
+```
+
+```key```s that require values below are:
+
+- ```vehicles[<VIN>]``` which represents the VIN provided by the vehicle over the OBD interface
+- ```vehicles[<VIN>]["name"]``` represents a unique human readable vehicle name to be used in reports
+- ```vehicles[<VIN>]["gears"]``` the number of total forward gears available from the transmission (not including ```vehicles[<VIN>]["4L_transfer_case_gear_ratio"]```) gear multiplication
+- ```vehicles[<VIN>]['forward_gear_ratios']``` difficult to acquire but necessary for assessing error rates in gear determination
+- ```vehicles[<VIN>]["fuel_type"]``` can be ```Gasoline``` or ```Diesel```
+
+Decoding tire information printed on each tire's sidewall is tedious at best.  Having this information will be helpful moving forward even though there are no analysis notebooks currently using this information.
+
+- ```vehicles[<VIN>]["tires"]["label"]``` is the tire label information from drive tire's sidewall
+- ```vehicles[<VIN>]["tires"]["diameter"]``` is the calculated tire diameter
+- ```vehicles[<VIN>]["tires"]["circumference"]``` is the calculated tire circumference
+
+The ```vehicles[<VIN>]["command_list"]``` is manually filled in by analysts using report data from ```Gear-Study-0.ipynb```.
 
 ## Known Problems
 

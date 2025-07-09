@@ -1,7 +1,7 @@
 # telemetry-analysis/telemetry_analysis/common.py
 
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from itertools import islice
 from numpy import arctan2, sin, cos
 from private.vehicles import vehicles
