@@ -84,9 +84,9 @@ fuel_study_input_columns = [
     "linear_acceleration-y",                                      # meters per second squared
     "linear_acceleration-z",                                      # meters per second squared
     "magnetometer-record_number",                                 # count in this "route"
-    "magnetometer-x",                                             # radians?
-    "magnetometer-y",                                             # radians?
-    "magnetometer-z",                                             # radians?
+    "magnetometer-x",                                             # micro Tesla (uT)
+    "magnetometer-y",                                             # micro Tesla (uT)
+    "magnetometer-z",                                             # micro Tesla (uT)
     "rotation_vector-record_number",                              # count in this "route"
     "rotation_vector-pitch",                                      # radians
     "rotation_vector-roll",                                       # radians
@@ -149,9 +149,9 @@ input_float_columns = [
     "linear_acceleration-x",                                      # meters per second squared
     "linear_acceleration-y",                                      # meters per second squared
     "linear_acceleration-z",                                      # meters per second squared
-    "magnetometer-x",                                             # radians?
-    "magnetometer-y",                                             # radians?
-    "magnetometer-z",                                             # radians?
+    "magnetometer-x",                                             # micro Tesla (uT)
+    "magnetometer-y",                                             # micro Tesla (uT)
+    "magnetometer-z",                                             # micro Tesla (uT)
     "rotation_vector-pitch",                                      # radians
     "rotation_vector-roll",                                       # radians
     "rotation_vector-yaw",                                        # radians
@@ -195,9 +195,9 @@ fuel_study_output_columns = [
     "linear_acceleration-x",                                      # meters per second squared
     "linear_acceleration-y",                                      # meters per second squared
     "linear_acceleration-z",                                      # meters per second squared
-    "magnetometer-x",                                             # radians?
-    "magnetometer-y",                                             # radians?
-    "magnetometer-z",                                             # radians?
+    "magnetometer-x",                                             # micro Tesla (uT)
+    "magnetometer-y",                                             # micro Tesla (uT)
+    "magnetometer-z",                                             # micro Tesla (uT)
     "rotation_vector-pitch",                                      # radians
     "rotation_vector-roll",                                       # radians
     "rotation_vector-yaw",                                        # radians

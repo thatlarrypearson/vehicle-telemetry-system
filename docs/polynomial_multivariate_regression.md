@@ -36,7 +36,7 @@ Returns the fitted model, the PolynomialFeatures transformer (useful for transfo
 The if __name__ == "__main__": block demonstrates how to use the function by creating a dummy CSV file and then calling the function with different degrees. It also shows how to use the returned model to make new predictions.
 ```
 
-## Code
+## Original Code
 
 ```python
 import pandas as pd
