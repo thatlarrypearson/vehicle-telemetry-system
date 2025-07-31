@@ -1,8 +1,0 @@
-graft telemetry_gps/*.py
-graft bin
-graft etc
-graft root/bin
-graft config/default.ini
-global-exclude *.py[co]
-prune .mypy_cache
-prune .pytest_cache
