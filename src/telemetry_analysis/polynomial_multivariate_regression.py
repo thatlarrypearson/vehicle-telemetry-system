@@ -11,12 +11,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 import numpy as np
 
-def perform_polynomial_regression(csv_filepath, degree, dependent_variable):
+def perform_polynomial_regression(df:pd.core.frame.DataFrame, degree, dependent_variable):
     """
     Performs polynomial multivariate regression on data from a CSV file.
 
     Args:
-        csv_filepath (str): The path to the CSV file. The first row should contain headers.
+        df (pd.core.frame.DataFrame): Pandas dataframe.
         degree (int): The degree of the polynomial features to generate.
         dependent_variable (str): The name of the dependent variable (column header) in the CSV.
 
@@ -25,17 +25,8 @@ def perform_polynomial_regression(csv_filepath, degree, dependent_variable):
               and R-squared score on the test set.
               Returns None if an error occurs (e.g., file not found, column not found).
     """
-    try:
-        # 1. Read the CSV file
-        df = pd.read_csv(csv_filepath)
-    except FileNotFoundError:
-        print(f"Error: CSV file not found at '{csv_filepath}'")
-        return None
-    except Exception as e:
-        print(f"Error reading CSV file: {e}")
-        return None
 
-    # 2. Identify independent and dependent variables
+    # 1. Identify independent and dependent variables
     if dependent_variable not in df.columns:
         print(f"Error: Dependent variable '{dependent_variable}' not found in CSV columns.")
         return None
@@ -60,16 +51,16 @@ def perform_polynomial_regression(csv_filepath, degree, dependent_variable):
     # Split data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # 3. Create polynomial features
+    # 2. Create polynomial features
     poly = PolynomialFeatures(degree=degree, include_bias=False) # include_bias=False to avoid duplicate constant term
     X_train_poly = poly.fit_transform(X_train)
     X_test_poly = poly.transform(X_test)
 
-    # 4. Perform linear regression on the polynomial features
+    # 3. Perform linear regression on the polynomial features
     model = LinearRegression()
     model.fit(X_train_poly, y_train)
 
-    # 5. Evaluate the model
+    # 4. Evaluate the model
     y_pred = model.predict(X_test_poly)
     r2 = r2_score(y_test, y_pred)
 
