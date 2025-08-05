@@ -9,9 +9,12 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
+from rich.console import Console
 import numpy as np
 
-def perform_polynomial_regression(df:pd.core.frame.DataFrame, degree, dependent_variable):
+console = Console(width=140)
+
+def perform_polynomial_regression(df:pd.core.frame.DataFrame, degree, dependent_variable)->dict:
     """
     Performs polynomial multivariate regression on data from a CSV file.
 
@@ -28,7 +31,7 @@ def perform_polynomial_regression(df:pd.core.frame.DataFrame, degree, dependent_
 
     # 1. Identify independent and dependent variables
     if dependent_variable not in df.columns:
-        print(f"Error: Dependent variable '{dependent_variable}' not found in CSV columns.")
+        console.print(f"Error: Dependent variable '{dependent_variable}' not found in CSV columns.")
         return None
 
     y = df[dependent_variable]
@@ -36,16 +39,16 @@ def perform_polynomial_regression(df:pd.core.frame.DataFrame, degree, dependent_
 
     # Check if there are any independent variables left
     if X.empty:
-        print("Error: No independent variables found after dropping the dependent variable.")
+        console.print("Error: No independent variables found after dropping the dependent variable.")
         return None
 
     # Handle non-numeric columns in independent variables by dropping them
     numeric_cols = X.select_dtypes(include=np.number).columns
     if len(numeric_cols) < X.shape[1]:
-        print(f"Warning: Dropping non-numeric independent columns: {list(set(X.columns) - set(numeric_cols))}")
+        console.print(f"Warning: Dropping non-numeric independent columns: {list(set(X.columns) - set(numeric_cols))}")
         X = X[numeric_cols]
     if X.empty:
-        print("Error: No numeric independent variables remaining after cleaning.")
+        console.print("Error: No numeric independent variables remaining after cleaning.")
         return None
 
     # Split data into training and testing sets
@@ -64,10 +67,10 @@ def perform_polynomial_regression(df:pd.core.frame.DataFrame, degree, dependent_
     y_pred = model.predict(X_test_poly)
     r2 = r2_score(y_test, y_pred)
 
-    print(f"\nPolynomial Regression Model Summary (Degree: {degree})")
-    print(f"Dependent Variable: {dependent_variable}")
-    print(f"Independent Variables: {list(X.columns)}")
-    print(f"R-squared (on test set): {r2:.4f}")
+    console.print(f"\nPolynomial Regression Model Summary (Degree: {degree})")
+    console.print(f"Dependent Variable: {dependent_variable}")
+    console.print(f"Independent Variables: {list(X.columns)}")
+    console.print(f"R-squared (on test set): {r2:.4f}")
 
     return {
         "model": model,
