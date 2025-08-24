@@ -29,7 +29,6 @@ dependencies = [
   'psutil == 6.1.0',
   'pynmeagps >= 1.0.10',
   'pyserial == 3.5',
-  'python-dateutil == 2.8.2',
 # under Windows, may need to uncomment the following
 #  'python-tzdata == 2023.3',
   'pytz == 2023.3',

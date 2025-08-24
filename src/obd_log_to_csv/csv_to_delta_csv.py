@@ -5,7 +5,7 @@ import csv
 from argparse import ArgumentParser
 from io import TextIOWrapper
 from copy import deepcopy
-from datetime import timedelta
+from datetime import timedelta, datetime
 from dateutil import parser
 
 
@@ -95,8 +95,8 @@ def delta(input_csv_file, output_csv_file, delta_columns, verbose=False):
             ):
                 v1 = float(delta_first[name]['value'])
                 v2 = float(in_row[name])
-                t1 = parser.isoparse(delta_first[name]['iso_ts_pre'])
-                t2 = parser.isoparse(in_row['iso_ts_post'])
+                t1 = datetime.fromisoformat(delta_first[name]['iso_ts_pre'])
+                t2 = datetime.fromisoformat(in_row['iso_ts_post'])
                 out_row[f"delta-{name}"] = (v2 - v1) / (float((t2 - t1) / timedelta(microseconds=1)) * 1000000.0)
 
             else:

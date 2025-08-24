@@ -919,3 +919,11 @@ def get_mode_pid_from_command_name(command_name:str)->tuple:
 
     return COMMAND_TO_MODE_PID[command_name]
 
+def null_output_record(commands:list) -> dict:
+    """returns a dictionary with command keys with corresponding None values
+    """
+    return {command: None for command in commands}
+
+def csv_header(commands:list) -> list:
+    return commands + date_time_fields
+

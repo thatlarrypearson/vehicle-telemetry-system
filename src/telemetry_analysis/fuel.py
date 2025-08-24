@@ -12,7 +12,6 @@ from rich.console import Console
 from rich.jupyter import print
 from rich.pretty import pprint
 from rich.table import Table
-from dateutil import parser
 from math import sqrt, atan2, tan, pi, radians, ceil
 from haversine import haversine
 
@@ -53,14 +52,14 @@ from private.vehicles import vehicles
 fuel_study_input_columns = [
     "AMBIANT_AIR_TEMP",                                           # Celsius 
     "BAROMETRIC_PRESSURE",                                        # kilopascal (kPa)
-    "COMMANDED_EQUIV_RATIO",                                      # air/fuel equivalence ratio
-    "ENGINE_LOAD",                                                # % of maximum torque
+    # "COMMANDED_EQUIV_RATIO",                                      # air/fuel equivalence ratio
+    # "ENGINE_LOAD",                                                # % of maximum torque
     "FUEL_LEVEL",                                                 # % of useable fuel capacity
-    "FUEL_RATE",                                                  # liters per hour
+    # "FUEL_RATE",                                                  # liters per hour
     "FUEL_RATE_2-engine_fuel_rate",                               # grams per second
-    "FUEL_RATE_2-vehicle_fuel_rate",                              # grams per second
+    # "FUEL_RATE_2-vehicle_fuel_rate",                              # grams per second
     "ODOMETER",                                                   # Kilometers
-    "MAF",                                                        # grams per second
+    # "MAF",                                                        # grams per second
     "THROTTLE_ACTUATOR",                                          # Gas Pedal Position - %, min @ idle = 0, max @ floor <= 100
     "THROTTLE_POS",                                               # Absolute Throttle Position - %, min @ idle > 0, max @ WOT <= 100
     "RPM",                                                        # revolutions per minute
@@ -314,7 +313,6 @@ def generate_fuel_study_data(vin:str, output_file_name:str, csv_file_dir:str, fo
             writer = csv.DictWriter(csv_output, fieldnames=fuel_study_output_columns, escapechar="\\")
             writer.writeheader()
 
-
             # each row in the union of all CSV files has a unique row number 'i'
             i = 0
 
@@ -364,10 +362,10 @@ def generate_fuel_study_data(vin:str, output_file_name:str, csv_file_dir:str, fo
 
                         # convert date/time
                         if isinstance(row['iso_ts_pre'], str):
-                            record['iso_ts_pre'] = parser.isoparse(row['iso_ts_pre'])
+                            record['iso_ts_pre'] = datetime.fromisoformat(row['iso_ts_pre'])
 
                         if isinstance(row['iso_ts_post'], str):
-                            record['iso_ts_post'] = parser.isoparse(row['iso_ts_post'])
+                            record['iso_ts_post'] = datetime.fromisoformat(row['iso_ts_post'])
 
                         record['duration'] = record['iso_ts_post'] - record['iso_ts_pre']
                         record['duration'] = record['duration'].total_seconds()

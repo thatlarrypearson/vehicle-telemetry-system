@@ -17,7 +17,6 @@ import json
 from pathlib import Path
 from argparse import ArgumentParser
 from itertools import count
-from dateutil import parser
 from datetime import datetime, timedelta
 from pytz import timezone
 from openpyxl import load_workbook
@@ -189,7 +188,7 @@ def gps_file_information(file_name, verbose=False)->tuple:
             # }
             if record['command_name'] == 'NMEA_GNGNS' and record['obd_response_value']['lat']:
                 if not iso_ts_pre:
-                    iso_ts_pre = parser.isoparse(record['iso_ts_pre'])
+                    iso_ts_pre = datetime.fromisoformat(record['iso_ts_pre'])
                     first_location = {
                         'time': record['obd_response_value']['time'],
                         'lat': record['obd_response_value']['lat'],
@@ -198,7 +197,7 @@ def gps_file_information(file_name, verbose=False)->tuple:
                         'EW': record['obd_response_value']['EW'],
                         'alt': record['obd_response_value']['alt'],
                     }
-                iso_ts_post = parser.isoparse(record['iso_ts_post'])
+                iso_ts_post = datetime.fromisoformatisoformat(record['iso_ts_post'])
                 last_location = {
                     'time': record['obd_response_value']['time'],
                     'lat': record['obd_response_value']['lat'],
@@ -293,9 +292,9 @@ def obd_file_information(file_name:Path, verbose=False) -> tuple:
 
             if record['command_name'] in ['ODOMETER', 'FUEL_LEVEL', ]:
                 if not iso_ts_pre:
-                    iso_ts_pre = parser.isoparse(record['iso_ts_pre'])
+                    iso_ts_pre = datetime.fromisoformat(record['iso_ts_pre'])
 
-                iso_ts_post = parser.isoparse(record['iso_ts_post'])
+                iso_ts_post = datetime.fromisoformat(record['iso_ts_post'])
 
             if record['command_name'] == 'ODOMETER' and record['obd_response_value']:
                 if not first_ODOMETER:

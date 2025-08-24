@@ -13,7 +13,6 @@ from rich.console import Console
 from rich.jupyter import print
 from rich.pretty import pprint
 from rich.table import Table
-from dateutil import parser
 from math import sqrt, atan2, tan, pi, radians, ceil
 from scipy.signal import argrelextrema
 from itertools import chain
@@ -173,9 +172,9 @@ def generate_gear_study_data(csv_file_dir:str, vin:str)->list:
                     record['theta'] = atan2(record['mps'], record['rps'])
                     record['radius'] = sqrt((record['rps'] * record['rps']) + (record['mps'] * record['mps']))
                     if isinstance(row['iso_ts_pre'], str):
-                        record['iso_ts_pre'] = parser.isoparse(row['iso_ts_pre'])
+                        record['iso_ts_pre'] = datetime.fromisoformat(row['iso_ts_pre'])
                     if isinstance(row['iso_ts_post'], str):
-                        record['iso_ts_post'] = parser.isoparse(row['iso_ts_post'])
+                        record['iso_ts_post'] = datetime.fromisoformat(row['iso_ts_post'])
                     record['duration'] = record['iso_ts_post'] - record['iso_ts_pre']
                     record['duration'] = record['duration'].total_seconds()
                     record['acceleration'] = 0.0

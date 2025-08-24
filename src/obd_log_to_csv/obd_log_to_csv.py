@@ -2,24 +2,19 @@
 # obd_log_to_csv/obd_log_to_csv.py
 import json
 import csv
+import itertools
 from sys import stdout, stderr
 from argparse import ArgumentParser
+from datetime import datetime
+from time import sleep
 from io import TextIOWrapper
 from pint import UnitRegistry, UndefinedUnitError, OffsetUnitCalculusError
-from dateutil import parser
 from .obd_log_common import (
-    get_list_command_name, base_command_name_filter, pint_to_value_type, get_field_names,
-    date_time_fields
+    get_list_command_name,
+    pint_to_value_type,
+    get_base_command_name,
+    csv_header,
 )
-
-def null_out_output_record(output_record:dict, commands:list) -> None:
-    """Nulls out the values within the output record dictionary.
-    """
-    for column_name in csv_header(commands):
-        output_record[column_name] = None
-
-def csv_header(commands:list) -> list:
-    return commands + date_time_fields
 
 def input_file(json_input:TextIOWrapper, commands:list, csv_output:TextIOWrapper,
                 header:bool=True, verbose:bool=False) -> None:
@@ -27,15 +22,26 @@ def input_file(json_input:TextIOWrapper, commands:list, csv_output:TextIOWrapper
         a list of OBD commands to include in the output and
         an output file handle for the CSV output file.
     """
-    commands = get_field_names(commands)
+
+    base_commands = [get_base_command_name(command) for command in commands]
+    iso_ts_pre = None
+
+    # Start with a no key/value pairs in dict
     output_record = {}
-    null_out_output_record(output_record, commands)
-    output_record_is_nulled_out = True
 
-    writer = csv.DictWriter(csv_output, fieldnames=csv_header(commands), escapechar="\\")
-
-    if verbose:
-        print(f"CSV field names: {csv_header(commands)}", file=stderr)
+    writer = csv.DictWriter(
+        csv_output,
+        fieldnames=csv_header(
+            list(
+                itertools.chain(
+                    commands,
+                    # ['iso_ts_pre', 'iso_ts_post', 'duration', ]
+                )
+            )
+        ),
+        escapechar="\\",
+        extrasaction='ignore'
+    )
 
     if header:
         writer.writeheader()
@@ -49,102 +55,56 @@ def input_file(json_input:TextIOWrapper, commands:list, csv_output:TextIOWrapper
                 print(f"Corrupted JSON info:\n{e}", file=stderr)
             return
 
-        if not base_command_name_filter(input_record['command_name'], commands):
-            if verbose:
-                print(f"base_command_name_filter({input_record['command_name']}) returned False")
+        base_command_name = get_base_command_name(input_record['command_name'])
+        if base_command_name not in base_commands:
+            # This is NOT a command name we are looking for so get the NEXT input_record
             continue
 
-        if verbose:
-            print(f"input_record: {input_record['command_name']} value: {input_record['obd_response_value']}", file=stderr)
+        # The current output_record gets written when the current input is for a command
+        # that has already been added to the output_record.
+        if base_command_name in output_record:
+            # For the record being output, the ending time boundary ends where the next
+            # input field is added.
+            output_record['iso_ts_post'] = datetime.fromisoformat(input_record['iso_ts_pre'])
+            output_record['iso_ts_pre'] = iso_ts_pre
 
-        write_row = False
+            # if not isinstance(output_record['iso_ts_post'], datetime):
+            #     print(f"output_record['iso_ts_post'] = {output_record['iso_ts_post']} is type {type(output_record['iso_ts_post'])}")
+            # if not isinstance(output_record['iso_ts_pre'], datetime):
+            #     print(f"output_record['iso_ts_pre'] = {output_record['iso_ts_pre']} is type {type(output_record['iso_ts_pre'])}")
+            output_record['duration'] = (output_record['iso_ts_post'] - output_record['iso_ts_pre']).total_seconds()
+
+            # Reset iso_ts_pre so that the next valid command will start its start time
+            iso_ts_pre = None
+
+            writer.writerow(output_record)
+
+            # Start again with a no key/value pairs in dict
+            output_record = {}
+
+        # For the record being output, the beginning time boundary starts with
+        # the first input field that was added.
+        if not iso_ts_pre:
+            # This is the first command in a CSV output record:
+            #   - record the starting timestamp for this record
+            iso_ts_pre = datetime.fromisoformat(input_record['iso_ts_pre'])
+
+        # The current command name is in the list and should move to output
+        # Trick to get the write(output record) to trigger for dicts and lists:
+        # - For single value responses, output_record[command_name] gets filled in
+        #   with the correct value.
+        output_record[base_command_name] = True
         if isinstance(input_record['obd_response_value'], dict):
             for field_name, obd_response_value in input_record['obd_response_value'].items():
                 command_name = f"{input_record['command_name']}-{field_name}"
-                if command_name not in commands and input_record['command_name'] not in commands:
-                    if verbose:
-                        print(f"dict command_name {command_name} not in commands")
-                    continue
-                if command_name not in commands:
-                    # then the root command name is in commands and the command with field name needs to be added to commands
-                    if verbose:
-                        print(f"dict command_name {command_name} added to commands")
-                    commands.append(command_name)
-                if verbose:
-                    print(f"dict: {input_record['command_name']} to {command_name}: value: {obd_response_value}", file=stderr)
-                if command_name in output_record and output_record[command_name]:
-                    output_record['iso_ts_post'] = parser.isoparse(input_record['iso_ts_pre'])
-                    write_row = True
-                    break
-        elif isinstance(input_record['obd_response_value'], list):
-            for obd_response_index, obd_response_value in enumerate(input_record['obd_response_value'], start=0):
-                command_name = get_list_command_name(input_record['command_name'], obd_response_index)
-                if command_name not in commands and input_record['obd_response_value'] not in commands:
-                    if verbose:
-                        print(f"list command_name {command_name} not in commands")
-                    continue
-                if command_name not in commands:
-                    # then the root command name is in commands and the command with field name needs to be added to commands
-                    if verbose:
-                        print(f"list command_name {command_name} added to commands")
-                    commands.append(command_name)
-                if verbose:
-                    print(f"list: {input_record['command_name']} to {command_name}: value: {obd_response_value}", file=stderr)
-                if command_name in output_record and output_record[command_name]:
-                    output_record['iso_ts_post'] = parser.isoparse(input_record['iso_ts_pre'])
-                    write_row = True
-                    break
-        else:
-            command_name = input_record['command_name']
-            if verbose:
-                print(f"{command_name}: value: {input_record['obd_response_value']}", file=stderr)
-
-            if command_name in commands and output_record[command_name]:
-                output_record['iso_ts_post'] = parser.isoparse(input_record['iso_ts_pre'])
-                write_row = True
-
-        if write_row:
-            if verbose:
-                print(f"====================================\noutput_record: {output_record}\n====================================", file=stderr)
-            output_record['duration'] = output_record['iso_ts_post'] - output_record['iso_ts_pre']
-            # remove keys/value pairs from output_record where the key doesn't match a command in commands
-            filtered_output_record = {k: v for k, v in output_record.items() if k in commands}
-            writer.writerow(filtered_output_record)
-
-            null_out_output_record(output_record, commands)
-            output_record_is_nulled_out = True
-
-        if output_record_is_nulled_out:
-            try:
-                output_record['iso_ts_pre'] = parser.isoparse(input_record['iso_ts_pre'])
-            except KeyError:
-                print(f"KeyError: 'iso_ts_pre' {line_number}: {input_record}")
-                exit(1)
-            output_record_is_nulled_out = False
-
-        if isinstance(input_record['obd_response_value'], dict):
-            for field_name, obd_response_value in input_record['obd_response_value'].items():
-                command_name = f"{input_record['command_name']}-{field_name}"
-                if command_name not in commands and input_record['command_name'] not in commands:
-                    continue
                 output_record[command_name], pint_value = pint_to_value_type(obd_response_value, verbose)
         elif isinstance(input_record['obd_response_value'], list):
             for obd_response_index, obd_response_value in enumerate(input_record['obd_response_value'], start=0):
                 command_name = get_list_command_name(input_record['command_name'], obd_response_index)
-                if command_name not in commands and input_record['obd_response_value'] not in commands:
-                    continue
                 output_record[command_name], pint_value = pint_to_value_type(obd_response_value, verbose)
         else:
             command_name = input_record['command_name']
             output_record[command_name], pint_value = pint_to_value_type(input_record['obd_response_value'], verbose)
-
-    if not output_record_is_nulled_out: 
-        if verbose:
-            print(f"====================================\noutput_record: {output_record}\n====================================", file=stderr)
-        output_record['iso_ts_post'] = parser.isoparse(input_record['iso_ts_pre'])
-        output_record['duration'] = output_record['iso_ts_post'] - output_record['iso_ts_pre']
-        final_output_record = {k: v for k, v in output_record.items() if k in commands}
-        writer.writerow(final_output_record)
 
     return
 
@@ -218,6 +178,14 @@ def main(json_input_files=None, csv_output_file_name='stdout', header=True, verb
         header = not args['no_header']
         verbose = args['verbose']
         commands = (args['commands']).split(sep=',')
+    else:
+        args = {
+            'json_input_files': json_input_files,
+            'csv_output_file_name': csv_output_file_name,
+            'header': header,
+            'verbose': verbose,
+            'commands': commands,
+        }
 
     if not commands:
         raise ValueError("required argument is None, should be a comma separated list of OBD commands")
