@@ -12,42 +12,55 @@ GPS_DEVICE_NAME = "u-blox GNSS receiver"
 # This default is the default device name on a Raspberry Pi when the GPS is the only attached serial USB device.
 DEFAULT_SERIAL_DEVICE="/dev/ttyACM0"
 
+logging.basicConfig(stream=stderr, level=logging.DEBUG)
+
 def get_serial_device_name(verbose=False, default_serial_device=DEFAULT_SERIAL_DEVICE)->str:
     """Get serial device name for GPS"""
 
-    for p in comports():
-        if p.vid and p.vid == DEFAULT_USB_VID and p.pid == DEFAULT_USB_PID:
-            return p.device
+    logging.info("Candidate Serial Device List (non-USB devices excluded)")
+    i = 0
+    return_device = None
 
-    logging.error(f"USB attached GPS device <{GPS_DEVICE_NAME}> not found.")
-    logging.info(f"Trying serial port device <{default_serial_device}>.")
+    for p in comports():
+        vid = p.vid
+        if not vid:
+            # not a USB device
+            continue
+
+        device = p.device
+        pid = p.pid
+
+        i += 1
+        logging.info(f"{i:3} {device}")
+        logging.info(f"\tName: {p.name}")
+        logging.info(f"\tUSB VID: {vid} type {type(vid)}")
+        logging.info(f"\tUSB PID: {pid} type {type(pid)}")
+        logging.info(f"\tDescription: {p.description}")
+        logging.info(f"\tHardware ID: {p.hwid}")
+        logging.info(f"\tManufacturer: {p.manufacturer}")
+        logging.info(f"\tProduct: {p.product}")
+        logging.info(f"\tSerial Number: {p.serial_number}")
+        logging.info(f"\tLocation: {p.location}")
+        logging.info(f"\tinterface: {p.interface}")
+        logging.info(f"\tdevice: {device}")
+        logging.info(f"\tdevice_path: {p.device_path}")
+        logging.info(f"\tusb_device_path: {p.usb_device_path}")
+
+        if p.vid == DEFAULT_USB_VID and p.pid == DEFAULT_USB_PID:
+            return_device = device
+            logging.info(f"** DEVICE FOUND: {return_device} **")
+
+    logging.info(f"{i} USB Serial Device(s) Found")
+
+    if return_device:
+        return return_device
+
+    logging.info(f"USB Attached GPS Device <{GPS_DEVICE_NAME}> not found.")
+    logging.info(f"Using Default Serial Device <{default_serial_device}>.")
 
     return default_serial_device
 
 def main():
-    logging.basicConfig(stream=stderr, level=logging.DEBUG)
-
-    logging.info("Candidate Serial Device List (non-USB devices excluded)")
-    i = 0
-    for p in comports():
-        if not p.vid:
-            # not a USB device
-            continue
-        i += 1
-        logging.info(f"\n\t+{i} {p.device}")
-        logging.info(f"\t\tName: {p.name}")
-        logging.info(f"\t\tUSB VID: {p.vid}")
-        logging.info(f"\t\tUSB PID: {p.pid}")
-        logging.info(f"\t\tDescription: {p.description}")
-        logging.info(f"\t\tHardware ID: {p.hwid}")
-        logging.info(f"\t\tManufacturer: {p.manufacturer}")
-        logging.info(f"\t\tProduct: {p.product}")
-        logging.info(f"\t\tSerial Number: {p.serial_number}")
-        logging.info(f"\t\tLocation: {p.location}")
-        logging.info(f"\t\tinterface: {p.interface}")
-
-    logging.info(f"\nFound {i} USB Serial Device(s)")
-
     if sdn := get_serial_device_name(default_serial_device=None):
         logging.info(f"\nUSB Serial Device <{GPS_DEVICE_NAME}> Name {sdn} found")
         exit(0)

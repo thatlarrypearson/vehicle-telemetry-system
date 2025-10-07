@@ -16,9 +16,12 @@ export VTS_SOURCE_DIR="${VTS_HOME}/vehicle-telemetry-system"
 # for your Bluetooth OBD Adapter
 export VTS_BT_MAC_ADDRESS="00:04:3E:5A:A7:67"
 
-# only change this value after determining that the default
-# serial device is different from the one listed below
+# Only change this value after determining that the default
+# serial device is different from the one listed below.
+# This is the Adafruit Ultimate GPS.
 export VTS_DEFAULT_GPS_SERIAL_DEVICE="/dev/ttyACM0"
+# This is the Waveshare u-blox GPS Serial Device
+# export VTS_DEFAULT_GPS_SERIAL_DEVICE="/dev/ttyACM0"
 
 if [ ! -d "${VTS_TMP_DIR}" ]
 then

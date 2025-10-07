@@ -8,17 +8,31 @@ Integrate GPS location and time data collection with vehicle engine data for bet
 
 ## Features
 
+There are two versions of this.  The **current** supported version uses [**Adafruit Ultimate GPS with USB - 99 channel w/10 Hz updates**](https://www.adafruit.com/product/4279).  The original version works uses [NEO-M8T GNSS TIMING HAT for Raspberry Pi, Single-Satellite Timing, Concurrent Reception of GPS, Beidou, Galileo, GLONASS](https://www.waveshare.com/neo-m8t-gnss-timing-hat.htm).
+
+I switched to the Adafruit version because I was experiencing problems with the original version not getting a fix, even under open skies.  It was simpler to replace than debug what I suspect was a hardware issue.
+
 - Logs location data to file
-- Works with a chip set family ([u-blox]((https://www.u-blox.com)) supporting GPS, GLONASS, Galileo and BeiDou Global Navigation Satellite Systems (GNSS)
+
 - Works with large family of GNSS enabling multiple constellations of satellites transmitting positioning and timing data
 - Works with Python 3.10 and newer
 - Raspberry Pi 4/5 hardware and Raspberry Pi OS target environment
+
+### Current Supported Version
+
+- Uses [GlobalTop MT3339](https://learn.adafruit.com/adafruit-ultimate-gps/downloads) chip set packaged by [CD Technology](https://www.cdtop-tech.com/products/pa1616d)
+
+### Original Version
+
+- Uses ([u-blox]((https://www.u-blox.com)) supporting GPS, GLONASS, Galileo and BeiDou Global Navigation Satellite Systems (GNSS) chip set families
 
 ## Target System
 
 Raspberry Pi 4 or 5 with 4 GB RAM (or more) and with a 32 GB (or more) SD card.
 
 ## Target GPS Hardware
+
+### Original Version Target GPS Hardware
 
 Devices supporting USB or **RS-232**/**UART** interfaces made from **u-blox 8** or **u-blox M8** or newer GPS receiver chip sets are required for this application.  **u-blox** devices support the **UBX** protocol in addition to the **NMEA** protocol.  UBX is used for device configuration.  **NMEA** is used to decode **NMEA** location data.  The libraries used to support this application are bilingual.  That is, the libraries speak both **UBX** and **NMEA**.
 
@@ -32,17 +46,40 @@ In theory, any **u-blox** GPS devices supporting a USB interface should work fin
 
 ## Usage
 
+### Current Support Version Usage
+
 ```bash
-$ uv run -m gps_logger.gps_logger --help
-usage: gps_logger.py [-h] [--log_file_directory LOG_FILE_DIRECTORY]
-                     [--serial SERIAL] [--verbose] [--version]
+$ uv run -m gps_logger.adafruit_ultimate_gps_logger --help
+usage: adafruit_ultimate_gps_logger.py [-h] [--serial SERIAL] [--verbose] [--version] [base_path]
 
 Telemetry GPS Logger
+
+positional arguments:
+  base_path        Relative or absolute output data directory. Defaults to 'telemetry-data\data'.
+
+options:
+  -h, --help       show this help message and exit
+  --serial SERIAL  Full path to the serial device where the GPS can be found, defaults to /dev/ttyUSB0
+  --verbose        Turn DEBUG logging on. Default is off.
+  --version        Print version number and exit.
+$
+```
+
+### Original Version Usage
+
+```bash
+$ uv run -m gps_logger.gps_logger --help
+usage: gps_logger.py [-h] [--message_rate MESSAGE_RATE] [--serial SERIAL] [--verbose] [--version] [base_path]
+
+Telemetry GPS Logger
+
+positional arguments:
+  base_path             Relative or absolute output data directory. Defaults to 'telemetry-data\data'.
 
 options:
   -h, --help            show this help message and exit
   --message_rate MESSAGE_RATE
-                        Number of whole seconds between each GPS fix.  Defaults to 1.
+                        Number of whole seconds between each GPS fix. Defaults to 1.
   --serial SERIAL       Full path to the serial device where the GPS can be found, defaults to /dev/ttyACM0
   --verbose             Turn DEBUG logging on. Default is off.
   --version             Print version number and exit.
@@ -81,26 +118,48 @@ The following discussion describes specific aspects of the data generated in thi
 
 #### ```command_name```
 
-The ```command_name``` identifies (```NMEA_<talker identifier><sentence formatter>```) the GPS data source.  See **Section 31 NMEA Protocol** in the [u-blox 8 / u-blox M8 Receiver description Manual](https://content.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_UBX-13003221.pdf).  The current GPS data sources have a talker identifier of ```GN``` indicating any combination of GNSS (GPS, SBAS, QZSS, GLONASS, Galileo and/or BeiDou) as supported by the GPS unit will be used for positioning output data.  The supported sentence formatters are ```GNS```, ```GST```, ```THS``` and ```VTD```.
+The ```command_name``` identifies the ```<talker identifier><sentence formatter>``` of the specific GPS data source.  See **Section 31 NMEA Protocol** in the [u-blox 8 / u-blox M8 Receiver description Manual](https://content.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_UBX-13003221.pdf).
 
-- ```NMEA_<talker identifier><sentence formatter>```
-  - ```NMEA_<GN><GNS>```: Fix data
-  - ```NMEA_<GN><GST>```: Pseudorange error statistics
-  - ```NMEA_<GN><THS>```: True heading and status
-  - ```NMEA_<GN><ZDA>```: Time and date
+| **NMEA Talker IDs**| |
+| ----- | ---- |
+| **GNSS** | **Talker ID** |
+| GPS | GP |
+| GLONASS | GL |
+| Galileo | GA |
+| BeiDou | GB |
+| Any combination of GNSS | GN |
 
 #### ```obd_response_value```
 
 Reflects the key/value pairs returned by the GPS.  The actual parsed NMEA output is contained in the ```obd_response_value``` field as a dictionary (key/value pairs).  That is, ```obd_response_value``` is a field that contains an NMEA record which also contains fields.  The field name is the key portion of the field.  The field value is the value part of the field.  Each NMEA sentence has its own unique set of field names.
 
-- ```NMEA_GNGNS```: ```GNS``` Fix data
-  - ```field_name_0```: ```field_value_type_0```
-- ```NMEA_GNGST```: ```GST``` Pseudorange error statistics
-  - ```field_name_0```: ```field_value_type_0```
-- ```NMEA_GNTHS```: ```THS``` True heading and status
-  - ```field_name_0```: ```field_value_type_0```
-- ```NMEA_GNVTD```: ```VTD``` Time and data
-  - ```field_name_0```: ```field_value_type_0```
+##### Current Solution ```obd_response_value```
+
+For the current GPS hardware, a decent description of the key/value pairs returned by the GPS are provided in the [GPS - NMEA sentence information](https://aprs.gids.nl/nmea/) web page.  Just remember to pay attention to the ```sentence formatter``` portion of the sentence identifier (see [Command Name](#command_name)) above.
+
+The logged command names will be a combination of **talker identifiers** ```GP``` (GPS only), ```GL``` (GLONASS only) and ```GN``` (GPS and GLONASS).  For most uses, ```GN``` prefixed command names will provide greater accuracy than ```GP``` or ```GL``` variants.  That is, generally, two GNSS's are better than one.
+
+The following represent the current solution's supported **sentence formatter**.
+
+- ```<talker identifier>```**```<sentence formatter>```**
+  - ```GGA``` Time, position and fix data
+  - ```GSA``` GNSS receiver operating mode, active satellites used in the position solution and DOP values
+  - ```GSV``` The number of GNSS satellites in view, satellite ID numbers, elevation, azimuth and SNR values
+  - ```RMC``` Time, date, position, course and speed data
+  - ```VTG``` Course and speed information relative to the ground
+
+##### Original Version ```obd_response_value```
+
+For the original solutions hardware, field names and value types can be found in the [u-blox 8 / u-blox M8 Receiver description - Manual](https://content.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_UBX-13003221.pdf) in the "31.2 Standard Messages" (messages as defined in the NMEA standard) section.  The current GPS data sources have a **talker identifier** of ```GN``` indicating any combination of GNSS (GPS, SBAS, QZSS, GLONASS, Galileo and/or BeiDou) as supported by the GPS unit will be used for positioning output data.
+
+The following represent the original version's supported **sentence formatter**.
+
+- ```<talker identifier>```**```<sentence formatter>```**
+  - ```GNS``` Fix data
+  - ```GST``` Pseudo range error statistics
+  - ```THS``` True heading and status
+  - ```TXT``` Text data (Not NMEA, proprietary u-blox protocol responses)
+  - ```VTD``` Time and data
 
 ```iso_ts_pre``` ISO formatted timestamp taken before the GPS command was processed (```datetime.isoformat(datetime.now(tz=timezone.utc))```).
 
@@ -264,7 +323,7 @@ Traceback (most recent call last):
 serial.serialutil.SerialException: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
 ```
 
-Note the above places where it says ```No such file or directory: '/dev/ttyACM0'```.  ```/dev/ttypACM0``` is the default device file name for a Raspberry Pi USB GPS device.
+Note the above places where it says ```No such file or directory: '/dev/ttyACM0'```.  ```/dev/ttypACM0``` is one of the default device file names for a Raspberry Pi USB GPS device.
 
 The following shows how to identify and then remove zero length JSON data files.
 
