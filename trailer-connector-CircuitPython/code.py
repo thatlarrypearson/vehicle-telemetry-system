@@ -7,9 +7,9 @@ import socketpool
 import traceback
 from time import sleep
 import board
-import busio
-import adafruit_ads1x15.ads1015 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
+from adafruit_ads1x15 import ADS1015
+from adafruit_ads1x15 import AnalogIn
+from adafruit_ads1x15 import ads1x15
 import json
 
 # The Raspberry Pi data collector acts as a WIFI hotspot with
@@ -20,8 +20,8 @@ UDP_HOST = os.getenv('UDP_HOST')
 UDP_PORT = os.getenv('UDP_PORT')
 
 CONNECTION_FAILED_SLEEP_TIME = os.getenv('CONNECTION_FAILED_SLEEP_TIME')
-WIFI_SSID = os.getenv('WIFI_SSID')
-WIFI_PASSWORD = os.getenv('WIFI_PASSWORD')
+CIRCUITPY_WIFI_SSID = os.getenv('CIRCUITPY_WIFI_SSID')
+CIRCUITPY_WIFI_PASSWORD = os.getenv('CIRCUITPY_WIFI_PASSWORD')
 ADS_GAIN = os.getenv('ADS_GAIN')
 # CYCLE_SLEEP is in milliseconds
 CYCLE_SLEEP = float(os.getenv('CYCLE_SLEEP'))/1000.0
@@ -31,30 +31,30 @@ sequence_number = 1
 print("UDP_HOST:", UDP_HOST)
 print("UDP_PORT:", UDP_PORT)
 print("CONNECTION_FAILED_SLEEP_TIME:", CONNECTION_FAILED_SLEEP_TIME)
-print("WIFI_SSID:", WIFI_SSID),
-print("WIFI_PASSWORD:", WIFI_PASSWORD)
+print("CIRCUITPY_WIFI_SSID:", CIRCUITPY_WIFI_SSID),
+print("CIRCUITPY_WIFI_PASSWORD:", CIRCUITPY_WIFI_PASSWORD)
 print("ADS_GAIN:", ADS_GAIN)
 print("CYCLE_SLEEP:", CYCLE_SLEEP)
 
 # when the following fails, power cycle the FeatherS3
 # after fixing the problem (e.g. I2C not connected to ADC).
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = board.I2C()
 
-ads0 = ADS.ADS1015(i2c, gain=1, address=72)
-# ads1 = ADS.ADS1015(i2c, gain=1, address=73)
+ads0 = ADS1015(i2c, gain=1, address=72)
+# ads1 = ADS1015(i2c, gain=1, address=73)
 
 while True:
     # connect to WIFI
     # print("trying to connect")
     try:
-        wifi.radio.connect(WIFI_SSID, WIFI_PASSWORD)
+        wifi.radio.connect(CIRCUITPY_WIFI_SSID, CIRCUITPY_WIFI_PASSWORD)
     except ConnectionError as e:
         for item in traceback.format_exception(e):
             print(item)
         sleep(CONNECTION_FAILED_SLEEP_TIME)
         continue
 
-    print("connected to WiFi:", WIFI_SSID)
+    print("connected to WiFi:", CIRCUITPY_WIFI_SSID)
 
     pool = socketpool.SocketPool(wifi.radio)
     broadcast = pool.socket(family=pool.AF_INET, type=pool.SOCK_DGRAM)
@@ -64,15 +64,16 @@ while True:
     while True:
         # Get and package ADC data
         analog_input_channels = {}
-        analog_input_channels['ads0/0'] = AnalogIn(ads0, ADS.P0)
-        analog_input_channels['ads0/1'] = AnalogIn(ads0, ADS.P1)
-        analog_input_channels['ads0/2'] = AnalogIn(ads0, ADS.P2)
-        analog_input_channels['ads0/3'] = AnalogIn(ads0, ADS.P3)
+        analog_input_channels['ads0/0'] = AnalogIn(ads0, ads1x15.Pin.A0)
+        analog_input_channels['ads0/1'] = AnalogIn(ads0, ads1x15.Pin.A1)
+        analog_input_channels['ads0/2'] = AnalogIn(ads0, ads1x15.Pin.A2)
+        analog_input_channels['ads0/3'] = AnalogIn(ads0, ads1x15.Pin.A3)
 
-        # analog_input_channels['ads1/0'] = AnalogIn(ads0, ADS.P0)
-        # analog_input_channels['ads1/1'] = AnalogIn(ads0, ADS.P1)
-        # analog_input_channels['ads1/2'] = AnalogIn(ads0, ADS.P2)
-        # analog_input_channels['ads1/3'] = AnalogIn(ads0, ADS.P3)
+#        analog_input_channels['ads1/0'] = AnalogIn(ads1, ads1x15.Pin.A0)
+#        analog_input_channels['ads1/1'] = AnalogIn(ads1, ads1x15.Pin.A1)
+#        analog_input_channels['ads1/2'] = AnalogIn(ads1, ads1x15.Pin.A2)
+#        analog_input_channels['ads1/3'] = AnalogIn(ads1, ads1x15.Pin.A3)
+#        analog_input_channels['ads1/3'] = AnalogIn(ads1, ads1x15.Pin.A3)
 
         record = {
             name: {
@@ -82,7 +83,7 @@ while True:
         }
 
         record['gain0'] = ads0.gain
-        # record['gain1'] = ads1.gain
+#        record['gain1'] = ads1.gain
         record['sequence_number'] = sequence_number
         json_record = json.dumps(record)
 

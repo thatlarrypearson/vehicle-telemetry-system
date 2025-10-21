@@ -1,10 +1,18 @@
+# CircuitPython 10.0.3
+# TinyUF2 0.35.0
+CIRCUITPY_WIFI_SSID = "telemetry"
+CIRCUITPY_WIFI_PASSWORD = "ThatLarryPearson"
+CIRCUITPY_WEB_API_PASSWORD = "telemetry"
+CIRCUITPY_WEB_API_PORT = 8080
+# 
 # telemetyry-trailer-connector/CircuitPython/settings.toml
 # Modify the environment variables in this file to suit your needs.
 # Install this file onto a FeatherS3 (ESP32-S3) CircuitPython microcontroller as settings.toml.
 UDP_HOST="192.168.2.1"
-UDP_PORT=50223
+UDP_PORT=50215
 WIFI_SSID="telemetry"
 WIFI_PASSWORD="ThatLarryPearson"
 CONNECTION_FAILED_SLEEP_TIME=15
 ADS_GAIN=1
 CYCLE_SLEEP=800
+
