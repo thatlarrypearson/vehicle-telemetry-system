@@ -344,7 +344,7 @@ uv sync
 .\.venv\Scripts\activate
 
 # Linux/Mac bash Shell
-source .venv/Scripts/activate
+source .venv/bin/activate
 
 # When the Python Virtual Environment is activated, the prompt will change.
 

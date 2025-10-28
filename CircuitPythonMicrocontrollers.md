@@ -256,9 +256,10 @@ Here is the summary:
 ```powershell
 cd vehicle-telemetry-system
 .\.venv\Scripts\activate
-uv run circup
-uv run circup install adafruit_bno08x
-uv run circup install adafruit_ads1x15
+circup
+circup install adafruit_itertools
+circup install adafruit_bno08x
+circup install adafruit_ads1x15
 ```
 
 The following is the Windows output:
@@ -266,7 +267,7 @@ The following is the Windows output:
 ```powershell
 > cd vehicle-telemetry-system
 > .\.venv\Scripts\activate
-(vehicle-telemetry-system) PS vehicle-telemetry-system> uv run circup
+(vehicle-telemetry-system) PS vehicle-telemetry-system> circup
 Usage: circup [OPTIONS] COMMAND [ARGS]...
 
   A tool to manage and update libraries on a CircuitPython device.
@@ -306,7 +307,7 @@ Commands:
                  update all modules without Major Version warnings.
 
 (vehicle-telemetry-system) PS vehicle-telemetry-system>
-(vehicle-telemetry-system) PS vehicle-telemetry-system> uv run circup install adafruit_bno08x
+(vehicle-telemetry-system) PS vehicle-telemetry-system> circup install adafruit_bno08x
 Uninstalled 3 packages in 169ms
 Installed 3 packages in 32ms
 Version 2.2.0 of circup is outdated. Version 2.2.2 was released Friday April 18, 2025.
@@ -342,7 +343,7 @@ Installed 'adafruit_bno08x'.
 Installed 'adafruit_bus_device'.
 
 (vehicle-telemetry-system) PS vehicle-telemetry-system> 
-(vehicle-telemetry-system) PS vehicle-telemetry-system> uv run circup install adafruit_ads1x15
+(vehicle-telemetry-system) PS vehicle-telemetry-system> circup install adafruit_ads1x15
 Uninstalled 2 packages in 7ms
 Installed 1 package in 31ms
 Version 2.2.0 of circup is outdated. Version 2.2.2 was released Friday April 18, 2025.
@@ -362,10 +363,11 @@ The output these commands are substantively similar to the above Windows output.
 
 ```bash
 cd vehicle-telemetry-system
-source .venv/Scripts/activate
-uv run circup
-uv run circup install adafruit_bno08x
-uv run circup install adafruit_ads1x15
+source .venv/bin/activate
+circup
+circup install adafruit_itertools
+circup install adafruit_bno08x
+circup install adafruit_ads1x15
 ```
 
 ## Installing Application Software on CircuitPython Microcontroller
@@ -392,6 +394,7 @@ Plug your CircuitPython microcontroller into the USB on your Desktop or Raspberr
 
 ```bash
 cd vehicle-telemetry-system/CircuitPython/trailer
+cp boot.py /media/$(whoami)/CIRCUITPY
 cp settings.toml /media/$(whoami)/CIRCUITPY
 cp code.py /media/$(whoami)/CIRCUITPY
 ```
@@ -406,6 +409,7 @@ Plug your CircuitPython microcontroller into the USB on your Desktop or Raspberr
 
 ```bash
 cd vehicle-telemetry-system/CircuitPython/motion
+cp boot.py /media/$(whoami)/CIRCUITPY
 cp settings.toml /media/$(whoami)/CIRCUITPY
 cp wifi_code.py /media/$(whoami)/CIRCUITPY/code.py
 ```
