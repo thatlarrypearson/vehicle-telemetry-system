@@ -1,16 +1,20 @@
-# telemetyry-trailer-connector/CircuitPython/code.py
+# code.py
+__version__ = "0.5.0"
+# vehicle-telemetry-system/CircuitPython/trailer/code.py
 # Install this file onto a FeatherS3 (ESP32-S3) CircuitPython microcontroller as 'code.py'.
 
+import board
+from adafruit_ads1x15 import ADS1015
+from adafruit_ads1x15 import AnalogIn
+from adafruit_ads1x15 import ads1x15
 import os
 import wifi
 import socketpool
 import traceback
-from time import sleep
-import board
-import busio
-import adafruit_ads1x15.ads1015 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
 import json
+from time import sleep
+from json import dumps
+from adafruit_itertools import count
 
 # The Raspberry Pi data collector acts as a WIFI hotspot with
 # an IP address on the WIFI hotspot interface of '192.168.2.1'.
@@ -26,8 +30,6 @@ ADS_GAIN = os.getenv('ADS_GAIN')
 # CYCLE_SLEEP is in milliseconds
 CYCLE_SLEEP = float(os.getenv('CYCLE_SLEEP'))/1000.0
 
-sequence_number = 1
-
 print("UDP_HOST:", UDP_HOST)
 print("UDP_PORT:", UDP_PORT)
 print("CONNECTION_FAILED_SLEEP_TIME:", CONNECTION_FAILED_SLEEP_TIME)
@@ -36,12 +38,21 @@ print("WIFI_PASSWORD:", WIFI_PASSWORD)
 print("ADS_GAIN:", ADS_GAIN)
 print("CYCLE_SLEEP:", CYCLE_SLEEP)
 
-# when the following fails, power cycle the FeatherS3
-# after fixing the problem (e.g. I2C not connected to ADC).
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = board.STEMMA_I2C()  # For using the built-in STEMMA QT connector on a microcontroller
 
-ads0 = ADS.ADS1015(i2c, gain=1, address=72)
-# ads1 = ADS.ADS1015(i2c, gain=1, address=73)
+while not i2c.try_lock():
+    pass
+
+print("I2C addr", [hex(device_address) for device_address in i2c.scan()])
+
+i2c.unlock()
+
+print(f"code.py version {__version__}")
+
+ads0 = ADS1015(i2c, gain=1, address=72)
+# ads1 = ADS1015(i2c, gain=1, address=73)
+
+sequence_number = 1
 
 while True:
     # connect to WIFI
@@ -63,32 +74,34 @@ while True:
 
     while True:
         # Get and package ADC data
-        analog_input_channels = {}
-        analog_input_channels['ads0/0'] = AnalogIn(ads0, ADS.P0)
-        analog_input_channels['ads0/1'] = AnalogIn(ads0, ADS.P1)
-        analog_input_channels['ads0/2'] = AnalogIn(ads0, ADS.P2)
-        analog_input_channels['ads0/3'] = AnalogIn(ads0, ADS.P3)
+        analog_input_channels = {
+            'ads0/0': AnalogIn(ads0, ads1x15.Pin.A0),
+            'ads0/1': AnalogIn(ads0, ads1x15.Pin.A1),
+            'ads0/2': AnalogIn(ads0, ads1x15.Pin.A2),
+            'ads0/3': AnalogIn(ads0, ads1x15.Pin.A3),
 
-        # analog_input_channels['ads1/0'] = AnalogIn(ads0, ADS.P0)
-        # analog_input_channels['ads1/1'] = AnalogIn(ads0, ADS.P1)
-        # analog_input_channels['ads1/2'] = AnalogIn(ads0, ADS.P2)
-        # analog_input_channels['ads1/3'] = AnalogIn(ads0, ADS.P3)
+    #        'ads1/0': AnalogIn(ads0, ads1x15.Pin.A0),
+    #        'ads1/1': AnalogIn(ads0, ads1x15.Pin.A1),
+    #        'ads1/2': AnalogIn(ads0, ads1x15.Pin.A2),
+    #        'ads1/3': AnalogIn(ads0, ads1x15.Pin.A3),
+        }
 
         record = {
             name: {
                 'raw_value': channel.value,
-                'voltage': channel.voltage
+                'voltage': channel.voltage,
             } for name, channel in analog_input_channels.items()
         }
 
         record['gain0'] = ads0.gain
-        # record['gain1'] = ads1.gain
+#        record['gain1'] = ads1.gain
         record['sequence_number'] = sequence_number
         json_record = json.dumps(record)
 
         # broadcast ADC data package
         broadcast.sendto(bytes(json_record, 'utf-8'), (UDP_HOST,UDP_PORT))
         sequence_number += 1
-        print(json_record)
+
+        # print(json_record)
 
         sleep(CYCLE_SLEEP)

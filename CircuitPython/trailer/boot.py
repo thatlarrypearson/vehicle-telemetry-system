@@ -1,7 +1,7 @@
 # boot.py
-__version__ = "0.5.0"
-# vehicle-telemetry-system/CircuitPython/motion/boot.py
-# Install this file onto a FeatherS3 (ESP32-S3) CircuitPython microcontroller as 'boot.py'
+# vehicle-telemetry-system/CircuitPython/trailer/boot.py
+# Install this file onto a FeatherS3 (ESP32-S3) CircuitPython microcontroller as 'boot.py'.
+
 import usb_cdc
 
 # disable both serial devices
