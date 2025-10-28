@@ -496,6 +496,15 @@ After finishing with ```nmtui```,  ```NetworkManager```:
 sudo systemctl restart NetworkManager
 ```
 
+## Hotspot Do-Over
+
+If you need to start over, you can completely remove a WIFI hotspot from your Raspberry Pi by issuing the following command:
+
+```bash
+# This completely deletes a WIFI hotspot including its configuration
+sudo nmcli con delete <connection-name>
+```
+
 ## Hotspot Client Info
 
 See connected hotspot clients (by WIFI MAC address) run the following command.  More info at [Linux Kernel Wireless Documentation - About iw](https://wireless.wiki.kernel.org/en/users/documentation/iw).
