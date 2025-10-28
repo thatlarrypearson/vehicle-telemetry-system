@@ -1,8 +1,7 @@
 # code.py
-__version__ = "0.0.1"
-# basic IMU software test
+__version__ = "0.5.0"
+# basic trlr software test
 
-import board
 import board
 import adafruit_bno08x
 from adafruit_bno08x.i2c import BNO08X_I2C

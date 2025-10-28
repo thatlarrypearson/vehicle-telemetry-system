@@ -1,8 +1,8 @@
 # code.py
-__version__ = "0.0.1"
-# basic IMU software test
+__version__ = "0.5.0"
+# vehicle-telemetry-system/CircuitPython/motion/wifi_code.py
+# Install this file onto a FeatherS3 (ESP32-S3) CircuitPython microcontroller as 'code.py'.
 
-import board
 import board
 import adafruit_bno08x
 from adafruit_bno08x.i2c import BNO08X_I2C
