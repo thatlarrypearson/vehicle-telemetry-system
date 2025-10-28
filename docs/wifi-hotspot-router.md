@@ -429,145 +429,65 @@ The following placeholders are used for values in the commands below.
 Replacing values to suit your needs, enter the following commands.
 
 ```bash
-sudo nmcli connection add con-name <connection-name> ifname <interface-name> type wifi ssid <hotspot-name>
-```
+# 1. Create a new Wi-Fi connection named "hotspot" on the wlan0 interface
+sudo nmcli con add con-name <connection-name> ifname <interface-name> type wifi ssid "<hotspot-name>"
 
-Example:
-
-```bash
-$ sudo nmcli con add con-name hotspot ifname wlan0 type wifi ssid telemetry
-Connection 'hotspot' (97129f02-1fbf-4361-bbf3-258cb320fe57) successfully added.
-$
-```
-
-The following sets the type of security offered by the hotspot.
-
-```bash
+# 2. Set the Wi-Fi security to WPA-PSK
 sudo nmcli con modify <connection-name> wifi-sec.key-mgmt wpa-psk
-```
+sudo nmcli con modify <connection-name> wifi-sec.proto rsn
 
-Example:
+# 3. Set the password for the hotspot
+sudo nmcli con modify <connection-name> wifi-sec.psk "<wifi-password>"
 
-```bash
-$ sudo nmcli con modify hotspot wifi-sec.key-mgmt wpa-psk
-$ 
-```
-
-* ```wifi-password``` is the WIFI password (wifi-sec psk).  This should be a real password and *not something silly*.
-
-```bash
-sudo nmcli con modify <connection-name> wifi-sec.psk <wifi-password>
-```
-
-Example:
-
-```bash
-$ sudo nmcli con modify hotspot wifi-sec.psk "not-something-silly"
-$ 
-```
-
-* Make this connection's ```802-11-wireless.mode``` into an ```ap``` (Access Point).
-
-```bash
-sudo nmcli con modify <connection-name> 802-11-wireless.mode ap
-```
-
-Example:
-
-```bash
-$ sudo nmcli con modify hotspot 802-11-wireless.mode ap
-$
-```
-
-* Limit the ```802-11-wireless.band``` (wireless frequency band) to ```bg``` (2.4 Ghz).
-
-```bash
-sudo nmcli con modify <connection-name> 802-11-wireless.band bg
-```
-
-Example:
-
-```bash
-$ sudo nmcli con modify hotspot 802-11-wireless.band bg
-$
-```
-
-* Configure the interface to *share* the internet (protocol version 4) to a subnet using ```ipv4.method``` ```shared```.
-
-```bash
-sudo nmcli con modify <connection-name> ipv4.method shared
-```
-
-Example:
-
-```bash
-$ sudo nmcli con modify hotspot ipv4.method shared
-$
-```
-
-* Succeed or fail, start the connection.
-
-```bash
-sudo nmcli con modify <connection-name> ipv4.may-fail yes
-```
-
-Example:
-
-```bash
-$ sudo nmcli con modify hotspot ipv4.may-fail yes
-$
-```
-
-* Disable Internet Protocol Version 6.
-
-```bash
+# 4. Disable IPV6
 sudo nmcli con modify <connection-name> ipv6.method disabled
-```
 
-Example:
+# 5. Configure the connection to act as an access point and share the internet connection
+sudo nmcli con modify <connection-name> 802-11-wireless.mode ap ipv4.method shared
 
-```bash
-$ sudo nmcli con modify hotspot ipv6.method disabled
-$
-```
-
-* Set the hotspot's IP address and network mask.
-
-```bash
+# 6. Set the hotspot IP address and network mask so CircuitPython microcontrollers can find it
 sudo nmcli con modify <connection-name> ipv4.addresses <hotspot-ip-address>/24
-```
 
-Example:
-
-```bash
-$ sudo nmcli con modify hotspot ipv4.addresses 192.168.2.1/24
-$
-```
-
-* Set the Raspberry Pi's gateway router address.
-
-```bash
+# 7. Set the Raspberry Pi's gateway router address
 sudo nmcli con modify <connection-name> ipv4.gateway <gateway-address>
+
+# 8. Bring the hotspot connection up
+sudo nmcli con up <connection-name>
+
+# 9. Make the hotspot connect automatically on startup
+sudo nmcli con modify <connection-name> connection.autoconnect yes connection.autoconnect-priority 100
 ```
 
-Example:
+For example, this is how it was implemented on my Raspberry Pi:
 
 ```bash
-$ sudo nmcli con modify hotspot ipv4.gateway 192.168.1.254
-$
-```
+# 1. Create a new Wi-Fi connection named "hotspot" on the wlan0 interface
+sudo nmcli con add con-name hotspot ifname wlan type wifi ssid "telemetry"
 
-* Never allow this connection to be the default route.
+# 2. Set the Wi-Fi security to WPA-PSK
+sudo nmcli con modify hotspot wifi-sec.key-mgmt wpa-psk
+sudo nmcli con modify hotspot wifi-sec.proto rsn
 
-```bash
-sudo nmcli con modify <connection-name> ipv4.never-default yes
-```
+# 3. Set the password for the hotspot
+sudo nmcli con modify hotspot wifi-sec.psk "not-something-silly"
 
-Example:
+# 4. Disable IPV6
+sudo nmcli con modify hotspot ipv6.method disabled
 
-```bash
-$ sudo nmcli con modify hotspot ipv4.never-default yes
-$
+# 5. Configure the connection to act as an access point and share the internet connection
+sudo nmcli con modify hotspot 802-11-wireless.mode ap ipv4.method shared
+
+# 6. Set the hotspot IP address and network mask so CircuitPython microcontrollers can find it
+sudo nmcli con modify hotspot ipv4.addresses 192.168.2.1/24
+
+# 7. Set the Raspberry Pi's gateway router address
+sudo nmcli con modify hotspot ipv4.gateway 192.168.1.254
+
+# 8. Bring the hotspot connection up
+sudo nmcli con up hotspot
+
+# 9. Make the hotspot connect automatically on startup
+sudo nmcli con modify hotspot connection.autoconnect yes connection.autoconnect-priority 100
 ```
 
 After finishing with ```nmtui```,  ```NetworkManager```:
