@@ -78,7 +78,7 @@ def basic_stats_table_generator(vin:str, basic_statistics:dict):
             try:
                 argv.append(f"{(basic_statistics[column][vstat]):.2f}")
             except Exception as e:
-                console.print(f"{column}: {vstat}: {(basic_statistics[column][vstat])}")
+                # console.print(f"{column}: {vstat}: {(basic_statistics[column][vstat])}")
                 argv.append(f"{(basic_statistics[column][vstat])}")
 
         table.add_row(*argv)
@@ -87,18 +87,35 @@ def basic_stats_table_generator(vin:str, basic_statistics:dict):
     console.print(table)
 
 def basic_statistics(vin:str, columns:list, df:pd.DataFrame) -> dict:
-    return {
-        column: {
-            'max': (df[df[column].notnull()])[column].max(),
-            'min': (df[df[column].notnull()])[column].min(),
-            'mean': (df[df[column].notnull()])[column].mean(),
-            'std': (df[df[column].notnull()])[column].std(),
+    return_dict = {}
+    for column in columns:
+        try:
+            return_max = (df[df[column].notnull()])[column].max()
+        except TypeError:
+            return_max = "NaN"
+        try:
+            return_min = (df[df[column].notnull()])[column].min()
+        except TypeError:
+            return_min = "NaN"
+        try:
+            return_mean = (df[df[column].notnull()])[column].mean()
+        except TypeError:
+            return_mean = "NaN"
+        try:
+            return_std = (df[df[column].notnull()])[column].std()
+        except TypeError:
+            return_std = "NaN"
+
+        return_dict[column] = {
+            'max': return_max,
+            'min': return_min,
+            'mean': return_mean,
+            'std': return_std,
             'not_null_rows': (df[df[column].notnull()])[column].shape[0],
-            'null_rows': df.shape[0]
-            - (df[df[column].notnull()])[column].shape[0],
+            'null_rows': df.shape[0] - (df[df[column].notnull()])[column].shape[0],
         }
-        for column in columns
-    }
+
+    return return_dict
 
 def generate_basic_stats_report(vin:str, df:pd.DataFrame, columns:list)->dict:
     stat_columns = [column for column in columns if column not in ['iso_ts_pre', 'iso_ts_post', ]]
