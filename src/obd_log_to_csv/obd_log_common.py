@@ -873,10 +873,7 @@ def pint_to_value_type(obd_response_value:str, verbose:bool=False):
     if verbose:
         print(f"response_value {pint_value} value {value} units {units}", file=stderr)
 
-    if len(units) == 0:
-        return value, 'dimensionless'
-
-    return value, units[0][0]
+    return (value, 'dimensionless') if len(units) == 0 else (value, units[0][0])
 
 def command_name_to_mode_pid_mapping():
     """
