@@ -198,7 +198,7 @@ def main(json_input_files=None, csv_output_file_name='stdout', header=True, verb
         print(f"csv: {csv_output_file_name}", file=stderr)
 
     if csv_output_file_name != "stdout":
-        with open(csv_output_file_name, "w") as csv_output_file:
+        with open(csv_output_file_name, "w", newline='') as csv_output_file:
             cycle_through_input_files(json_input_files, commands, header, csv_output_file, verbose=verbose)
     else:
         cycle_through_input_files(json_input_files, commands, header, stdout, verbose=verbose)
