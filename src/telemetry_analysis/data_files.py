@@ -73,7 +73,17 @@ def obd_to_csv(vin:str, columns:list, study="gear", verbose=False):
 
     console.print(f"\tCreated {create_count}\n\tSkipped {skip_count}\n")
 
-def integrated_to_csv(vin:str, columns:list, study="fuel", verbose=False):
+
+def integrated_to_csv(vin:str, columns:list, study:str ="fuel", integrated_files:list | None =None, verbose=False):
+    """
+    Transforms lists of JSON "integrated" files into CSV files using obd_log_to_csv
+    The output CSV file name is based on "study" variable.
+    When "integrated_files" is None, the "vin" is used to automatically find all "integrated" files for that "vin".
+    Otherwise, the list of files used to create the CSV file is limited to "integrated_files".
+    "integrated_files should include the full path to each file.
+    Output CSV records are defined by the "columns" list.  This list would include all "command_name"s.
+    """
+
     # make temporary directory
     temporary_file_directory = Path(f"{temporary_file_base_directory}/{vin}/{study}")
     temporary_file_directory.mkdir(parents=True, exist_ok=True)
@@ -84,9 +94,10 @@ def integrated_to_csv(vin:str, columns:list, study="fuel", verbose=False):
     console.print(f"{vehicles[vin]['name']} Generating CSV Files in {str(temporary_file_directory).replace(vin, '<VIN>')}")
 
     # make list of integrated files
-    integrated_files = list(
-        Path(data_file_base_directory).glob(f"**/*integrated-{vin}.json")
-    )
+    if not integrated_files:
+        integrated_files = list(
+            Path(data_file_base_directory).glob(f"**/*integrated-{vin}.json")
+        )
 
     for integrated_file in integrated_files:
         csv_integrated_file = Path(temporary_file_directory) / Path(obd_to_csv_file_name(integrated_file.name))
