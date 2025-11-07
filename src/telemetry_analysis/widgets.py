@@ -21,7 +21,6 @@ from private.vehicles import vehicles
 vehicle_names = [vehicles[vin]['name'] for vin in vehicles]
 name_to_vin = {vehicle['name']: vin for vin, vehicle in vehicles.items()}
 selected_names = None
-
 ui_done = False
 
 def select_vin_dialog(title="Select Vehicle By Name", verbose=True)->list:
@@ -30,6 +29,9 @@ def select_vin_dialog(title="Select Vehicle By Name", verbose=True)->list:
     """
     global vehicle_names
     global name_to_vin
+    global ui_done
+    global selected_names
+
     checkboxes = [widgets.Checkbox(description=name) for name in vehicle_names]
     checkbox_container = widgets.VBox(children=checkboxes)
     selection_button = widgets.Button(description='Select vehicles...')
@@ -51,6 +53,7 @@ def select_vin_dialog(title="Select Vehicle By Name", verbose=True)->list:
 
     # Wait for user to press the select button
     with ui_events() as poll:
+        selected_names = [checkbox.description for checkbox in checkboxes if checkbox.value]
         while ui_done is False:
             poll(10)          # React to UI events (upto 10 at a time)
             if verbose:
