@@ -28,10 +28,6 @@ See [CircuitPython Microcontrollers](./CircuitPythonMicrocontrollers.md) for mor
 
 ![WIFI Enabled Microcontroller/Sensors](docs/WIFIEnabledMicrocontrollerSensors.JPG)
 
-### Wiring Diagram
-
-![Wiring Diagram](docs/WiringDiagram.JPG)
-
 ## Motivation
 
 Integrate brake use information with vehicle engine, motion, wind and location data for better, more accurate analytics.
@@ -57,7 +53,7 @@ The [Unexpected Maker FeatherS3](https://unexpectedmaker.com/shop.html#!/Feather
 * Supports WIFI and Bluetooth
 * Supports I2C Bus with QWIIC/STEMMA QT Connectors
 * Well Supported with Examples and Documentation
-* Inexpensive
+* Inexpensive (before tariffs)
 
 See [CircuitPython Microcontrollers](./CircuitPythonMicrocontrollers.md#circuitpython-microcontrollers) for installation and configuration information.
 
@@ -82,6 +78,54 @@ To install a development system on a desktop computer, follow [Python Project So
 ### Raspberry Pi Deployment System Installation
 
 Follow the instructions at [Raspberry Pi Data Collector](./README-rpdc.md) when installing a deployment system.  Pay particular attention to [Step 4 - Configure WIFI Hotspot](./README-rpdc.md/#step-4---configure-wifi-hotspot) since this module requires the use of an in-vehicle hotspot.
+
+### Wiring Diagram
+
+![Wiring Diagram](docs/WiringDiagram.JPG)
+
+### Adafruit ADS1015 I2C Addressing
+
+Each of the Adafruit ADS1015 Analog to Digital Converters (ADC) must have their own I2C address on the shared I2C bus.  On my first attempt to create the sensor hardware, I ruined two ADCs because I made the wrong assumption about how the I2C addresses needed to be set on the hardware.
+
+The following diagram shows what to connect where to set the I2C address on an ADC.
+
+![Adafruit ADS1015 I2C Addressing](./docs/AdafruitADS1015I2CAddressing.jpg)
+
+The following picture shows how I did my initial testing to ensure that I got the addressing right.
+
+![Adafruit ADS1015 Address Jumpers](./docs/ADC-Address-Jumpers.jpg)
+
+### Testing and Debugging Sensors
+
+Start with testing/debugging on your [development platform](#development-system-installation).  Using a simple test/debug environment like the one [shown above](#adafruit-ads1015-i2c-addressing) coupled with the [Mu editor](https://codewith.mu/), you can make code changes at the same time you are seeing output from the microcontroller when it starts up.
+
+In the [Mu editor](https://codewith.mu/), the [Serial](https://learn.adafruit.com/adafruit-feather-m4-express-atsamd51/kattni-connecting-to-the-serial-console) console provides output from ```code.py``` when it runs.  You can restart the microcontroller by clicking on the Mu **serial** panel below the code panel and typing ```<CTRL>C```.  On restart, you will get something like the following depending on how you have your microcontroller and sensors configured.
+
+```text
+Auto-reload is on. Simply save files over USB to run them or enter REPL to disable.
+code.py output:
+telemetry-trailer-connector/CircuitPython/code.py version: 0.5.0
+UDP_HOST: 192.168.2.1
+UDP_PORT: 50215
+CONNECTION_FAILED_SLEEP_TIME: 15
+WIFI_SSID: telemetry
+WIFI_PASSWORD: something-secret
+ADS_GAIN: 1
+ADS0_ADDRESS: 72
+ADS1_ADDRESS: 75
+CYCLE_SLEEP: 0.8
+I2C addr ['0x48', '0x4b']
+code.py version 0.5.0
+connected to WiFi: telemetry
+MAC address: ['0xec', '0xda', '0x3b', '0x41', '0xbf', '0x2c']
+IP address: 192.168.2.18
+```
+
+In the above output, the line starting with ```I2C addr``` gives the I2C addresses of the I2C devices seen on the I2C bus.  These are shown in hexadecimal notation where ```0x48``` is 72 and ```0X4b``` is 75.  Both of your sensors should show up with the correct I2C addresses matching ```ADS0_ADDRESS``` and ```ADS1_ADDRESS```.
+
+The following values displayed in the **serial** panel output match the values that I configured in [```settings.toml```](./CircuitPython/trailer/settings.toml).
+
+Python exceptions may cause the program to stop or try to reconnect to WIFI.
 
 ## Data Logger Usage
 
