@@ -1,6 +1,7 @@
 # code.py
+# code.py
 __version__ = "0.5.0"
-# vehicle-telemetry-system/CircuitPython/trailer/code.py
+# telemetry-trailer-connector/CircuitPython/code.py
 # Install this file onto a FeatherS3 (ESP32-S3) CircuitPython microcontroller as 'code.py'.
 
 import board
@@ -11,7 +12,6 @@ import os
 import wifi
 import socketpool
 import traceback
-import json
 from time import sleep
 from json import dumps
 from adafruit_itertools import count
@@ -27,15 +27,20 @@ CONNECTION_FAILED_SLEEP_TIME = os.getenv('CONNECTION_FAILED_SLEEP_TIME')
 WIFI_SSID = os.getenv('WIFI_SSID')
 WIFI_PASSWORD = os.getenv('WIFI_PASSWORD')
 ADS_GAIN = os.getenv('ADS_GAIN')
+ADS0_ADDRESS = os.getenv('ADS0_ADDRESS')
+ADS1_ADDRESS = os.getenv('ADS1_ADDRESS')
 # CYCLE_SLEEP is in milliseconds
 CYCLE_SLEEP = float(os.getenv('CYCLE_SLEEP'))/1000.0
 
+print("telemetry-trailer-connector/CircuitPython/code.py version:", __version__)
 print("UDP_HOST:", UDP_HOST)
 print("UDP_PORT:", UDP_PORT)
 print("CONNECTION_FAILED_SLEEP_TIME:", CONNECTION_FAILED_SLEEP_TIME)
 print("WIFI_SSID:", WIFI_SSID),
 print("WIFI_PASSWORD:", WIFI_PASSWORD)
 print("ADS_GAIN:", ADS_GAIN)
+print("ADS0_ADDRESS:", ADS0_ADDRESS)
+print("ADS1_ADDRESS:", ADS1_ADDRESS)
 print("CYCLE_SLEEP:", CYCLE_SLEEP)
 
 i2c = board.STEMMA_I2C()  # For using the built-in STEMMA QT connector on a microcontroller
@@ -49,19 +54,24 @@ i2c.unlock()
 
 print(f"code.py version {__version__}")
 
-ads0 = ADS1015(i2c, gain=1, address=72)
-# ads1 = ADS1015(i2c, gain=1, address=73)
+# ads0 - No Jumpers, then address = 72
+ads0 = ADS1015(i2c, gain=1, address=ADS0_ADDRESS)
+# ads1 - Jumper between ADDR and SCL then address = 75
+#                       ADDR and SDA then address = 74
+#                       ADDR and VIN then address = 73
+ads1 = ADS1015(i2c, gain=1, address=ADS1_ADDRESS)
 
 sequence_number = 1
 
 while True:
     # connect to WIFI
     # print("trying to connect")
+    # print("trying to connect")
     try:
         wifi.radio.connect(WIFI_SSID, WIFI_PASSWORD)
     except ConnectionError as e:
-        for item in traceback.format_exception(e):
-            print(item)
+        #for item in traceback.format_exception(e):
+        #    print(item)
         sleep(CONNECTION_FAILED_SLEEP_TIME)
         continue
 
@@ -75,15 +85,15 @@ while True:
     while True:
         # Get and package ADC data
         analog_input_channels = {
-            'ads0/0': AnalogIn(ads0, ads1x15.Pin.A0),
-            'ads0/1': AnalogIn(ads0, ads1x15.Pin.A1),
-            'ads0/2': AnalogIn(ads0, ads1x15.Pin.A2),
-            'ads0/3': AnalogIn(ads0, ads1x15.Pin.A3),
+            'ads0/0': AnalogIn(ads0, ads1x15.Pin.A0),   # 7 pin - blue,   brakes
+            'ads0/1': AnalogIn(ads0, ads1x15.Pin.A1),   # 7 pin - brown,  taillights
+            'ads0/2': AnalogIn(ads0, ads1x15.Pin.A2),   # 7 pin - yellow, left/stop
+            'ads0/3': AnalogIn(ads0, ads1x15.Pin.A3),   # 7 pin - green,  right/stop
 
-    #        'ads1/0': AnalogIn(ads0, ads1x15.Pin.A0),
-    #        'ads1/1': AnalogIn(ads0, ads1x15.Pin.A1),
-    #        'ads1/2': AnalogIn(ads0, ads1x15.Pin.A2),
-    #        'ads1/3': AnalogIn(ads0, ads1x15.Pin.A3),
+            'ads1/0': AnalogIn(ads1, ads1x15.Pin.A0),   # 7 pin - purple, backup
+            'ads1/1': AnalogIn(ads1, ads1x15.Pin.A1),   # 4 pin - brown,  taillights
+            'ads1/2': AnalogIn(ads1, ads1x15.Pin.A2),   # 4 pin - yellow, left/stop
+            'ads1/3': AnalogIn(ads1, ads1x15.Pin.A3),   # 4 pin - green,  right/stop
         }
 
         record = {
@@ -94,14 +104,18 @@ while True:
         }
 
         record['gain0'] = ads0.gain
-#        record['gain1'] = ads1.gain
+        record['gain1'] = ads1.gain
         record['sequence_number'] = sequence_number
-        json_record = json.dumps(record)
+        json_record = dumps(record)
 
         # broadcast ADC data package
-        broadcast.sendto(bytes(json_record, 'utf-8'), (UDP_HOST,UDP_PORT))
-        sequence_number += 1
+        try:
+            broadcast.sendto(bytes(json_record, 'utf-8'), (UDP_HOST,UDP_PORT))
+        except BrokenPipeError:
+            # BrokenPipeError exception occurs when the hotspot is unreachable or down
+            # Go back to trying to establish WIFI connection
+            break
 
-        # print(json_record)
+        sequence_number += 1
 
         sleep(CYCLE_SLEEP)
