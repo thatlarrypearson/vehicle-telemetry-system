@@ -182,6 +182,8 @@ Output data files are in a hybrid format.  Data files contain records separated 
 }<CR>
 ```
 
+The above sample output is from a test setup where the sensors are connected to a microcontroller but not to anything else.  That is the voltage values seen in the above output are invalid.
+
 ## JSON Fields
 
 - ```command_name```
