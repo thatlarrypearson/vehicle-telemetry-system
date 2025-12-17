@@ -27,6 +27,9 @@ CONNECTION_FAILED_SLEEP_TIME = os.getenv('CONNECTION_FAILED_SLEEP_TIME')
 WIFI_SSID = os.getenv('WIFI_SSID')
 WIFI_PASSWORD = os.getenv('WIFI_PASSWORD')
 ADS_GAIN = os.getenv('ADS_GAIN')
+# Work around for gain "2/3" as opposed to [1,2,3,4]
+if isinstance(ADS_GAIN, str) and ADS_GAIN == "2/3":
+    ADS_GAIN = 2/3
 ADS0_ADDRESS = os.getenv('ADS0_ADDRESS')
 ADS1_ADDRESS = os.getenv('ADS1_ADDRESS')
 # CYCLE_SLEEP is in milliseconds
