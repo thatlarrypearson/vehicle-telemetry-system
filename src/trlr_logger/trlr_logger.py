@@ -64,7 +64,7 @@ def argument_parsing()-> dict:
 
 def dict_to_log_format(tc_record:dict) -> dict:
     """
-    Converts weather report output to obd-logger output format:
+    Converts trailer sensor output to obd-logger output format:
     {
         'command_name': DEFAULT_RECORD_TYPE,
         'obd_response_value': "result of said command",
