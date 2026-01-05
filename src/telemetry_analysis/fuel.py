@@ -335,7 +335,7 @@ def generate_fuel_study_data(vin:str, output_file_name:str, csv_file_dir:str, fo
                         for column in input_float_columns:
                             try:
                                 record[column] = float(row[column])
-                            except ValueError:
+                            except (ValueError, KeyError):
                                 record[column] = None
 
                         # Column names changed midway through data collection
